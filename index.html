@@ -2,41 +2,55 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Pico Split Chat Pro</title>
+    <title>Flonters IoT Monitoring</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { background: #121212; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
-        input, select, button { padding: 12px; margin: 10px; border-radius: 8px; border: none; width: 90%; max-width: 300px; font-size: 16px; }
-        button { background: #00ff88; color: #121212; font-weight: bold; cursor: pointer; }
+        body { background: #121212; color: white; font-family: sans-serif; text-align: center; }
+        .grid { display: flex; justify-content: center; gap: 20px; margin-top: 30px; }
+        .indicator { width: 80px; height: 80px; border-radius: 50%; border: 4px solid #333; line-height: 80px; font-weight: bold; transition: 0.3s; color: #444; }
+        /* สีตอนไฟติด */
+        .red.on { background: #ff4d4d; box-shadow: 0 0 30px #ff4d4d; color: white; }
+        .yellow.on { background: #ffeb3b; box-shadow: 0 0 30px #ffeb3b; color: black; }
+        .green.on { background: #4caf50; box-shadow: 0 0 30px #4caf50; color: white; }
+        .log { background: #222; padding: 15px; width: 80%; max-width: 400px; margin: 30px auto; border-radius: 10px; height: 150px; overflow-y: auto; text-align: left; }
     </style>
 </head>
 <body>
-    <h2>Split Chat (ค้างข้อความ)</h2>
-    <select id="user">
-        <option value="P1">P1 (ฝั่งซ้าย)</option>
-        <option value="P2">P2 (ฝั่งขวา)</option>
-    </select><br>
-    <input type="text" id="msg" placeholder="ภาษาอังกฤษเท่านั้น..." maxlength="10"><br>
-    <button onclick="send()">SEND</button>
+    <h1>Pico Status Monitor</h1>
+    
+    <div class="grid">
+        <div id="ledRed" class="indicator red">RED</div>
+        <div id="ledYellow" class="indicator yellow">YEL</div>
+        <div id="ledGreen" class="indicator green">GRN</div>
+    </div>
+
+    <div class="log" id="logBox">กำลังรอข้อมูลจาก Pico...</div>
 
     <script>
-        // แก้ URL ให้เป็นตัวหลัก ไม่ต้องลงท้าย chat.json ตรงนี้
-        const baseURL = "https://flonters-default-rtdb.asia-southeast1.firebasedatabase.app/";
-
-        function send() {
-            const user = document.getElementById('user').value;
-            const text = document.getElementById('msg').value;
-            const time = new Date().toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
-            
-            // ส่งแยกไปตามชื่อ User เช่น /P1.json หรือ /P2.json
-            fetch(baseURL + user + ".json", {
-                method: 'PUT',
-                body: JSON.stringify({ text: text, time: time })
-            }).then(() => {
-                alert("ส่งไปหา " + user + " แล้ว!");
-                document.getElementById('msg').value = "";
+        const dbURL = "https://flonters-default-rtdb.asia-southeast1.firebasedatabase.app/system_status.json";
+        
+        function updateUI() {
+            fetch(dbURL)
+            .then(res => res.json())
+            .then(data => {
+                if(!data) return;
+                
+                // อัปเดตไฟสีแดง
+                document.getElementById('ledRed').classList.toggle('on', data.red === 1);
+                // อัปเดตไฟสีเหลือง
+                document.getElementById('ledYellow').classList.toggle('on', data.yellow === 1);
+                // อัปเดตไฟสีเขียว
+                document.getElementById('ledGreen').classList.toggle('on', data.green === 1);
+                
+                if(data.last_action) {
+                    const logBox = document.getElementById('logBox');
+                    logBox.innerHTML = `<div>[${new Date().toLocaleTimeString()}] ${data.last_action}</div>` + logBox.innerHTML;
+                }
             });
         }
+
+        // เช็คข้อมูลทุกๆ 1 วินาที
+        setInterval(updateUI, 1000);
     </script>
 </body>
 </html>
