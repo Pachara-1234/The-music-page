@@ -19,7 +19,6 @@
             position: relative;
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
@@ -77,7 +76,6 @@
         }
 
         .top-nav { height: 70px; border-bottom: 1px solid #222; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #080808; flex-shrink: 0; }
-        
         .nav-left-group { display: flex; align-items: center; gap: 20px; }
         
         .menu-toggle-icon { width: 30px; height: 20px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; }
@@ -93,54 +91,37 @@
             display: flex; justify-content: center; align-items: center; font-family: 'Cinzel', serif; font-size: 1.2rem; color: #f0ece1; background-size: cover; background-position: center;
         }
 
-        /* Workspace & Resizers */
         .workspace { display: flex; flex: 1; overflow: hidden; position: relative;}
-        
         .panel-left { width: 220px; background: #0a0a0a; display: flex; flex-direction: column; flex-shrink: 0; }
-        
         .resizer-x { width: 4px; background: #1a1a1a; cursor: ew-resize; transition: 0.2s; z-index: 2; }
         .resizer-x:hover, .resizer-x.active { background: #555; }
         
         .panel-right { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        
         .resizer-y { height: 4px; background: #1a1a1a; cursor: ns-resize; transition: 0.2s; z-index: 2; }
         .resizer-y:hover, .resizer-y.active { background: #555; }
 
         .panel-iot { height: 220px; background: #050505; display: flex; flex-direction: column; flex-shrink: 0; }
-
         .panel-header { font-family: 'Cinzel', serif; font-size: 0.85rem; letter-spacing: 2px; color: #555; padding: 12px 20px; border-bottom: 1px solid #1a1a1a; background: #080808; text-transform: uppercase; }
         
         /* Editor Zone */
-        .panel-editor-wrapper { flex: 1; display: flex; flex-direction: column; background: #f4ecd8; overflow: hidden; }
-        .editor-header { border-bottom: 1px solid #d4c8b2; background: #e8dcc4; color: #333; font-weight: bold; flex-shrink: 0; }
-        .panel-editor-content { flex: 1; padding: 20px; overflow-y: auto; display: flex; justify-content: center; align-items: center; position: relative; }
+        .panel-editor-wrapper { flex: 1; display: flex; flex-direction: column; background: #181818; overflow: hidden; }
+        .editor-header { border-bottom: 1px solid #2a2a2a; background: #111; color: #dcd8cc; font-weight: bold; flex-shrink: 0; }
+        .panel-editor-content { flex: 1; padding: 20px; overflow-y: auto; display: flex; justify-content: center; align-items: flex-start; position: relative; background: #222; }
 
-        /* File List Styles */
         .file-list { list-style: none; padding: 0 10px 10px 10px; color: #888; font-size: 0.85rem; overflow-y: auto; flex: 1; }
-        .file-list li { 
-            padding: 10px 8px; cursor: pointer; transition: 0.2s; 
-            border-bottom: 1px solid #222; 
-            word-break: break-all; display: flex; align-items: center;
-        }
+        .file-list li { padding: 10px 8px; cursor: pointer; transition: 0.2s; border-bottom: 1px solid #222; word-break: break-all; display: flex; align-items: center; }
         .file-list li:hover { background-color: #1a1a1a; color: #dcd8cc; }
         .file-icon { color: #555; margin-right: 8px; font-weight: bold; }
         .file-name { flex: 1; }
         
-        .btn-new-score {
-            width: 90%; background: transparent; border: 1px solid #444; 
-            color: #777; padding: 8px 0; margin: 15px auto; display: block; cursor: pointer; 
-            font-family: 'Cinzel', serif; font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; 
-            border-radius: 4px; transition: 0.3s; flex-shrink: 0;
-        }
+        .btn-new-score { width: 90%; background: transparent; border: 1px solid #444; color: #777; padding: 8px 0; margin: 15px auto; display: block; cursor: pointer; font-family: 'Cinzel', serif; font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; border-radius: 4px; transition: 0.3s; flex-shrink: 0; }
         .btn-new-score:hover { color: #dcd8cc; border-color: #dcd8cc; background: rgba(255,255,255,0.02); }
 
-        .new-file-input, .rename-input {
-            width: 100%; background: #111; border: 1px solid #555; color: #dcd8cc;
-            padding: 4px 6px; font-family: 'Lora', serif; font-size: 0.85rem; border-radius: 3px;
-        }
-        .new-file-input:focus, .rename-input:focus { outline: none; border-color: #dcd8cc; }
+        .new-file-group { display: flex; flex-direction: column; gap: 5px; width: 100%; }
+        .new-file-input, .new-inst-input, .rename-input { width: 100%; background: #111; border: 1px solid #555; color: #dcd8cc; padding: 4px 6px; font-family: 'Lora', serif; font-size: 0.85rem; border-radius: 3px; }
+        .new-file-input:focus, .new-inst-input:focus, .rename-input:focus { outline: none; border-color: #dcd8cc; }
 
-        .placeholder-text { color: #4a4235; font-style: italic; text-align: center; font-size: 1.2rem; }
+        .placeholder-text { color: #4a4235; font-style: italic; text-align: center; font-size: 1.2rem; margin-top: 20%; }
         .sub-text { font-size: 0.8rem; color: #6d6251; }
 
         .iot-terminal { font-family: 'Courier Prime', monospace; padding: 15px 20px; color: #666; font-size: 0.9rem; overflow-y: auto; flex: 1; }
@@ -151,65 +132,94 @@
         .no-select { user-select: none; }
 
         /* ================= Side Tab Panel ================= */
-        #side-tab-panel {
-            position: absolute; top: 0; left: 0; bottom: 0; width: 220px;
-            background: #0a0a0a; border-right: 1px solid #222; z-index: 100;
-            display: flex; flex-direction: column;
-            transition: transform 0.3s ease-in-out;
-            transform: translateX(-100%);
-        }
-        
+        #side-tab-panel { position: absolute; top: 0; left: 0; bottom: 0; width: 220px; background: #0a0a0a; border-right: 1px solid #222; z-index: 100; display: flex; flex-direction: column; transition: transform 0.3s ease-in-out; transform: translateX(-100%); }
         #side-tab-panel.open-panel { transform: translateX(0); }
-
         .main-menu-list { list-style: none; padding: 10px; color: #888; font-size: 0.85rem; }
-        .main-menu-list li { 
-            padding: 10px 8px; cursor: pointer; transition: 0.2s; 
-            border-bottom: 1px solid #222; display: flex; align-items: center; 
-        }
+        .main-menu-list li { padding: 10px 8px; cursor: pointer; transition: 0.2s; border-bottom: 1px solid #222; display: flex; align-items: center; }
         .main-menu-list li:hover { background-color: #1a1a1a; color: #dcd8cc; }
 
         /* ================= Context Menu ================= */
-        #context-menu {
-            position: absolute; background: #0a0a0a; border: 1px solid #333;
-            border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.8);
-            z-index: 1000; overflow: hidden; min-width: 130px;
-        }
+        #context-menu { position: absolute; background: #0a0a0a; border: 1px solid #333; border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); z-index: 1000; overflow: hidden; min-width: 130px; }
         .context-item { padding: 10px 15px; cursor: pointer; font-size: 0.85rem; color: #dcd8cc; font-family: 'Lora', serif; transition: 0.2s; }
         .context-item:hover { background: #1a1a1a; }
         .context-item.delete { color: #e63946; border-top: 1px solid #222; }
         .context-item.delete:hover { background: #3a1115; color: #ffebf0; }
 
-        /* ================= Interactive Sheet Music (ใหม่!) ================= */
-        .sheet-music-container {
-            width: 100%; height: 100%; display: flex; flex-direction: column;
-            align-items: center; padding-top: 60px;
+        /* ================= Professional Sheet Music Layout ================= */
+        .sheet-paper {
+            background-color: #fcfbfa; /* สีกระดาษโน้ต */
+            width: 100%; max-width: 850px; min-height: 1100px; /* สัดส่วน A4 */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            padding: 60px 50px;
+            color: #000;
+            display: flex; flex-direction: column;
         }
 
-        .stave {
-            position: relative; width: 80%; max-width: 800px; height: 60px; /* ความสูงรวมของ 5 เส้น */
+        .sheet-header { width: 100%; margin-bottom: 50px; position: relative; }
+        
+        /* 1. Title */
+        .sheet-title {
+            font-family: 'Cinzel', serif; font-size: 2.2rem; font-weight: 800;
+            text-align: center; text-transform: uppercase; margin-bottom: 5px;
+            letter-spacing: 2px;
+        }
+
+        /* Subtitle / Movie ref (Optional) */
+        .sheet-subtitle {
+            font-family: 'Lora', serif; font-size: 1rem; text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* 2 & 3. Instrument and Composer */
+        .sheet-meta {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            font-family: 'Lora', serif; font-size: 1.1rem;
+        }
+        .sheet-instrument { font-weight: bold; }
+        .sheet-composer { font-weight: normal; }
+
+        /* 4. Staff Section */
+        .sheet-body { width: 100%; position: relative; margin-top: 40px; }
+
+        /* BPM */
+        .tempo-marking {
+            font-family: 'Lora', serif; font-size: 1rem; font-weight: bold;
+            position: absolute; top: -35px; left: 60px; /* วางตรงกับกุญแจ/Time sig */
+        }
+        .tempo-note { font-size: 1.2rem; margin-right: 5px; } /* สัญลักษณ์ตัวดำ */
+
+        /* 5 Lines Stave */
+        .stave-container {
+            position: relative; width: 100%; height: 40px; /* ความสูงของ 5 เส้น */
+        }
+        
+        .stave-lines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: space-between;
-            cursor: crosshair; /* เปลี่ยนเมาส์เป็นเป้าเล็ง ให้รู้ว่ากดได้ */
-            margin-bottom: 80px;
+            z-index: 1;
         }
+        .stave-line { width: 100%; height: 1px; background-color: #000; }
 
-        .stave-line {
-            width: 100%; height: 1px; background-color: #222; /* เส้นสีดำ */
-            pointer-events: none; /* ป้องกันเมาส์ไปติดที่เส้น */
+        /* Clef & Time Signature */
+        .stave-elements {
+            position: absolute; top: 0; left: 0; height: 100%; width: 100%;
+            z-index: 2; display: flex; align-items: center; padding-left: 0;
         }
 
         .clef {
-            position: absolute; left: 10px; top: -38px;
-            font-size: 90px; color: #222; pointer-events: none;
-            font-family: 'Times New Roman', serif; /* ฟอนต์คลาสสิกสำหรับกุญแจซอล */
+            font-family: 'Times New Roman', serif; /* ฟอนต์ที่รองรับ 𝄞 ได้ดี */
+            font-size: 75px; /* ขนาดกุญแจซอล */
+            margin-top: -12px; margin-right: 15px;
+            color: #000;
         }
 
-        /* ดีไซน์ตัวโน้ตพื้นฐาน (จุดสีดำ) */
-        .musical-note {
-            position: absolute; width: 14px; height: 10px;
-            background-color: #111; border-radius: 50%;
-            transform: translate(-50%, -50%) rotate(-15deg); /* เอียงนิดๆ ให้ดูเหมือนหัวโน้ต */
-            pointer-events: none;
+        .time-signature {
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            font-family: 'Times New Roman', serif; font-weight: bold; font-size: 26px;
+            line-height: 0.75; margin-top: -2px;
+            color: #000;
         }
+        .time-signature span { display: block; }
 
     </style>
 </head>
@@ -288,7 +298,7 @@
                 <div class="panel-editor-wrapper" id="panel-editor">
                     <div class="panel-header editor-header" id="editor-title">Composition</div>
                     <div class="panel-editor-content" id="editor-content-area">
-                        <div class="placeholder-text" id="editor-placeholder">The stage is empty. Select or create a score...<br><span class="sub-text">(Music staff composition area)</span></div>
+                        <div class="placeholder-text" id="editor-placeholder">The stage is empty. Select or create a score...</div>
                     </div>
                 </div>
                 
@@ -308,10 +318,11 @@
     </div>
 
     <script>
-        // ================= Global State & Core Logic (คงเดิม) =================
         let currentUserEmail = null;
+        let currentUserName = "Unknown"; // เอาไว้ใส่ใน Composer
         let activeFileLi = null;   
         let activeFileName = "";   
+        let activeFileInst = "";
 
         const menuToggle = document.getElementById('menu-toggle');
         const sideTabPanel = document.getElementById('side-tab-panel');
@@ -333,19 +344,12 @@
         resizerY.addEventListener('mousedown', () => { isResizingY = true; document.body.classList.add('no-select'); resizerY.classList.add('active'); });
 
         document.addEventListener('mousemove', (e) => {
-            if (isResizingX) {
-                let newWidth = e.clientX;
-                if(newWidth > 150 && newWidth < 500) panelLeft.style.width = `${newWidth}px`;
-            }
-            if (isResizingY) {
-                let newHeight = window.innerHeight - e.clientY;
-                if(newHeight > 50 && newHeight < window.innerHeight - 100) panelIoT.style.height = `${newHeight}px`;
-            }
+            if (isResizingX) { let newWidth = e.clientX; if(newWidth > 150 && newWidth < 500) panelLeft.style.width = `${newWidth}px`; }
+            if (isResizingY) { let newHeight = window.innerHeight - e.clientY; if(newHeight > 50 && newHeight < window.innerHeight - 100) panelIoT.style.height = `${newHeight}px`; }
         });
 
         document.addEventListener('mouseup', () => {
-            isResizingX = false; isResizingY = false;
-            document.body.classList.remove('no-select');
+            isResizingX = false; isResizingY = false; document.body.classList.remove('no-select');
             resizerX.classList.remove('active'); resizerY.classList.remove('active');
         });
 
@@ -354,20 +358,15 @@
             if (e.target.closest('#side-tab-panel') === null && sideTabPanel.classList.contains('open-panel')) sideTabPanel.classList.remove('open-panel');
         });
 
-        // ================= Auth Functions (คงเดิม) =================
         function clearMessages() {
-            document.getElementById('log-msg').textContent = '';
-            document.getElementById('reg-msg').textContent = '';
+            document.getElementById('log-msg').textContent = ''; document.getElementById('reg-msg').textContent = '';
             document.getElementById('reg-msg').className = 'error-msg';
         }
 
         function switchForm(type) {
             clearMessages();
-            const formLogin = document.getElementById('form-login');
-            const formSignup = document.getElementById('form-signup');
-            const btnLogin = document.getElementById('btn-login');
-            const btnSignup = document.getElementById('btn-signup');
-
+            const formLogin = document.getElementById('form-login'), formSignup = document.getElementById('form-signup');
+            const btnLogin = document.getElementById('btn-login'), btnSignup = document.getElementById('btn-signup');
             if (type === 'login') {
                 formLogin.classList.remove('hidden'); formSignup.classList.add('hidden');
                 btnLogin.classList.add('active'); btnSignup.classList.remove('active');
@@ -379,25 +378,16 @@
 
         function processRegister(event) {
             event.preventDefault();
-            const name = document.getElementById('reg-name').value.trim();
-            const email = document.getElementById('reg-email').value.trim();
-            const pass = document.getElementById('reg-pass').value;
-            const avatarInput = document.getElementById('reg-avatar');
-            const msgBox = document.getElementById('reg-msg');
-
+            const name = document.getElementById('reg-name').value.trim(), email = document.getElementById('reg-email').value.trim(), pass = document.getElementById('reg-pass').value;
+            const avatarInput = document.getElementById('reg-avatar'), msgBox = document.getElementById('reg-msg');
             let users = JSON.parse(localStorage.getItem('flonters_users')) || {};
-
             if (users[email]) { msgBox.className = 'error-msg'; msgBox.textContent = 'This email is already registered!'; return; }
-
             const saveUser = (avatarBase64) => {
                 users[email] = { name: name, password: pass, avatar: avatarBase64, scores: [] };
                 localStorage.setItem('flonters_users', JSON.stringify(users));
-
-                msgBox.className = 'error-msg success-msg';
-                msgBox.textContent = 'Audition Passed. Please Login...';
+                msgBox.className = 'error-msg success-msg'; msgBox.textContent = 'Audition Passed. Please Login...';
                 setTimeout(() => { switchForm('login'); }, 1500);
             };
-
             if (avatarInput.files && avatarInput.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) { saveUser(e.target.result); };
@@ -407,89 +397,69 @@
 
         function processLogin(event) {
             event.preventDefault();
-            const email = document.getElementById('log-email').value.trim();
-            const pass = document.getElementById('log-pass').value;
-            const msgBox = document.getElementById('log-msg');
-
+            const email = document.getElementById('log-email').value.trim(), pass = document.getElementById('log-pass').value, msgBox = document.getElementById('log-msg');
             let users = JSON.parse(localStorage.getItem('flonters_users')) || {};
-
             if (!users[email]) { msgBox.textContent = 'User not found! (Not quite my tempo)'; return; }
             if (users[email].password !== pass) { msgBox.textContent = 'Incorrect password! (Were you rushing or dragging?)'; return; }
 
             msgBox.textContent = '';
             currentUserEmail = email; 
+            currentUserName = users[email].name; // เก็บชื่อผู้ใช้ไว้ใช้กับ Composer
             
-            const userName = users[email].name;
-            const userAvatar = users[email].avatar;
-            
-            document.getElementById('dashboard-username').textContent = userName;
+            document.getElementById('dashboard-username').textContent = currentUserName;
             const avatarEl = document.getElementById('dashboard-avatar');
-            if (userAvatar) {
-                avatarEl.style.backgroundImage = `url(${userAvatar})`;
-                avatarEl.textContent = ''; 
+            if (users[email].avatar) {
+                avatarEl.style.backgroundImage = `url(${users[email].avatar})`; avatarEl.textContent = ''; 
             } else {
-                avatarEl.style.backgroundImage = 'none';
-                avatarEl.textContent = userName.charAt(0).toUpperCase(); 
+                avatarEl.style.backgroundImage = 'none'; avatarEl.textContent = currentUserName.charAt(0).toUpperCase(); 
             }
 
             loadUserScores();
-
-            const authSection = document.getElementById('auth-section');
-            const dashSection = document.getElementById('dash-section');
-
-            authSection.style.opacity = '0';
-            authSection.style.transform = 'scale(1.05)'; 
-            
-            setTimeout(() => {
-                authSection.style.display = 'none';
-                dashSection.style.pointerEvents = 'all';
-                dashSection.style.opacity = '1';
-            }, 800);
+            const authSection = document.getElementById('auth-section'), dashSection = document.getElementById('dash-section');
+            authSection.style.opacity = '0'; authSection.style.transform = 'scale(1.05)'; 
+            setTimeout(() => { authSection.style.display = 'none'; dashSection.style.pointerEvents = 'all'; dashSection.style.opacity = '1'; }, 800);
         }
 
         function handleLogout() {
-            currentUserEmail = null;
+            currentUserEmail = null; currentUserName = "Unknown";
             document.getElementById('side-tab-panel').classList.remove('open-panel');
-            
-            const authSection = document.getElementById('auth-section');
-            const dashSection = document.getElementById('dash-section');
-
+            const authSection = document.getElementById('auth-section'), dashSection = document.getElementById('dash-section');
             authSection.style.display = 'flex';
             setTimeout(() => {
-                authSection.style.opacity = '1';
-                authSection.style.transform = 'scale(1)'; 
-                dashSection.style.pointerEvents = 'none';
-                dashSection.style.opacity = '0';
-                
-                document.getElementById('log-email').value = '';
-                document.getElementById('log-pass').value = '';
+                authSection.style.opacity = '1'; authSection.style.transform = 'scale(1)'; 
+                dashSection.style.pointerEvents = 'none'; dashSection.style.opacity = '0';
+                document.getElementById('log-email').value = ''; document.getElementById('log-pass').value = '';
                 switchForm('login');
-                
-                // เคลียร์หน้า Composition กลับเป็นหน้าว่าง
                 document.getElementById('editor-title').textContent = 'Composition';
-                document.getElementById('editor-content-area').innerHTML = `<div class="placeholder-text" id="editor-placeholder">The stage is empty. Select or create a score...<br><span class="sub-text">(Music staff composition area)</span></div>`;
+                document.getElementById('editor-content-area').innerHTML = `<div class="placeholder-text" id="editor-placeholder">The stage is empty. Select or create a score...</div>`;
             }, 50);
         }
 
         // ================= File Management =================
         function loadUserScores() {
-            const list = document.getElementById('score-list');
-            list.innerHTML = ''; 
+            const list = document.getElementById('score-list'); list.innerHTML = ''; 
             let users = JSON.parse(localStorage.getItem('flonters_users'));
             let userScores = users[currentUserEmail].scores || [];
-            userScores.forEach(scoreName => { renderScoreItem(scoreName); });
+            userScores.forEach(scoreData => { 
+                // รองรับข้อมูลแบบเก่า (String) และแบบใหม่ที่รวมเครื่องดนตรี (String format: "Name|Instrument")
+                let parts = scoreData.split('|');
+                let name = parts[0];
+                let inst = parts[1] || "Piano"; // ถ้าไม่มีให้เป็น Piano
+                renderScoreItem(name, inst); 
+            });
         }
 
-        function saveScoreToDB(oldName, newName) {
+        function saveScoreToDB(oldData, newName, newInst) {
             if (!currentUserEmail) return;
             let users = JSON.parse(localStorage.getItem('flonters_users'));
             let scores = users[currentUserEmail].scores || [];
+            let newData = `${newName}|${newInst}`;
 
-            if (oldName === null && newName) {
-                if (!scores.includes(newName)) scores.push(newName);
-            } else if (oldName && newName) {
-                let index = scores.indexOf(oldName);
-                if (index > -1) scores[index] = newName;
+            if (oldData === null) {
+                if (!scores.includes(newData)) scores.push(newData);
+            } else {
+                let index = scores.findIndex(s => s === oldData || s.startsWith(oldData + '|'));
+                if (index > -1) scores[index] = newData;
             }
             users[currentUserEmail].scores = scores;
             localStorage.setItem('flonters_users', JSON.stringify(users));
@@ -499,82 +469,101 @@
             if (!currentUserEmail) return;
             let users = JSON.parse(localStorage.getItem('flonters_users'));
             let scores = users[currentUserEmail].scores || [];
-            users[currentUserEmail].scores = scores.filter(s => s !== fileName);
+            users[currentUserEmail].scores = scores.filter(s => s !== fileName && !s.startsWith(fileName + '|'));
             localStorage.setItem('flonters_users', JSON.stringify(users));
         }
 
         function showNewFileInput() {
             const list = document.getElementById('score-list');
             const li = document.createElement('li');
-            li.innerHTML = `<span class="file-icon">></span> <input type="text" class="new-file-input" placeholder="Name...">`;
+            li.style.flexDirection = 'column';
+            li.style.alignItems = 'flex-start';
+            // เพิ่ม 2 ช่อง: ชื่อเพลง และ เครื่องดนตรี ตามที่รีเควส
+            li.innerHTML = `
+                <div class="new-file-group">
+                    <input type="text" class="new-file-input" placeholder="Score Name...">
+                    <input type="text" class="new-inst-input" placeholder="Instrument (e.g. Piano)...">
+                </div>
+            `;
             list.insertBefore(li, list.firstChild); 
             
-            const input = li.querySelector('input');
-            input.focus();
+            const inputName = li.querySelector('.new-file-input');
+            const inputInst = li.querySelector('.new-inst-input');
+            inputName.focus();
 
             const finishNewFile = () => {
-                let fileName = input.value.trim();
-                if (fileName === '') li.remove();
-                else {
+                let fileName = inputName.value.trim();
+                let fileInst = inputInst.value.trim() || "Piano";
+                if (fileName === '') {
                     li.remove();
-                    saveScoreToDB(null, fileName); 
-                    renderScoreItem(fileName, true); 
+                } else {
+                    li.remove();
+                    saveScoreToDB(null, fileName, fileInst); 
+                    renderScoreItem(fileName, fileInst, true); 
                 }
             };
 
-            input.addEventListener('keypress', function(e) { if (e.key === 'Enter') finishNewFile(); });
-            input.addEventListener('blur', finishNewFile);
+            inputName.addEventListener('keypress', function(e) { if (e.key === 'Enter') inputInst.focus(); });
+            inputInst.addEventListener('keypress', function(e) { if (e.key === 'Enter') finishNewFile(); });
+            
+            // ลบ event blur ออกไปก่อนเพราะมี 2 ช่องเดี๋ยวมันจะทับซ้อนกัน ให้ผู้ใช้กด Enter ในช่องที่ 2 หรือคลิกที่อื่น
+            inputInst.addEventListener('blur', () => { setTimeout(() => { if(document.activeElement !== inputName) finishNewFile(); }, 100) });
         }
 
-        // ================= ระบบสร้างโน้ตเพลง (ของใหม่!) =================
-        function renderScoreItem(fileName, prepend = false) {
+        // ================= Professional Sheet Music Injector =================
+        function renderScoreItem(fileName, instrument, prepend = false) {
             const list = document.getElementById('score-list');
             const li = document.createElement('li');
+            li.setAttribute('data-inst', instrument);
             
             li.innerHTML = `<span class="file-icon">></span><span class="file-name">${fileName}</span>`;
             
-            // เมื่อดับเบิ้ลคลิกที่ไฟล์ จะสร้างหน้ากระดาษโน้ต
             li.ondblclick = function() {
-                document.getElementById('editor-title').textContent = 'Composition - ' + li.querySelector('.file-name').textContent;
-                
+                document.getElementById('editor-title').textContent = 'Composition - ' + fileName;
                 const editorArea = document.getElementById('editor-content-area');
                 
-                // ล้างข้อความ Placeholder ทิ้ง แล้ววาดบรรทัด 5 เส้นแทน
+                // โครงสร้าง Sheet Music เป๊ะตามรูป 100%
                 editorArea.innerHTML = `
-                    <div class="sheet-music-container">
-                        <div class="stave" id="music-stave">
-                            <div class="clef">&#119070;</div> <div class="stave-line"></div>
-                            <div class="stave-line"></div>
-                            <div class="stave-line"></div>
-                            <div class="stave-line"></div>
-                            <div class="stave-line"></div>
+                    <div class="sheet-paper">
+                        <div class="sheet-header">
+                            <div class="sheet-title">${fileName}</div>
+                            <div class="sheet-subtitle">(from FLONTERS)</div>
+                            
+                            <div class="sheet-meta">
+                                <div class="sheet-instrument">${instrument}</div>
+                                <div class="sheet-composer">${currentUserName}</div>
+                            </div>
+                        </div>
+
+                        <div class="sheet-body">
+                            <div class="tempo-marking"><span class="tempo-note">&#9833;</span> = 140</div>
+                            
+                            <div class="stave-container">
+                                <div class="stave-lines">
+                                    <div class="stave-line"></div>
+                                    <div class="stave-line"></div>
+                                    <div class="stave-line"></div>
+                                    <div class="stave-line"></div>
+                                    <div class="stave-line"></div>
+                                </div>
+                                <div class="stave-elements">
+                                    <div class="clef">&#119074;</div> 
+                                    <div class="time-signature">
+                                        <span>4</span>
+                                        <span>4</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
-
-                // เพิ่มระบบโต้ตอบ: คลิกลงบนบรรทัด 5 เส้นเพื่อวางโน้ต!
-                const stave = document.getElementById('music-stave');
-                stave.addEventListener('click', function(e) {
-                    const rect = stave.getBoundingClientRect();
-                    // คำนวณตำแหน่ง X, Y ที่เมาส์คลิกเทียบกับกรอบบรรทัด 5 เส้น
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    
-                    // สร้าง div ตัวโน้ตขึ้นมาใหม่
-                    const note = document.createElement('div');
-                    note.className = 'musical-note';
-                    note.style.left = x + 'px';
-                    note.style.top = y + 'px';
-                    
-                    // แปะตัวโน้ตลงไปในบรรทัด 5 เส้น
-                    stave.appendChild(note);
-                });
             };
 
             li.oncontextmenu = function(e) {
                 e.preventDefault(); 
                 activeFileLi = li;
-                activeFileName = li.querySelector('.file-name').textContent;
+                activeFileName = fileName;
+                activeFileInst = instrument;
                 
                 const menu = document.getElementById('context-menu');
                 menu.style.left = e.pageX + 'px';
@@ -592,6 +581,7 @@
             
             const li = activeFileLi;
             const oldName = activeFileName;
+            const oldInst = activeFileInst;
             
             li.innerHTML = `<span class="file-icon">></span><input type="text" class="rename-input" value="${oldName}">`;
             const input = li.querySelector('input');
@@ -600,14 +590,20 @@
 
             const finishRename = () => {
                 let newName = input.value.trim();
-                if (newName === '' || newName === oldName) newName = oldName; 
-                else saveScoreToDB(oldName, newName); 
+                if (newName === '' || newName === oldName) {
+                    newName = oldName; 
+                } else {
+                    saveScoreToDB(`${oldName}|${oldInst}`, newName, oldInst); 
+                }
                 
                 li.innerHTML = `<span class="file-icon">></span><span class="file-name">${newName}</span>`;
+                activeFileName = newName; // update global
                 
                 let currentTitle = document.getElementById('editor-title').textContent;
                 if (currentTitle === 'Composition - ' + oldName) {
                     document.getElementById('editor-title').textContent = 'Composition - ' + newName;
+                    // ถ้ากำลังเปิดไฟล์นี้อยู่ ให้คลิกจำลองเพื่อรีเฟรชหน้ากระดาษให้ชื่อเปลี่ยน
+                    li.ondblclick();
                 }
             };
 
@@ -626,7 +622,7 @@
                 let currentTitle = document.getElementById('editor-title').textContent;
                 if (currentTitle === 'Composition - ' + activeFileName) {
                     document.getElementById('editor-title').textContent = 'Composition';
-                    document.getElementById('editor-content-area').innerHTML = `<div class="placeholder-text" id="editor-placeholder">The stage is empty. Select or create a score...<br><span class="sub-text">(Music staff composition area)</span></div>`;
+                    document.getElementById('editor-content-area').innerHTML = `<div class="placeholder-text" id="editor-placeholder">The stage is empty. Select or create a score...</div>`;
                 }
             }
         }
