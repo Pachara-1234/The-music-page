@@ -22,24 +22,15 @@
         /* ================= Auth Section ================= */
         #auth-section {
             background: radial-gradient(circle at 50% -20%, #2a2a2a 0%, #050505 70%);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.8s ease, transform 0.8s ease;
-            position: absolute;
-            width: 100%;
-            z-index: 10;
+            height: 100vh; display: flex; justify-content: center; align-items: center;
+            transition: opacity 0.8s ease, transform 0.8s ease; position: absolute; width: 100%; z-index: 10;
         }
-
         .auth-box { width: 100%; max-width: 400px; padding: 40px; text-align: center; }
 
         h1.logo {
             font-family: 'Cinzel', serif; font-size: 3.5rem; font-weight: 800;
-            letter-spacing: 6px; color: #f0ece1; margin-bottom: 5px;
-            text-shadow: 0 5px 15px rgba(0,0,0,0.8);
+            letter-spacing: 6px; color: #f0ece1; margin-bottom: 5px; text-shadow: 0 5px 15px rgba(0,0,0,0.8);
         }
-
         .subtitle { font-size: 0.9rem; font-style: italic; color: #7a756b; letter-spacing: 2px; margin-bottom: 30px; }
 
         .toggle-box { display: flex; margin-bottom: 25px; border-bottom: 1px solid #222; }
@@ -47,16 +38,13 @@
         .toggle-btn.active { color: #dcd8cc; border-bottom: 1px solid #dcd8cc; }
 
         form { display: flex; flex-direction: column; gap: 20px; text-align: left; }
-        .input-group input[type="text"],
-        .input-group input[type="email"],
-        .input-group input[type="password"] { 
+        .input-group input[type="text"], .input-group input[type="email"], .input-group input[type="password"] { 
             width: 100%; background: transparent; border: none; border-bottom: 1px solid #444; 
             padding: 10px 5px; color: #dcd8cc; font-size: 1rem; font-family: 'Lora', serif; transition: 0.3s; 
         }
         .input-group input:focus { outline: none; border-bottom-color: #888; }
         .input-group input::placeholder { color: #444; font-style: italic; }
 
-        /* Profile Upload */
         .file-label { display: block; color: #7a756b; font-size: 0.85rem; margin-bottom: 5px; font-style: italic; }
         .file-input { color: #dcd8cc; font-size: 0.85rem; width: 100%; }
         .file-input::file-selector-button {
@@ -64,12 +52,9 @@
             padding: 5px 10px; margin-right: 10px; cursor: pointer; 
             font-family: 'Lora', serif; transition: 0.3s; border-radius: 3px;
         }
-        .file-input::file-selector-button:hover { background: #dcd8cc; color: #000; }
 
         input:-webkit-autofill {
-            -webkit-box-shadow: 0 0 0 30px #080808 inset !important;
-            -webkit-text-fill-color: #dcd8cc !important;
-            transition: background-color 5000s ease-in-out 0s;
+            -webkit-box-shadow: 0 0 0 30px #080808 inset !important; -webkit-text-fill-color: #dcd8cc !important; transition: background-color 5000s ease-in-out 0s;
         }
 
         .submit-btn { background-color: transparent; color: #dcd8cc; border: 1px solid #555; padding: 15px; font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: 600; letter-spacing: 2px; cursor: pointer; margin-top: 5px; transition: all 0.4s; }
@@ -85,58 +70,61 @@
             background-color: #050505; transition: opacity 1s ease; position: absolute; width: 100%; z-index: 5;
         }
 
-        .top-nav { height: 70px; border-bottom: 1px solid #222; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #080808; }
+        .top-nav { height: 70px; border-bottom: 1px solid #222; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #080808; flex-shrink: 0; }
         .nav-logo { font-family: 'Cinzel', serif; font-size: 1.5rem; letter-spacing: 3px; }
         
-        /* Profile Layout */
         .user-profile-container { display: flex; align-items: center; gap: 12px; }
         .nav-user { font-style: italic; color: #7a756b; font-size: 0.95rem; }
         .user-avatar { 
-            width: 35px; height: 35px; border-radius: 50%; 
-            background-color: #1a1a1a; border: 1px solid #444;
-            display: flex; justify-content: center; align-items: center; 
-            font-family: 'Cinzel', serif; font-size: 1.2rem; color: #f0ece1;
-            background-size: cover; background-position: center;
+            width: 35px; height: 35px; border-radius: 50%; background-color: #1a1a1a; border: 1px solid #444;
+            display: flex; justify-content: center; align-items: center; font-family: 'Cinzel', serif; font-size: 1.2rem; color: #f0ece1; background-size: cover; background-position: center;
         }
 
+        /* Workspace & Resizers */
         .workspace { display: flex; flex: 1; overflow: hidden; }
         
-        .panel-left { width: 160px; border-right: 1px solid #222; background: #0a0a0a; display: flex; flex-direction: column; }
-        .panel-right { flex: 1; display: flex; flex-direction: column; }
+        .panel-left { width: 200px; background: #0a0a0a; display: flex; flex-direction: column; flex-shrink: 0; }
         
-        .panel-editor { 
-            flex: 1; background: #f4ecd8; padding: 20px; display: flex; 
-            justify-content: center; align-items: center; position: relative; 
-        }
+        /* แกน X (ลากซ้ายขวา) */
+        .resizer-x { width: 4px; background: #1a1a1a; cursor: ew-resize; transition: 0.2s; z-index: 2; }
+        .resizer-x:hover, .resizer-x.active { background: #555; }
         
-        .panel-iot { height: 220px; border-top: 1px solid #222; background: #050505; display: flex; flex-direction: column; }
+        .panel-right { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        
+        .panel-editor { flex: 1; background: #f4ecd8; padding: 20px; display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; }
+        
+        /* แกน Y (ลากบนล่าง) */
+        .resizer-y { height: 4px; background: #1a1a1a; cursor: ns-resize; transition: 0.2s; z-index: 2; }
+        .resizer-y:hover, .resizer-y.active { background: #555; }
 
-        .panel-header {
-            font-family: 'Cinzel', serif; font-size: 0.85rem; letter-spacing: 2px; color: #555;
-            padding: 12px 20px; border-bottom: 1px solid #1a1a1a; background: #080808; text-transform: uppercase;
-        }
+        .panel-iot { height: 220px; background: #050505; display: flex; flex-direction: column; flex-shrink: 0; }
 
-        .editor-header { 
-            position: absolute; top: 0; left: 0; width: 100%; 
-            border-bottom: 1px solid #d4c8b2; background: #e8dcc4; color: #333; font-weight: bold;
+        .panel-header { font-family: 'Cinzel', serif; font-size: 0.85rem; letter-spacing: 2px; color: #555; padding: 12px 20px; border-bottom: 1px solid #1a1a1a; background: #080808; text-transform: uppercase; }
+        .editor-header { position: absolute; top: 0; left: 0; width: 100%; border-bottom: 1px solid #d4c8b2; background: #e8dcc4; color: #333; font-weight: bold; }
+        
+        /* File List Styles - ปรับให้แคบลงและเนียบขึ้น */
+        .file-list { list-style: none; padding: 10px; color: #888; font-size: 0.85rem; overflow-y: auto; flex: 1; }
+        .file-list li { 
+            padding: 5px 8px; margin-bottom: 4px; cursor: pointer; transition: 0.2s; 
+            border-radius: 4px; word-break: break-all; display: flex; align-items: center;
         }
+        .file-list li:hover { background-color: #1a1a1a; color: #dcd8cc; }
+        .file-icon { color: #555; margin-right: 8px; font-weight: bold; }
+        .file-name { flex: 1; }
         
-        .file-list { list-style: none; padding: 15px; color: #888; font-size: 0.9rem; overflow-y: auto; }
-        .file-list li { margin-bottom: 15px; cursor: pointer; transition: 0.2s; word-break: break-all;}
-        .file-list li:hover { color: #dcd8cc; }
-        .file-icon { color: #555; margin-right: 5px; }
-        
+        /* ปรับปุ่ม New Score ให้แคบและดูแพงขึ้น */
         .btn-new-score {
-            width: 100%; background: transparent; border: 1px dashed #444; color: #777;
-            padding: 8px 0; margin-bottom: 15px; cursor: pointer; font-family: 'Cinzel', serif; transition: 0.3s;
+            width: 90%; background: transparent; border: 1px dashed #444; color: #777;
+            padding: 6px 0; margin: 15px auto 5px auto; display: block; cursor: pointer; 
+            font-family: 'Cinzel', serif; font-size: 0.8rem; border-radius: 4px; transition: 0.3s;
         }
-        .btn-new-score:hover { color: #dcd8cc; border-color: #dcd8cc; }
+        .btn-new-score:hover { color: #dcd8cc; border-color: #dcd8cc; background: rgba(255,255,255,0.02); }
 
-        .new-file-input {
-            width: 100%; background: #111; border: 1px solid #444; color: #dcd8cc;
-            padding: 5px; font-family: 'Lora', serif; font-size: 0.85rem; margin-bottom: 15px;
+        .new-file-input, .rename-input {
+            width: 100%; background: #111; border: 1px solid #555; color: #dcd8cc;
+            padding: 4px 6px; font-family: 'Lora', serif; font-size: 0.85rem; border-radius: 3px;
         }
-        .new-file-input:focus { outline: none; border-color: #888; }
+        .new-file-input:focus, .rename-input:focus { outline: none; border-color: #dcd8cc; }
 
         .placeholder-text { color: #4a4235; font-style: italic; text-align: center; font-size: 1.2rem; }
         .sub-text { font-size: 0.8rem; color: #6d6251; }
@@ -145,6 +133,9 @@
         .iot-terminal p { margin-bottom: 8px; }
         .log-success { color: #5a7a5a; } 
         .log-warn { color: #8a7a4a; }
+
+        /* Utility class สำหรับตอนกำลังลากเพื่อไม่ให้เมาส์เผลอคลุมดำ text */
+        .no-select { user-select: none; }
     </style>
 </head>
 <body>
@@ -160,31 +151,20 @@
             </div>
 
             <form id="form-login" onsubmit="processLogin(event)">
-                <div class="input-group">
-                    <input type="email" id="log-email" placeholder="Email" required>
-                </div>
-                <div class="input-group">
-                    <input type="password" id="log-pass" placeholder="Password" required>
-                </div>
+                <div class="input-group"><input type="email" id="log-email" placeholder="Email" required></div>
+                <div class="input-group"><input type="password" id="log-pass" placeholder="Password" required></div>
                 <div id="log-msg" class="error-msg"></div>
                 <button type="submit" class="submit-btn">ENTER STAGE</button>
             </form>
 
             <form id="form-signup" class="hidden" onsubmit="processRegister(event)">
-                <div class="input-group">
-                    <input type="text" id="reg-name" placeholder="Name" required>
-                </div>
-                <div class="input-group">
-                    <input type="email" id="reg-email" placeholder="Email" required>
-                </div>
-                <div class="input-group">
-                    <input type="password" id="reg-pass" placeholder="Password" required>
-                </div>
+                <div class="input-group"><input type="text" id="reg-name" placeholder="Name" required></div>
+                <div class="input-group"><input type="email" id="reg-email" placeholder="Email" required></div>
+                <div class="input-group"><input type="password" id="reg-pass" placeholder="Password" required></div>
                 <div class="input-group">
                     <label class="file-label" for="reg-avatar">Profile Picture (Optional)</label>
                     <input type="file" id="reg-avatar" accept="image/*" class="file-input">
                 </div>
-                
                 <div id="reg-msg" class="error-msg"></div>
                 <button type="submit" class="submit-btn">REGISTER</button>
             </form>
@@ -201,21 +181,24 @@
         </div>
 
         <div class="workspace">
-            <div class="panel-left">
+            <div class="panel-left" id="panel-left">
                 <div class="panel-header">Score Files</div>
-                <div style="padding: 15px 15px 0 15px;">
-                    <button class="btn-new-score" onclick="showNewFileInput()">+ New Score</button>
-                </div>
+                <button class="btn-new-score" onclick="showNewFileInput()">+ New Score</button>
                 <ul class="file-list" id="score-list">
                     </ul>
             </div>
             
-            <div class="panel-right">
-                <div class="panel-editor">
+            <div class="resizer-x" id="resizer-x"></div>
+            
+            <div class="panel-right" id="panel-right">
+                <div class="panel-editor" id="panel-editor">
                     <div class="panel-header editor-header" id="editor-title">Composition</div>
                     <div class="placeholder-text" id="editor-placeholder">The stage is empty. Select or create a score...<br><span class="sub-text">(Music staff composition area)</span></div>
                 </div>
-                <div class="panel-iot">
+                
+                <div class="resizer-y" id="resizer-y"></div>
+                
+                <div class="panel-iot" id="panel-iot">
                     <div class="panel-header">System Telemetry (IoT Monitor)</div>
                     <div class="iot-terminal">
                         <p>> System initialized...</p>
@@ -229,6 +212,56 @@
     </div>
 
     <script>
+        // ================= Global State =================
+        let currentUserEmail = null;
+
+        // ================= UI Resizer Logic =================
+        const resizerX = document.getElementById('resizer-x');
+        const resizerY = document.getElementById('resizer-y');
+        const panelLeft = document.getElementById('panel-left');
+        const panelIoT = document.getElementById('panel-iot');
+        
+        let isResizingX = false;
+        let isResizingY = false;
+
+        resizerX.addEventListener('mousedown', () => {
+            isResizingX = true;
+            document.body.classList.add('no-select');
+            resizerX.classList.add('active');
+        });
+
+        resizerY.addEventListener('mousedown', () => {
+            isResizingY = true;
+            document.body.classList.add('no-select');
+            resizerY.classList.add('active');
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isResizingX) {
+                // กันไม่ให้ลากซ้ายสุดจนหายไป
+                let newWidth = e.clientX;
+                if(newWidth > 100 && newWidth < 500) {
+                    panelLeft.style.width = `${newWidth}px`;
+                }
+            }
+            if (isResizingY) {
+                // คำนวณความสูงของช่องล่างจากขอบจอล่าง
+                let newHeight = window.innerHeight - e.clientY;
+                if(newHeight > 50 && newHeight < window.innerHeight - 100) {
+                    panelIoT.style.height = `${newHeight}px`;
+                }
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isResizingX = false;
+            isResizingY = false;
+            document.body.classList.remove('no-select');
+            resizerX.classList.remove('active');
+            resizerY.classList.remove('active');
+        });
+
+        // ================= Auth Logic =================
         function clearMessages() {
             document.getElementById('log-msg').textContent = '';
             document.getElementById('reg-msg').textContent = '';
@@ -265,9 +298,9 @@
                 msgBox.className = 'error-msg'; msgBox.textContent = 'This email is already registered!'; return;
             }
 
-            // Save function handling base64 image
             const saveUser = (avatarBase64) => {
-                users[email] = { name: name, password: pass, avatar: avatarBase64 };
+                // สร้าง Database ของผู้ใช้นี้ พร้อม array สำหรับเก็บไฟล์ score
+                users[email] = { name: name, password: pass, avatar: avatarBase64, scores: [] };
                 localStorage.setItem('flonters_users', JSON.stringify(users));
 
                 msgBox.className = 'error-msg success-msg';
@@ -275,12 +308,9 @@
                 setTimeout(() => { switchForm('login'); }, 1500);
             };
 
-            // Check if file is selected
             if (avatarInput.files && avatarInput.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    saveUser(e.target.result); 
-                };
+                reader.onload = function(e) { saveUser(e.target.result); };
                 reader.readAsDataURL(avatarInput.files[0]);
             } else {
                 saveUser(""); 
@@ -304,12 +334,12 @@
             }
 
             msgBox.textContent = '';
+            currentUserEmail = email; // จดจำว่าใครเข้าระบบ
+            
             const userName = users[email].name;
             const userAvatar = users[email].avatar;
             
-            // Update dashboard user info
             document.getElementById('dashboard-username').textContent = userName;
-            
             const avatarEl = document.getElementById('dashboard-avatar');
             if (userAvatar) {
                 avatarEl.style.backgroundImage = `url(${userAvatar})`;
@@ -318,6 +348,9 @@
                 avatarEl.style.backgroundImage = 'none';
                 avatarEl.textContent = userName.charAt(0).toUpperCase(); 
             }
+
+            // โหลดข้อมูลไฟล์ส่วนตัวมาแสดง
+            loadUserScores();
 
             const authSection = document.getElementById('auth-section');
             const dashSection = document.getElementById('dash-section');
@@ -332,42 +365,120 @@
             }, 800);
         }
 
-        // ================= File Management System =================
-        function showNewFileInput() {
+        // ================= User Database & File Management =================
+        
+        // โหลดไฟล์ของผู้ใช้คนนั้นๆ
+        function loadUserScores() {
             const list = document.getElementById('score-list');
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'new-file-input';
-            input.placeholder = 'Score name... (Press Enter)';
+            list.innerHTML = ''; // Clear list ก่อน
+            let users = JSON.parse(localStorage.getItem('flonters_users'));
+            let userScores = users[currentUserEmail].scores || [];
             
-            const li = document.createElement('li');
-            li.appendChild(input);
-            list.appendChild(li);
-            
-            input.focus();
-
-            input.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') saveFile(this, li);
-            });
-
-            input.addEventListener('blur', function() {
-                saveFile(this, li);
+            userScores.forEach(scoreName => {
+                renderScoreItem(scoreName);
             });
         }
 
-        function saveFile(inputElement, liElement) {
-            let fileName = inputElement.value.trim();
-            if (fileName === '') {
-                liElement.remove(); 
-                return;
+        // บันทึก/อัปเดตไฟล์ลง LocalStorage ของผู้ใช้
+        function saveScoreToDB(oldName, newName) {
+            if (!currentUserEmail) return;
+            let users = JSON.parse(localStorage.getItem('flonters_users'));
+            let scores = users[currentUserEmail].scores || [];
+
+            if (oldName === null && newName) {
+                // กรณีสร้างไฟล์ใหม่
+                if (!scores.includes(newName)) scores.push(newName);
+            } else if (oldName && newName) {
+                // กรณีคลิกขวาเปลี่ยนชื่อ (Rename)
+                let index = scores.indexOf(oldName);
+                if (index > -1) {
+                    scores[index] = newName;
+                }
             }
             
-            liElement.innerHTML = `<span class="file-icon">></span> ${fileName}`;
+            users[currentUserEmail].scores = scores;
+            localStorage.setItem('flonters_users', JSON.stringify(users));
+        }
+
+        // กดปุ่ม + New Score
+        function showNewFileInput() {
+            const list = document.getElementById('score-list');
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="file-icon">></span> <input type="text" class="new-file-input" placeholder="Name...">`;
+            list.appendChild(li);
             
-            liElement.ondblclick = function() {
-                document.getElementById('editor-title').textContent = 'Composition - ' + fileName;
-                document.getElementById('editor-placeholder').innerHTML = `Now composing: <strong>${fileName}</strong>...<br><span class="sub-text">(Music staff composition area)</span>`;
+            const input = li.querySelector('input');
+            input.focus();
+
+            const finishNewFile = () => {
+                let fileName = input.value.trim();
+                if (fileName === '') {
+                    li.remove();
+                } else {
+                    li.remove();
+                    saveScoreToDB(null, fileName); // เซฟลง DB ส่วนตัว
+                    renderScoreItem(fileName);     // วาด UI ใหม่
+                }
             };
+
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') finishNewFile();
+            });
+            input.addEventListener('blur', finishNewFile);
+        }
+
+        // ฟังก์ชันวาด <li> ขึ้นมา พร้อมระบบ Double Click และ Right Click (Rename)
+        function renderScoreItem(fileName) {
+            const list = document.getElementById('score-list');
+            const li = document.createElement('li');
+            
+            // โครงสร้างข้างใน <li>
+            li.innerHTML = `<span class="file-icon">></span><span class="file-name">${fileName}</span>`;
+            
+            // ดับเบิ้ลคลิกเพื่อโชว์ Composition
+            li.ondblclick = function() {
+                document.getElementById('editor-title').textContent = 'Composition - ' + li.querySelector('.file-name').textContent;
+                document.getElementById('editor-placeholder').innerHTML = `Now composing: <strong>${li.querySelector('.file-name').textContent}</strong>...<br><span class="sub-text">(Music staff composition area)</span>`;
+            };
+
+            // คลิกขวาเพื่อ Rename (เหมือน File Explorer)
+            li.oncontextmenu = function(e) {
+                e.preventDefault(); // ปิดเมนูคลิกขวาของ Browser
+                
+                const nameSpan = li.querySelector('.file-name');
+                const oldName = nameSpan.textContent;
+                
+                // เปลี่ยนเป็น Input
+                li.innerHTML = `<span class="file-icon">></span><input type="text" class="rename-input" value="${oldName}">`;
+                const input = li.querySelector('input');
+                input.focus();
+                input.select(); // คลุมดำชื่อเก่ารอให้พิมพ์แก้เลย
+
+                const finishRename = () => {
+                    let newName = input.value.trim();
+                    if (newName === '' || newName === oldName) {
+                        newName = oldName; // ถ้าปล่อยว่าง หรือไม่แก้ ให้กลับเป็นชื่อเดิม
+                    } else {
+                        saveScoreToDB(oldName, newName); // เซฟชื่อใหม่ลง DB
+                    }
+                    
+                    // ปรับ UI กลับเป็น Text
+                    li.innerHTML = `<span class="file-icon">></span><span class="file-name">${newName}</span>`;
+                    
+                    // ถ้า Composition กำลังเปิดชื่อเก่าอยู่ ให้เปลี่ยนชื่อตามด้วย
+                    let currentTitle = document.getElementById('editor-title').textContent;
+                    if (currentTitle === 'Composition - ' + oldName) {
+                        document.getElementById('editor-title').textContent = 'Composition - ' + newName;
+                    }
+                };
+
+                input.addEventListener('keypress', function(evt) {
+                    if (evt.key === 'Enter') finishRename();
+                });
+                input.addEventListener('blur', finishRename);
+            };
+
+            list.appendChild(li);
         }
     </script>
 </body>
