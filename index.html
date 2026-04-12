@@ -2,42 +2,97 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Pico IoT Control</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pico IoT Control - Flonters</title>
     <style>
-        body { background-color: #1a1a1a; color: white; font-family: sans-serif; text-align: center; padding: 50px; }
-        .btn {
-            width: 150px; height: 150px; border-radius: 50%; border: none;
-            background-color: #444; color: white; font-size: 20px; cursor: pointer;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5); transition: 0.3s;
+        body { 
+            background-color: #121212; 
+            color: white; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
         }
-        .btn.on { background-color: #00ff88; color: #1a1a1a; box-shadow: 0 0 30px #00ff88; }
-        h1 { margin-bottom: 30px; }
+        h1 { font-weight: 300; margin-bottom: 30px; }
+        .btn {
+            width: 200px; height: 200px; border-radius: 50%; border: none;
+            background: #333; color: #777; font-size: 24px; font-weight: bold;
+            cursor: pointer; box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            transition: all 0.3s ease; border: 5px solid #222;
+        }
+        /* สถานะตอนไฟเปิด */
+        .btn.on { 
+            background: #00ff88; color: #121212; 
+            box-shadow: 0 0 50px #00ff88; border: 5px solid #fff;
+        }
+        .status-text { margin-top: 20px; font-size: 18px; color: #aaa; }
     </style>
 </head>
 <body>
-    <h1>Pico 2W Light Control</h1>
+
+    <h1>IoT Light Control</h1>
+    
     <button id="ledBtn" class="btn" onclick="toggleLED()">OFF</button>
+    
+    <div id="status" class="status-text">กำลังโหลดสถานะ...</div>
 
     <script>
-        let isDefaultOn = false;
-        // ในขั้นตอนนี้ ถ้าจะทำจริงต้องผูกกับ Firebase API 
-        // แต่สำหรับมือใหม่ "ฉบับไม่รู้เรื่อง" ผมจะให้คุณดูโครงสร้างปุ่มก่อน
+        // ลิงก์ Firebase ของคุณ
+        const dbURL = "https://flonters-default-rtdb.asia-southeast1.firebasedatabase.app/ledStatus.json";
+
+        // ฟังก์ชันดึงสถานะล่าสุดจาก Firebase มาโชว์ตอนเปิดเว็บครั้งแรก
+        function checkStatus() {
+            fetch(dbURL)
+            .then(res => res.json())
+            .then(data => {
+                const btn = document.getElementById('ledBtn');
+                const statusDiv = document.getElementById('status');
+                if(data === 1) {
+                    btn.innerText = "ON";
+                    btn.classList.add('on');
+                    statusDiv.innerText = "ไฟกำลังเปิดอยู่";
+                } else {
+                    btn.innerText = "OFF";
+                    btn.classList.remove('on');
+                    statusDiv.innerText = "ไฟปิดอยู่";
+                }
+            });
+        }
+
+        // ฟังก์ชันตอนกดปุ่ม
         function toggleLED() {
             const btn = document.getElementById('ledBtn');
-            isDefaultOn = !isDefaultOn;
+            const statusDiv = document.getElementById('status');
+            const isTurningOn = !btn.classList.contains('on');
             
-            if(isDefaultOn) {
-                btn.innerText = "ON";
-                btn.classList.add('on');
-                console.log("ส่งคำสั่ง: เปิดไฟ");
-                // โค้ดส่งค่าไป Firebase จะอยู่ตรงนี้
-            } else {
-                btn.innerText = "OFF";
-                btn.classList.remove('on');
-                console.log("ส่งคำสั่ง: ปิดไฟ");
-            }
+            statusDiv.innerText = "กำลังส่งคำสั่ง...";
+
+            // ส่งค่า 1 หรือ 0 ไปที่ Firebase
+            fetch(dbURL, {
+                method: 'PUT',
+                body: JSON.stringify(isTurningOn ? 1 : 0)
+            })
+            .then(() => {
+                if(isTurningOn) {
+                    btn.innerText = "ON";
+                    btn.classList.add('on');
+                    statusDiv.innerText = "เปิดไฟสำเร็จ!";
+                } else {
+                    btn.innerText = "OFF";
+                    btn.classList.remove('on');
+                    statusDiv.innerText = "ปิดไฟสำเร็จ!";
+                }
+            })
+            .catch(err => {
+                statusDiv.innerText = "เกิดข้อผิดพลาด: " + err;
+            });
         }
+
+        // รันเช็คสถานะทันทีที่เปิดเว็บ
+        checkStatus();
     </script>
 </body>
 </html>
