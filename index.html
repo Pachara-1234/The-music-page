@@ -7,220 +7,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Lora:ital,wght@0,400;0,700;1,400&family=Courier+Prime&display=swap" rel="stylesheet">
     
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            background-color: #080808;
-            color: #dcd8cc;
-            font-family: 'Lora', serif;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* =========================================
-           1. หน้าต่าง Login (เหมือนเดิม เพิ่มเติมคือจัดการง่ายขึ้น)
-           ========================================= */
-        #auth-section {
-            background: radial-gradient(circle at 50% -20%, #2a2a2a 0%, #050505 70%);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.8s ease, transform 0.8s ease;
-            position: absolute;
-            width: 100%;
-            z-index: 10;
-        }
-
-        .auth-box {
-            width: 100%;
-            max-width: 400px;
-            padding: 40px;
-            text-align: center;
-        }
-
-        h1.logo {
-            font-family: 'Cinzel', serif;
-            font-size: 3.5rem;
-            font-weight: 800;
-            letter-spacing: 6px;
-            color: #f0ece1;
-            margin-bottom: 5px;
-            text-shadow: 0 5px 15px rgba(0,0,0,0.8);
-        }
-
-        .subtitle {
-            font-size: 0.9rem;
-            font-style: italic;
-            color: #7a756b;
-            letter-spacing: 2px;
-            margin-bottom: 40px;
-        }
-
-        form { display: flex; flex-direction: column; gap: 25px; text-align: left; }
-
-        .input-group input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            border-bottom: 1px solid #444;
-            padding: 10px 5px;
-            color: #dcd8cc;
-            font-size: 1rem;
-            font-family: 'Lora', serif;
-            transition: 0.3s;
-        }
-
-        .input-group input:focus { outline: none; border-bottom-color: #888; }
-        .input-group input::placeholder { color: #444; font-style: italic; }
-
-        .submit-btn {
-            background-color: transparent;
-            color: #dcd8cc;
-            border: 1px solid #555;
-            padding: 15px;
-            font-family: 'Cinzel', serif;
-            font-size: 1.1rem;
-            font-weight: 600;
-            letter-spacing: 2px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: all 0.4s;
-        }
-
-        .submit-btn:hover {
-            background-color: #dcd8cc;
-            color: #000;
-            border-color: #dcd8cc;
-        }
-
-        /* =========================================
-           2. หน้าต่าง Dashboard (พื้นที่ทำงาน 3 โซน)
-           ========================================= */
-        #dash-section {
-            opacity: 0;
-            pointer-events: none;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background-color: #050505;
-            transition: opacity 1s ease;
-            position: absolute;
-            width: 100%;
-            z-index: 5;
-        }
-
-        /* แถบเมนูด้านบน (Top Navigation) */
-        .top-nav {
-            height: 60px;
-            border-bottom: 1px solid #222;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            background: #080808;
-        }
-
-        .nav-logo {
-            font-family: 'Cinzel', serif;
-            font-size: 1.5rem;
-            letter-spacing: 3px;
-        }
-
-        .nav-user {
-            font-style: italic;
-            color: #7a756b;
-            font-size: 0.9rem;
-        }
-
-        /* โครงสร้างหลัก (แบ่งซ้าย-ขวา) */
-        .workspace {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        /* --- โซน 1: จัดการไฟล์ (ซ้าย) --- */
-        .panel-left {
-            width: 260px;
-            border-right: 1px solid #222;
-            background: #0a0a0a;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* --- โซนขวา: แบ่งเป็นบน(เขียนโน้ต) และ ล่าง(IoT) --- */
-        .panel-right {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* --- โซน 2: พื้นที่เขียนโน้ต (ขวาบน) --- */
-        .panel-editor {
-            flex: 1; /* กินพื้นที่ที่เหลือทั้งหมด */
-            background: #0d0d0d;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-
-        /* --- โซน 3: เช็คระบบ IoT (ขวาล่าง) --- */
-        .panel-iot {
-            height: 220px; /* ความสูงคงที่สำหรับแถบด้านล่าง */
-            border-top: 1px solid #222;
-            background: #050505;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* สไตล์หัวข้อของแต่ละโซน */
-        .panel-header {
-            font-family: 'Cinzel', serif;
-            font-size: 0.85rem;
-            letter-spacing: 2px;
-            color: #555;
-            padding: 12px 20px;
-            border-bottom: 1px solid #1a1a1a;
-            background: #080808;
-            text-transform: uppercase;
-        }
-
-        /* คลาสตกแต่งเนื้อหาชั่วคราว */
-        .placeholder-text {
-            color: #333;
-            font-style: italic;
-            text-align: center;
-            font-size: 1.2rem;
-        }
-
-        .file-list {
-            list-style: none;
-            padding: 15px;
-            color: #888;
-            font-size: 0.95rem;
-        }
-        .file-list li { margin-bottom: 15px; cursor: pointer; transition: 0.2s; }
-        .file-list li:hover { color: #dcd8cc; }
-
-        /* หน้าจอ IoT ใช้ฟอนต์แบบพิมพ์ดีด/คอมพิวเตอร์ */
-        .iot-terminal {
-            font-family: 'Courier Prime', monospace;
-            padding: 15px 20px;
-            color: #666;
-            font-size: 0.9rem;
-            overflow-y: auto;
-            flex: 1;
-        }
-        .iot-terminal p { margin-bottom: 8px; }
-        .log-success { color: #5a7a5a; } /* สีเขียวหม่นๆ ให้เข้าธีม */
-        .log-warn { color: #8a7a4a; } /* สีเหลืองหม่นๆ */
-
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -229,7 +16,12 @@
             <h1 class="logo">FLONTERS</h1>
             <p class="subtitle">The first music IOT</p>
 
-            <form onsubmit="handleLogin(event)">
+            <div class="toggle-box">
+                <button class="toggle-btn active" id="btn-login" onclick="switchForm('login')">LOGIN</button>
+                <button class="toggle-btn" id="btn-signup" onclick="switchForm('signup')">SIGN UP</button>
+            </div>
+
+            <form id="form-login" onsubmit="handleLogin(event)">
                 <div class="input-group">
                     <input type="email" placeholder="Email" required>
                 </div>
@@ -237,6 +29,19 @@
                     <input type="password" placeholder="Password" required>
                 </div>
                 <button type="submit" class="submit-btn">ENTER STAGE</button>
+            </form>
+
+            <form id="form-signup" class="hidden" onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <input type="text" placeholder="Conductor Name" required>
+                </div>
+                <div class="input-group">
+                    <input type="email" placeholder="Email" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="submit-btn">REGISTER</button>
             </form>
         </div>
     </div>
@@ -252,52 +57,31 @@
             <div class="panel-left">
                 <div class="panel-header">Repertoire (Library)</div>
                 <ul class="file-list">
-                    <li><span style="color:#555;">></span> Untitled_Score_01</li>
-                    <li><span style="color:#555;">></span> Whiplash_Draft</li>
-                    <li><span style="color:#555;">></span> Pico_Test_Tune</li>
+                    <li><span class="file-icon">></span> Untitled_Score_01</li>
+                    <li><span class="file-icon">></span> Whiplash_Draft</li>
+                    <li><span class="file-icon">></span> Pico_Test_Tune</li>
                 </ul>
             </div>
 
             <div class="panel-right">
-                
                 <div class="panel-editor">
-                    <div class="panel-header" style="position: absolute; top: 0; left: 0; width: 100%; border-bottom: none; border-bottom: 1px solid #1a1a1a;">Composition</div>
-                    <div class="placeholder-text">The stage is empty. Ready for your notes...<br><span style="font-size:0.8rem; color:#222;">(พื้นที่สำหรับระบบเขียนโน้ตเพลง 5 เส้น)</span></div>
+                    <div class="panel-header editor-header">Composition</div>
+                    <div class="placeholder-text">The stage is empty. Ready for your notes...<br><span class="sub-text">(พื้นที่สำหรับระบบเขียนโน้ตเพลง 5 เส้น)</span></div>
                 </div>
 
                 <div class="panel-iot">
                     <div class="panel-header">System Telemetry (IoT Monitor)</div>
                     <div class="iot-terminal">
                         <p>> System initialized...</p>
-                        <p class="log-warn">> Awaiting connection from Raspberry Pi Pico W...</p>
+                        <p class="log-warn">> Awaiting connection from Raspberry Pi Pico...</p>
                         <p class="log-success">> Firebase real-time database hooked.</p>
                         <p>> Listening for GPIO inputs...</p>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <script>
-        function handleLogin(event) {
-            event.preventDefault();
-            
-            const authSection = document.getElementById('auth-section');
-            const dashSection = document.getElementById('dash-section');
-
-            // เฟดหน้า Login ออก
-            authSection.style.opacity = '0';
-            authSection.style.transform = 'scale(1.05)'; // ซูมเข้านิดๆ ตอนเปลี่ยนหน้า
-            
-            // รอให้เฟดเสร็จแล้วค่อยโชว์หน้า Dashboard
-            setTimeout(() => {
-                authSection.style.display = 'none';
-                
-                dashSection.style.pointerEvents = 'all';
-                dashSection.style.opacity = '1';
-            }, 800);
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
