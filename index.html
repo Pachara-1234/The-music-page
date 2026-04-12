@@ -3,71 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FLONTERS | Enter the Stage</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <title>FLONTERS | The First Music IoT</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #050505;
-            color: #fff;
+            background-color: #080808;
+            /* พื้นหลังสร้างเอฟเฟกต์ไฟสปอตไลต์สาดลงมาจากด้านบน แบบโปสเตอร์ Whiplash */
+            background: radial-gradient(circle at 50% -20%, #2a2a2a 0%, #050505 70%);
+            color: #dcd8cc; /* สีขาวอมเหลืองหม่นๆ เหมือนกระดาษเก่า */
+            font-family: 'Lora', serif;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* รูปพื้นหลัง: กลอง/คอนเสิร์ต มืดๆ กดดันๆ */
-            background-image: linear-gradient(to bottom, rgba(5, 5, 5, 0.7), rgba(5, 5, 5, 1)), 
-                              url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1920&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
             overflow: hidden;
         }
 
+        /* --- กล่อง Login --- */
         .auth-container {
-            background: rgba(15, 15, 15, 0.85);
-            backdrop-filter: blur(10px);
-            border: 1px solid #333;
+            background: transparent;
+            width: 100%;
+            max-width: 400px;
             padding: 40px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.9), 0 0 20px rgba(212, 175, 55, 0.1);
-            position: relative;
-        }
-
-        /* แถบสีทองด้านบน ให้ความรู้สึกเหมือนไฟสปอตไลต์ */
-        .auth-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, #d4af37, transparent);
-        }
-
-        h1 {
-            font-family: 'Oswald', sans-serif;
-            font-size: 2.5rem;
             text-align: center;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            color: #fff;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        h1.logo {
+            font-family: 'Cinzel', serif;
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: 6px;
+            color: #f0ece1;
             margin-bottom: 5px;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.8);
         }
 
         .subtitle {
-            text-align: center;
-            font-size: 0.85rem;
-            color: #888;
-            margin-bottom: 30px;
-            letter-spacing: 1px;
+            font-size: 0.9rem;
             font-style: italic;
+            color: #7a756b;
+            letter-spacing: 2px;
+            margin-bottom: 40px;
         }
 
         .toggle-box {
@@ -81,31 +62,25 @@
             background: none;
             border: none;
             color: #555;
-            font-family: 'Oswald', sans-serif;
-            font-size: 1.1rem;
-            letter-spacing: 1px;
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 2px;
             padding: 10px 0;
             cursor: pointer;
             transition: 0.3s;
         }
 
         .toggle-btn.active {
-            color: #d4af37; /* สีทองเหลือง */
-            border-bottom: 2px solid #d4af37;
-        }
-
-        .toggle-btn:hover:not(.active) {
-            color: #fff;
+            color: #dcd8cc;
+            border-bottom: 1px solid #dcd8cc;
         }
 
         form {
             display: flex;
             flex-direction: column;
-            gap: 20px;
-        }
-
-        .input-group {
-            position: relative;
+            gap: 25px;
+            text-align: left;
         }
 
         .input-group input {
@@ -114,102 +89,122 @@
             border: none;
             border-bottom: 1px solid #444;
             padding: 10px 5px;
-            color: #fff;
+            color: #dcd8cc;
             font-size: 1rem;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Lora', serif;
             transition: 0.3s;
         }
 
         .input-group input:focus {
             outline: none;
-            border-bottom-color: #d4af37;
+            border-bottom-color: #888;
         }
 
-        .input-group input::placeholder {
-            color: #555;
-        }
+        .input-group input::placeholder { color: #444; font-style: italic; }
 
         .submit-btn {
-            background-color: #d4af37;
-            color: #000;
-            border: none;
+            background-color: transparent;
+            color: #dcd8cc;
+            border: 1px solid #555;
             padding: 15px;
-            font-family: 'Oswald', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700;
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
             letter-spacing: 2px;
             cursor: pointer;
             margin-top: 10px;
-            transition: all 0.3s;
-            text-transform: uppercase;
+            transition: all 0.4s;
         }
 
         .submit-btn:hover {
-            background-color: #fce27c;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-            transform: translateY(-2px);
+            background-color: #dcd8cc;
+            color: #000;
+            border-color: #dcd8cc;
         }
 
-        .forgot-pass {
-            text-align: center;
-            font-size: 0.8rem;
-            color: #666;
-            margin-top: 15px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: 0.3s;
+        .hidden { display: none !important; }
+
+        /* --- หน้า Dashboard เปล่าๆ (หลัง Login) --- */
+        .dashboard-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            padding: 50px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .forgot-pass:hover {
-            color: #d4af37;
+        .dashboard-container.visible {
+            opacity: 1;
+            pointer-events: all;
         }
 
-        /* ซ่อนฟอร์มที่ไม่ได้ใช้ */
-        .hidden {
-            display: none;
+        .dash-header {
+            font-family: 'Cinzel', serif;
+            font-size: 2rem;
+            color: #555;
+            letter-spacing: 4px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+            width: 100%;
+            max-width: 1000px;
+            text-align: left;
+        }
+
+        .dash-content {
+            margin-top: 40px;
+            color: #555;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
 
-    <div class="auth-container">
-        <h1>FLONTERS</h1>
-        <p class="subtitle">"Not quite my tempo."</p>
+    <div class="auth-container" id="auth-section">
+        <h1 class="logo">FLONTERS</h1>
+        <p class="subtitle">The first music IOT</p>
 
         <div class="toggle-box">
             <button class="toggle-btn active" id="btn-login" onclick="switchForm('login')">LOGIN</button>
             <button class="toggle-btn" id="btn-signup" onclick="switchForm('signup')">SIGN UP</button>
         </div>
 
-        <form id="form-login">
+        <form id="form-login" onsubmit="handleLogin(event)">
             <div class="input-group">
-                <input type="email" placeholder="Email Address" required>
+                <input type="email" placeholder="Email" required>
             </div>
             <div class="input-group">
                 <input type="password" placeholder="Password" required>
             </div>
-            <button type="submit" class="submit-btn">Enter the Stage</button>
-            <a href="#" class="forgot-pass">Forgot Password?</a>
+            <button type="submit" class="submit-btn">ENTER</button>
         </form>
 
-        <form id="form-signup" class="hidden">
+        <form id="form-signup" class="hidden" onsubmit="handleLogin(event)">
             <div class="input-group">
-                <input type="text" placeholder="Conductor Name (Username)" required>
+                <input type="text" placeholder="Conductor Name" required>
             </div>
             <div class="input-group">
-                <input type="email" placeholder="Email Address" required>
+                <input type="email" placeholder="Email" required>
             </div>
             <div class="input-group">
                 <input type="password" placeholder="Password" required>
             </div>
-            <div class="input-group">
-                <input type="password" placeholder="Confirm Password" required>
-            </div>
-            <button type="submit" class="submit-btn">Audition Now</button>
+            <button type="submit" class="submit-btn">REGISTER</button>
         </form>
     </div>
 
+    <div class="dashboard-container" id="dash-section">
+        <div class="dash-header">FLONTERS STUDIO</div>
+        <div class="dash-content">
+            <p>Ready to compose... (หน้าเปล่ารอใส่ระบบเขียนโน้ต)</p>
+        </div>
+    </div>
+
     <script>
+        // สลับหน้า Login / Sign Up
         function switchForm(type) {
             const formLogin = document.getElementById('form-login');
             const formSignup = document.getElementById('form-signup');
@@ -227,6 +222,24 @@
                 btnLogin.classList.remove('active');
                 btnSignup.classList.add('active');
             }
+        }
+
+        // ฟังก์ชันจำลองการ Login
+        function handleLogin(event) {
+            event.preventDefault(); // ป้องกันไม่ให้เว็บโหลดใหม่ตอนกด Submit
+            
+            const authSection = document.getElementById('auth-section');
+            const dashSection = document.getElementById('dash-section');
+
+            // ทำให้กล่อง Login ค่อยๆ จางหายไป
+            authSection.style.opacity = '0';
+            authSection.style.transform = 'scale(0.95)';
+            
+            // รอแป๊บนึงแล้วค่อยโชว์หน้า Dashboard
+            setTimeout(() => {
+                authSection.classList.add('hidden');
+                dashSection.classList.add('visible');
+            }, 800);
         }
     </script>
 </body>
