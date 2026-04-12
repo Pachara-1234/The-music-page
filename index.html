@@ -2,36 +2,40 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Pico Split Chat</title>
+    <title>Pico Split Chat Pro</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { background: #121212; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
         input, select, button { padding: 12px; margin: 10px; border-radius: 8px; border: none; width: 90%; max-width: 300px; font-size: 16px; }
         button { background: #00ff88; color: #121212; font-weight: bold; cursor: pointer; }
-        .preview { color: #555; font-size: 12px; }
     </style>
 </head>
 <body>
-    <h2>Split Chat Control</h2>
+    <h2>Split Chat (ค้างข้อความ)</h2>
     <select id="user">
         <option value="P1">P1 (ฝั่งซ้าย)</option>
         <option value="P2">P2 (ฝั่งขวา)</option>
     </select><br>
-    <input type="text" id="msg" placeholder="พิมพ์ข้อความภาษาอังกฤษ..." maxlength="10"><br>
-    <button onclick="send()">SEND TO OLED</button>
-    <p class="preview">หมายเหตุ: จอเล็ก พิมพ์ยาวข้อความจะล้นนะจ๊ะ</p>
+    <input type="text" id="msg" placeholder="ภาษาอังกฤษเท่านั้น..." maxlength="10"><br>
+    <button onclick="send()">SEND</button>
 
     <script>
-        const dbURL = "https://flonters-default-rtdb.asia-southeast1.firebasedatabase.app/chat.json";
+        // แก้ URL ให้เป็นตัวหลัก ไม่ต้องลงท้าย chat.json ตรงนี้
+        const baseURL = "https://flonters-default-rtdb.asia-southeast1.firebasedatabase.app/";
+
         function send() {
             const user = document.getElementById('user').value;
             const text = document.getElementById('msg').value;
             const time = new Date().toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
             
-            fetch(dbURL, {
+            // ส่งแยกไปตามชื่อ User เช่น /P1.json หรือ /P2.json
+            fetch(baseURL + user + ".json", {
                 method: 'PUT',
-                body: JSON.stringify({ user: user, text: text, time: time })
-            }).then(() => { alert("ส่งแล้ว!"); document.getElementById('msg').value = ""; });
+                body: JSON.stringify({ text: text, time: time })
+            }).then(() => {
+                alert("ส่งไปหา " + user + " แล้ว!");
+                document.getElementById('msg').value = "";
+            });
         }
     </script>
 </body>
