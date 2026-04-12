@@ -2,90 +2,232 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Flonters Sheet Music Editor</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-basic-min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-audio.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLONTERS | Enter the Stage</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
     
     <style>
-        body { 
-            background: #1e1e1e; color: #f4f4f9; font-family: 'Segoe UI', Tahoma, sans-serif; 
-            padding: 20px; margin: 0; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        h1 { text-align: center; color: #00ff88; }
-        .container { display: flex; flex-direction: column; gap: 20px; max-width: 1000px; margin: 0 auto; }
-        
-        .editor-box { background: #2d2d2d; padding: 20px; border-radius: 10px; }
-        textarea { 
-            width: 100%; height: 180px; font-family: monospace; font-size: 18px; 
-            background: #121212; color: #00ff88; border: 1px solid #444; 
-            padding: 10px; border-radius: 5px; resize: vertical; box-sizing: border-box;
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050505;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* รูปพื้นหลัง: กลอง/คอนเสิร์ต มืดๆ กดดันๆ */
+            background-image: linear-gradient(to bottom, rgba(5, 5, 5, 0.7), rgba(5, 5, 5, 1)), 
+                              url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1920&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
         }
-        
-        .result-box { background: white; padding: 20px; border-radius: 10px; color: black; overflow-x: auto; }
-        .audio-box { background: #2d2d2d; padding: 20px; border-radius: 10px; text-align: center; }
-        
-        /* เปลี่ยนสีเครื่องเล่นเสียงนิดหน่อยให้เข้ากับธีมมืด */
-        .abcjs-inline-audio { max-width: 100%; }
+
+        .auth-container {
+            background: rgba(15, 15, 15, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid #333;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9), 0 0 20px rgba(212, 175, 55, 0.1);
+            position: relative;
+        }
+
+        /* แถบสีทองด้านบน ให้ความรู้สึกเหมือนไฟสปอตไลต์ */
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+        }
+
+        h1 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 2.5rem;
+            text-align: center;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+            font-style: italic;
+        }
+
+        .toggle-box {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #333;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #555;
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            padding: 10px 0;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .toggle-btn.active {
+            color: #d4af37; /* สีทองเหลือง */
+            border-bottom: 2px solid #d4af37;
+        }
+
+        .toggle-btn:hover:not(.active) {
+            color: #fff;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #444;
+            padding: 10px 5px;
+            color: #fff;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-bottom-color: #d4af37;
+        }
+
+        .input-group input::placeholder {
+            color: #555;
+        }
+
+        .submit-btn {
+            background-color: #d4af37;
+            color: #000;
+            border: none;
+            padding: 15px;
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .submit-btn:hover {
+            background-color: #fce27c;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .forgot-pass {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 15px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .forgot-pass:hover {
+            color: #d4af37;
+        }
+
+        /* ซ่อนฟอร์มที่ไม่ได้ใช้ */
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
-    <h1>🎵 Flonters Sheet Music Editor</h1>
-    
-    <div class="container">
-        <div class="editor-box">
-            <h3>📝 พิมพ์โครงสร้างและโน้ตเพลงตรงนี้ (อัปเดตอัตโนมัติ)</h3>
-            <textarea id="abc-source">
-X: 1
-T: เพลงแรกของ Flonters
-M: 4/4
-L: 1/4
-Q: 1/4=120
-K: C
-% พิมพ์โน้ตบรรทัดล่างนี้ (C D E F G A B c)
-C D E F | G A B c | c B A G | F E D C |]
-            </textarea>
-        </div>
-        
-        <div class="result-box">
-            <div id="sheet-music"></div>
+    <div class="auth-container">
+        <h1>FLONTERS</h1>
+        <p class="subtitle">"Not quite my tempo."</p>
+
+        <div class="toggle-box">
+            <button class="toggle-btn active" id="btn-login" onclick="switchForm('login')">LOGIN</button>
+            <button class="toggle-btn" id="btn-signup" onclick="switchForm('signup')">SIGN UP</button>
         </div>
 
-        <div class="audio-box">
-            <h3>▶️ ทดลองฟังเสียง</h3>
-            <div id="audio-player"></div>
-        </div>
+        <form id="form-login">
+            <div class="input-group">
+                <input type="email" placeholder="Email Address" required>
+            </div>
+            <div class="input-group">
+                <input type="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="submit-btn">Enter the Stage</button>
+            <a href="#" class="forgot-pass">Forgot Password?</a>
+        </form>
+
+        <form id="form-signup" class="hidden">
+            <div class="input-group">
+                <input type="text" placeholder="Conductor Name (Username)" required>
+            </div>
+            <div class="input-group">
+                <input type="email" placeholder="Email Address" required>
+            </div>
+            <div class="input-group">
+                <input type="password" placeholder="Password" required>
+            </div>
+            <div class="input-group">
+                <input type="password" placeholder="Confirm Password" required>
+            </div>
+            <button type="submit" class="submit-btn">Audition Now</button>
+        </form>
     </div>
 
     <script>
-        // ฟังก์ชันสำหรับวาดโน้ตและสร้างเสียง
-        function renderMusic() {
-            var abcString = document.getElementById("abc-source").value;
-            
-            // 1. วาดบรรทัด 5 เส้น
-            var visualObj = ABCJS.renderAbc("sheet-music", abcString, { 
-                responsive: "resize",
-                add_classes: true 
-            });
-            
-            // 2. โหลดเสียงเข้าเครื่องเล่น
-            if (ABCJS.synth.supportsAudio()) {
-                var synthControl = new ABCJS.synth.SynthController();
-                synthControl.load("#audio-player", null, { 
-                    displayLoop: true, 
-                    displayRestart: true, 
-                    displayPlay: true, 
-                    displayProgress: true 
-                });
-                synthControl.setTune(visualObj[0], false);
+        function switchForm(type) {
+            const formLogin = document.getElementById('form-login');
+            const formSignup = document.getElementById('form-signup');
+            const btnLogin = document.getElementById('btn-login');
+            const btnSignup = document.getElementById('btn-signup');
+
+            if (type === 'login') {
+                formLogin.classList.remove('hidden');
+                formSignup.classList.add('hidden');
+                btnLogin.classList.add('active');
+                btnSignup.classList.remove('active');
+            } else {
+                formLogin.classList.add('hidden');
+                formSignup.classList.remove('hidden');
+                btnLogin.classList.remove('active');
+                btnSignup.classList.add('active');
             }
         }
-
-        // วาดทันทีที่เปิดเว็บ
-        renderMusic();
-
-        // สั่งให้มันวาดใหม่ทุกครั้งที่อ้วนพิมพ์แก้ข้อความในกล่อง Textarea
-        document.getElementById("abc-source").addEventListener("input", renderMusic);
     </script>
 </body>
 </html>
