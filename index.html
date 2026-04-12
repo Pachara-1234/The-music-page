@@ -2,49 +2,36 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Pico Chat Control</title>
+    <title>Pico Split Chat</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { background: #121212; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
-        input, select, button { padding: 10px; margin: 10px; border-radius: 5px; border: none; width: 80%; max-width: 300px; }
-        button { background: #1DB954; color: white; font-weight: bold; cursor: pointer; }
-        .log { background: #222; padding: 10px; text-align: left; margin: 20px auto; max-width: 400px; border-radius: 10px; }
+        input, select, button { padding: 12px; margin: 10px; border-radius: 8px; border: none; width: 90%; max-width: 300px; font-size: 16px; }
+        button { background: #00ff88; color: #121212; font-weight: bold; cursor: pointer; }
+        .preview { color: #555; font-size: 12px; }
     </style>
 </head>
 <body>
-    <h1>Pico OLED Chat</h1>
-    <select id="sender">
-        <option value="P1">P1</option>
-        <option value="P2">P2</option>
+    <h2>Split Chat Control</h2>
+    <select id="user">
+        <option value="P1">P1 (ฝั่งซ้าย)</option>
+        <option value="P2">P2 (ฝั่งขวา)</option>
     </select><br>
-    <input type="text" id="message" placeholder="พิมพ์ข้อความ..."><br>
-    <button onclick="sendMsg()">ส่งไปที่จอ OLED</button>
-
-    <div class="log" id="history">
-        <small>ประวัติข้อความ:</small>
-        <div id="lastSent">ไม่มีข้อมูล</div>
-    </div>
+    <input type="text" id="msg" placeholder="พิมพ์ข้อความภาษาอังกฤษ..." maxlength="10"><br>
+    <button onclick="send()">SEND TO OLED</button>
+    <p class="preview">หมายเหตุ: จอเล็ก พิมพ์ยาวข้อความจะล้นนะจ๊ะ</p>
 
     <script>
         const dbURL = "https://flonters-default-rtdb.asia-southeast1.firebasedatabase.app/chat.json";
-
-        function sendMsg() {
-            const sender = document.getElementById('sender').value;
-            const msg = document.getElementById('message').value;
+        function send() {
+            const user = document.getElementById('user').value;
+            const text = document.getElementById('msg').value;
             const time = new Date().toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
             
-            const payload = {
-                user: sender,
-                text: msg,
-                time: time,
-                full: sender + ": " + msg
-            };
-
-            fetch(dbURL, { method: 'PUT', body: JSON.stringify(payload) })
-            .then(() => {
-                document.getElementById('lastSent').innerText = payload.full + " (" + time + ")";
-                document.getElementById('message').value = "";
-            });
+            fetch(dbURL, {
+                method: 'PUT',
+                body: JSON.stringify({ user: user, text: text, time: time })
+            }).then(() => { alert("ส่งแล้ว!"); document.getElementById('msg').value = ""; });
         }
     </script>
 </body>
