@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,7 +56,7 @@
         .input-group input:focus { outline: none; border-bottom-color: #888; }
         .input-group input::placeholder { color: #444; font-style: italic; }
 
-        /* อัปโหลดรูปโปรไฟล์ */
+        /* Profile Upload */
         .file-label { display: block; color: #7a756b; font-size: 0.85rem; margin-bottom: 5px; font-style: italic; }
         .file-input { color: #dcd8cc; font-size: 0.85rem; width: 100%; }
         .file-input::file-selector-button {
@@ -88,11 +88,11 @@
         .top-nav { height: 70px; border-bottom: 1px solid #222; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #080808; }
         .nav-logo { font-family: 'Cinzel', serif; font-size: 1.5rem; letter-spacing: 3px; }
         
-        /* แก้ไข Profile กลับเป็นสไตล์เดิมและลดขนาดรูป */
+        /* Profile Layout */
         .user-profile-container { display: flex; align-items: center; gap: 12px; }
         .nav-user { font-style: italic; color: #7a756b; font-size: 0.95rem; }
         .user-avatar { 
-            width: 35px; height: 35px; border-radius: 50%; /* ลดขนาดลงเหลือ 35px */
+            width: 35px; height: 35px; border-radius: 50%; 
             background-color: #1a1a1a; border: 1px solid #444;
             display: flex; justify-content: center; align-items: center; 
             font-family: 'Cinzel', serif; font-size: 1.2rem; color: #f0ece1;
@@ -213,7 +213,7 @@
             <div class="panel-right">
                 <div class="panel-editor">
                     <div class="panel-header editor-header" id="editor-title">Composition</div>
-                    <div class="placeholder-text" id="editor-placeholder">The stage is empty. Select or create a score...<br><span class="sub-text">(พื้นที่สำหรับระบบเขียนโน้ตเพลง 5 เส้น)</span></div>
+                    <div class="placeholder-text" id="editor-placeholder">The stage is empty. Select or create a score...<br><span class="sub-text">(Music staff composition area)</span></div>
                 </div>
                 <div class="panel-iot">
                     <div class="panel-header">System Telemetry (IoT Monitor)</div>
@@ -262,10 +262,10 @@
             let users = JSON.parse(localStorage.getItem('flonters_users')) || {};
 
             if (users[email]) {
-                msgBox.className = 'error-msg'; msgBox.textContent = 'อีเมลนี้ถูกใช้ลงชื่อบนเวทีไปแล้ว!'; return;
+                msgBox.className = 'error-msg'; msgBox.textContent = 'This email is already registered!'; return;
             }
 
-            // ฟังก์ชันย่อยสำหรับบันทึกข้อมูล (รับรูปภาพมาด้วยถ้ามี)
+            // Save function handling base64 image
             const saveUser = (avatarBase64) => {
                 users[email] = { name: name, password: pass, avatar: avatarBase64 };
                 localStorage.setItem('flonters_users', JSON.stringify(users));
@@ -275,15 +275,15 @@
                 setTimeout(() => { switchForm('login'); }, 1500);
             };
 
-            // เช็คว่ามีการแนบรูปภาพมาไหม
+            // Check if file is selected
             if (avatarInput.files && avatarInput.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    saveUser(e.target.result); // เซฟเป็น Base64 String
+                    saveUser(e.target.result); 
                 };
                 reader.readAsDataURL(avatarInput.files[0]);
             } else {
-                saveUser(""); // ไม่มีรูป
+                saveUser(""); 
             }
         }
 
@@ -296,28 +296,27 @@
             let users = JSON.parse(localStorage.getItem('flonters_users')) || {};
 
             if (!users[email]) {
-                msgBox.textContent = 'ไม่พบผู้ใช้! (Not quite my tempo)'; return;
+                msgBox.textContent = 'User not found! (Not quite my tempo)'; return;
             }
 
             if (users[email].password !== pass) {
-                msgBox.textContent = 'รหัสผ่านไม่ถูกต้อง! (Were you rushing or dragging?)'; return;
+                msgBox.textContent = 'Incorrect password! (Were you rushing or dragging?)'; return;
             }
 
             msgBox.textContent = '';
             const userName = users[email].name;
             const userAvatar = users[email].avatar;
             
-            // อัปเดตชื่อสไตล์เก่า
+            // Update dashboard user info
             document.getElementById('dashboard-username').textContent = userName;
             
-            // จัดการรูปโปรไฟล์
             const avatarEl = document.getElementById('dashboard-avatar');
             if (userAvatar) {
                 avatarEl.style.backgroundImage = `url(${userAvatar})`;
-                avatarEl.textContent = ''; // ลบตัวอักษรออกถ้ารูปมา
+                avatarEl.textContent = ''; 
             } else {
                 avatarEl.style.backgroundImage = 'none';
-                avatarEl.textContent = userName.charAt(0).toUpperCase(); // ใช้ตัวอักษรแรกถ้าไม่มีรูป
+                avatarEl.textContent = userName.charAt(0).toUpperCase(); 
             }
 
             const authSection = document.getElementById('auth-section');
@@ -333,7 +332,7 @@
             }, 800);
         }
 
-        // ================= ระบบจัดการไฟล์ =================
+        // ================= File Management System =================
         function showNewFileInput() {
             const list = document.getElementById('score-list');
             const input = document.createElement('input');
@@ -367,7 +366,7 @@
             
             liElement.ondblclick = function() {
                 document.getElementById('editor-title').textContent = 'Composition - ' + fileName;
-                document.getElementById('editor-placeholder').innerHTML = `Now composing: <strong>${fileName}</strong>...<br><span class="sub-text">(พื้นที่สำหรับระบบเขียนโน้ตเพลง 5 เส้น)</span>`;
+                document.getElementById('editor-placeholder').innerHTML = `Now composing: <strong>${fileName}</strong>...<br><span class="sub-text">(Music staff composition area)</span>`;
             };
         }
     </script>
