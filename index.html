@@ -2,24 +2,42 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>My Music Page</title>
+    <title>Pico IoT Control</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { background-color: #121212; color: white; font-family: sans-serif; text-align: center; padding: 50px; }
-        h1 { color: #1DB954; }
-        .my-button { 
-            background-color: #1DB954; color: white; padding: 10px 20px; 
-            border-radius: 20px; text-decoration: none; display: inline-block; margin-top: 20px;
+        body { background-color: #1a1a1a; color: white; font-family: sans-serif; text-align: center; padding: 50px; }
+        .btn {
+            width: 150px; height: 150px; border-radius: 50%; border: none;
+            background-color: #444; color: white; font-size: 20px; cursor: pointer;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5); transition: 0.3s;
         }
+        .btn.on { background-color: #00ff88; color: #1a1a1a; box-shadow: 0 0 30px #00ff88; }
+        h1 { margin-bottom: 30px; }
     </style>
 </head>
 <body>
-    <h1>ยินดีต้อนรับสู่หน้าเพลงของ Pachara!</h1>
-    <p>อัปเดตใหม่: ลองใส่ปุ่มกับคลิปดูแล้วนะ</p>
-    
-    <a href="https://facebook.com" class="my-button">ติดตามผมได้ที่นี่</a>
+    <h1>Pico 2W Light Control</h1>
+    <button id="ledBtn" class="btn" onclick="toggleLED()">OFF</button>
 
-    <br><br>
-    
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>
+    <script>
+        let isDefaultOn = false;
+        // ในขั้นตอนนี้ ถ้าจะทำจริงต้องผูกกับ Firebase API 
+        // แต่สำหรับมือใหม่ "ฉบับไม่รู้เรื่อง" ผมจะให้คุณดูโครงสร้างปุ่มก่อน
+        function toggleLED() {
+            const btn = document.getElementById('ledBtn');
+            isDefaultOn = !isDefaultOn;
+            
+            if(isDefaultOn) {
+                btn.innerText = "ON";
+                btn.classList.add('on');
+                console.log("ส่งคำสั่ง: เปิดไฟ");
+                // โค้ดส่งค่าไป Firebase จะอยู่ตรงนี้
+            } else {
+                btn.innerText = "OFF";
+                btn.classList.remove('on');
+                console.log("ส่งคำสั่ง: ปิดไฟ");
+            }
+        }
+    </script>
 </body>
 </html>
