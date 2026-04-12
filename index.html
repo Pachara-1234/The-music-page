@@ -19,7 +19,7 @@
             position: relative;
         }
 
-        /* Custom Scrollbar for cool look */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
@@ -78,10 +78,8 @@
 
         .top-nav { height: 70px; border-bottom: 1px solid #222; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #080808; flex-shrink: 0; }
         
-        /* Left Group: Menu + Logo */
         .nav-left-group { display: flex; align-items: center; gap: 20px; }
         
-        /* Hamburger Menu Icon */
         .menu-toggle-icon { width: 30px; height: 20px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; }
         .menu-toggle-icon span { display: block; height: 2px; width: 100%; background-color: #dcd8cc; border-radius: 2px; transition: 0.3s; }
         .menu-toggle-icon:hover span { background-color: #fff; }
@@ -128,9 +126,8 @@
         .file-icon { color: #555; margin-right: 8px; font-weight: bold; }
         .file-name { flex: 1; }
         
-        /* ปุ่ม New Score ปรับขอบเป็นเส้นทึบ */
         .btn-new-score {
-            width: 90%; background: transparent; border: 1px solid #444; /* เปลี่ยนเป็น Solid */
+            width: 90%; background: transparent; border: 1px solid #444; 
             color: #777; padding: 8px 0; margin: 15px auto; display: block; cursor: pointer; 
             font-family: 'Cinzel', serif; font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; 
             border-radius: 4px; transition: 0.3s; flex-shrink: 0;
@@ -153,16 +150,16 @@
 
         .no-select { user-select: none; }
 
-        /* ================= New Side Tab Panel (Another Tab) ================= */
+        /* ================= Side Tab Panel ================= */
         #side-tab-panel {
             position: absolute; top: 0; left: 0; bottom: 0; width: 220px;
             background: #0a0a0a; border-right: 1px solid #222; z-index: 100;
             display: flex; flex-direction: column;
             transition: transform 0.3s ease-in-out;
-            transform: translateX(-100%); /* Initially off-screen */
+            transform: translateX(-100%);
         }
         
-        #side-tab-panel.open-panel { transform: translateX(0); } /* Open state */
+        #side-tab-panel.open-panel { transform: translateX(0); }
 
         .main-menu-list { list-style: none; padding: 10px; color: #888; font-size: 0.85rem; }
         .main-menu-list li { 
@@ -181,6 +178,38 @@
         .context-item:hover { background: #1a1a1a; }
         .context-item.delete { color: #e63946; border-top: 1px solid #222; }
         .context-item.delete:hover { background: #3a1115; color: #ffebf0; }
+
+        /* ================= Interactive Sheet Music (ใหม่!) ================= */
+        .sheet-music-container {
+            width: 100%; height: 100%; display: flex; flex-direction: column;
+            align-items: center; padding-top: 60px;
+        }
+
+        .stave {
+            position: relative; width: 80%; max-width: 800px; height: 60px; /* ความสูงรวมของ 5 เส้น */
+            display: flex; flex-direction: column; justify-content: space-between;
+            cursor: crosshair; /* เปลี่ยนเมาส์เป็นเป้าเล็ง ให้รู้ว่ากดได้ */
+            margin-bottom: 80px;
+        }
+
+        .stave-line {
+            width: 100%; height: 1px; background-color: #222; /* เส้นสีดำ */
+            pointer-events: none; /* ป้องกันเมาส์ไปติดที่เส้น */
+        }
+
+        .clef {
+            position: absolute; left: 10px; top: -38px;
+            font-size: 90px; color: #222; pointer-events: none;
+            font-family: 'Times New Roman', serif; /* ฟอนต์คลาสสิกสำหรับกุญแจซอล */
+        }
+
+        /* ดีไซน์ตัวโน้ตพื้นฐาน (จุดสีดำ) */
+        .musical-note {
+            position: absolute; width: 14px; height: 10px;
+            background-color: #111; border-radius: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg); /* เอียงนิดๆ ให้ดูเหมือนหัวโน้ต */
+            pointer-events: none;
+        }
 
     </style>
 </head>
@@ -226,9 +255,7 @@
         <div class="top-nav">
             <div class="nav-left-group">
                 <div id="menu-toggle" class="menu-toggle-icon">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+                    <span></span><span></span><span></span>
                 </div>
                 <div class="nav-logo">FLONTERS</div>
             </div>
@@ -239,7 +266,6 @@
         </div>
 
         <div class="workspace">
-            
             <div id="side-tab-panel" class="side-tab-panel">
                 <div class="panel-header">MAIN MENU</div>
                 <ul class="main-menu-list">
@@ -253,8 +279,7 @@
             <div class="panel-left" id="panel-left">
                 <div class="panel-header">Score Files</div>
                 <button class="btn-new-score" onclick="showNewFileInput()">+ New Score</button>
-                <ul class="file-list" id="score-list">
-                    </ul>
+                <ul class="file-list" id="score-list"></ul>
             </div>
             
             <div class="resizer-x" id="resizer-x"></div>
@@ -262,7 +287,7 @@
             <div class="panel-right" id="panel-right">
                 <div class="panel-editor-wrapper" id="panel-editor">
                     <div class="panel-header editor-header" id="editor-title">Composition</div>
-                    <div class="panel-editor-content">
+                    <div class="panel-editor-content" id="editor-content-area">
                         <div class="placeholder-text" id="editor-placeholder">The stage is empty. Select or create a score...<br><span class="sub-text">(Music staff composition area)</span></div>
                     </div>
                 </div>
@@ -283,21 +308,19 @@
     </div>
 
     <script>
-        // ================= Global State =================
+        // ================= Global State & Core Logic (คงเดิม) =================
         let currentUserEmail = null;
         let activeFileLi = null;   
         let activeFileName = "";   
 
-        // ================= Hamburger Menu Logic =================
         const menuToggle = document.getElementById('menu-toggle');
         const sideTabPanel = document.getElementById('side-tab-panel');
 
         menuToggle.addEventListener('click', (e) => {
-            e.stopPropagation(); // กันไม่ให้ปิดทันทีเวลาคลิกตัวเอง
+            e.stopPropagation(); 
             sideTabPanel.classList.toggle('open-panel');
         });
 
-        // ================= UI Resizer Logic =================
         const resizerX = document.getElementById('resizer-x');
         const resizerY = document.getElementById('resizer-y');
         const panelLeft = document.getElementById('panel-left');
@@ -326,17 +349,12 @@
             resizerX.classList.remove('active'); resizerY.classList.remove('active');
         });
 
-        // Close Context Menu and Side Tab when clicking elsewhere
         document.addEventListener('click', (e) => {
-            if (e.target.closest('#context-menu') === null) {
-                document.getElementById('context-menu').classList.add('hidden');
-            }
-            if (e.target.closest('#side-tab-panel') === null && sideTabPanel.classList.contains('open-panel')) {
-                sideTabPanel.classList.remove('open-panel');
-            }
+            if (e.target.closest('#context-menu') === null) document.getElementById('context-menu').classList.add('hidden');
+            if (e.target.closest('#side-tab-panel') === null && sideTabPanel.classList.contains('open-panel')) sideTabPanel.classList.remove('open-panel');
         });
 
-        // ================= Auth Logic =================
+        // ================= Auth Functions (คงเดิม) =================
         function clearMessages() {
             document.getElementById('log-msg').textContent = '';
             document.getElementById('reg-msg').textContent = '';
@@ -369,9 +387,7 @@
 
             let users = JSON.parse(localStorage.getItem('flonters_users')) || {};
 
-            if (users[email]) {
-                msgBox.className = 'error-msg'; msgBox.textContent = 'This email is already registered!'; return;
-            }
+            if (users[email]) { msgBox.className = 'error-msg'; msgBox.textContent = 'This email is already registered!'; return; }
 
             const saveUser = (avatarBase64) => {
                 users[email] = { name: name, password: pass, avatar: avatarBase64, scores: [] };
@@ -445,20 +461,22 @@
                 dashSection.style.pointerEvents = 'none';
                 dashSection.style.opacity = '0';
                 
-                // Reset dashboard
                 document.getElementById('log-email').value = '';
                 document.getElementById('log-pass').value = '';
                 switchForm('login');
+                
+                // เคลียร์หน้า Composition กลับเป็นหน้าว่าง
+                document.getElementById('editor-title').textContent = 'Composition';
+                document.getElementById('editor-content-area').innerHTML = `<div class="placeholder-text" id="editor-placeholder">The stage is empty. Select or create a score...<br><span class="sub-text">(Music staff composition area)</span></div>`;
             }, 50);
         }
 
-        // ================= User Database & File Management =================
+        // ================= File Management =================
         function loadUserScores() {
             const list = document.getElementById('score-list');
             list.innerHTML = ''; 
             let users = JSON.parse(localStorage.getItem('flonters_users'));
             let userScores = users[currentUserEmail].scores || [];
-            
             userScores.forEach(scoreName => { renderScoreItem(scoreName); });
         }
 
@@ -496,9 +514,8 @@
 
             const finishNewFile = () => {
                 let fileName = input.value.trim();
-                if (fileName === '') {
-                    li.remove();
-                } else {
+                if (fileName === '') li.remove();
+                else {
                     li.remove();
                     saveScoreToDB(null, fileName); 
                     renderScoreItem(fileName, true); 
@@ -509,15 +526,49 @@
             input.addEventListener('blur', finishNewFile);
         }
 
+        // ================= ระบบสร้างโน้ตเพลง (ของใหม่!) =================
         function renderScoreItem(fileName, prepend = false) {
             const list = document.getElementById('score-list');
             const li = document.createElement('li');
             
             li.innerHTML = `<span class="file-icon">></span><span class="file-name">${fileName}</span>`;
             
+            // เมื่อดับเบิ้ลคลิกที่ไฟล์ จะสร้างหน้ากระดาษโน้ต
             li.ondblclick = function() {
                 document.getElementById('editor-title').textContent = 'Composition - ' + li.querySelector('.file-name').textContent;
-                document.getElementById('editor-placeholder').innerHTML = `Now composing: <strong>${li.querySelector('.file-name').textContent}</strong>...<br><span class="sub-text">(Music staff composition area)</span>`;
+                
+                const editorArea = document.getElementById('editor-content-area');
+                
+                // ล้างข้อความ Placeholder ทิ้ง แล้ววาดบรรทัด 5 เส้นแทน
+                editorArea.innerHTML = `
+                    <div class="sheet-music-container">
+                        <div class="stave" id="music-stave">
+                            <div class="clef">&#119070;</div> <div class="stave-line"></div>
+                            <div class="stave-line"></div>
+                            <div class="stave-line"></div>
+                            <div class="stave-line"></div>
+                            <div class="stave-line"></div>
+                        </div>
+                    </div>
+                `;
+
+                // เพิ่มระบบโต้ตอบ: คลิกลงบนบรรทัด 5 เส้นเพื่อวางโน้ต!
+                const stave = document.getElementById('music-stave');
+                stave.addEventListener('click', function(e) {
+                    const rect = stave.getBoundingClientRect();
+                    // คำนวณตำแหน่ง X, Y ที่เมาส์คลิกเทียบกับกรอบบรรทัด 5 เส้น
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    // สร้าง div ตัวโน้ตขึ้นมาใหม่
+                    const note = document.createElement('div');
+                    note.className = 'musical-note';
+                    note.style.left = x + 'px';
+                    note.style.top = y + 'px';
+                    
+                    // แปะตัวโน้ตลงไปในบรรทัด 5 เส้น
+                    stave.appendChild(note);
+                });
             };
 
             li.oncontextmenu = function(e) {
@@ -531,11 +582,10 @@
                 menu.classList.remove('hidden');
             };
 
-            if (prepend) { list.insertBefore(li, list.firstChild); } 
-            else { list.appendChild(li); }
+            if (prepend) list.insertBefore(li, list.firstChild); 
+            else list.appendChild(li); 
         }
 
-        // ================= Context Menu Functions =================
         function executeRename() {
             document.getElementById('context-menu').classList.add('hidden'); 
             if(!activeFileLi) return;
@@ -550,11 +600,8 @@
 
             const finishRename = () => {
                 let newName = input.value.trim();
-                if (newName === '' || newName === oldName) {
-                    newName = oldName; 
-                } else {
-                    saveScoreToDB(oldName, newName); 
-                }
+                if (newName === '' || newName === oldName) newName = oldName; 
+                else saveScoreToDB(oldName, newName); 
                 
                 li.innerHTML = `<span class="file-icon">></span><span class="file-name">${newName}</span>`;
                 
@@ -579,7 +626,7 @@
                 let currentTitle = document.getElementById('editor-title').textContent;
                 if (currentTitle === 'Composition - ' + activeFileName) {
                     document.getElementById('editor-title').textContent = 'Composition';
-                    document.getElementById('editor-placeholder').innerHTML = `The stage is empty. Select or create a score...<br><span class="sub-text">(Music staff composition area)</span>`;
+                    document.getElementById('editor-content-area').innerHTML = `<div class="placeholder-text" id="editor-placeholder">The stage is empty. Select or create a score...<br><span class="sub-text">(Music staff composition area)</span></div>`;
                 }
             }
         }
