@@ -7,7 +7,204 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Lora:ital,wght@0,400;0,700;1,400&family=Courier+Prime&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #080808;
+            color: #dcd8cc;
+            font-family: 'Lora', serif;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ================= Auth Section ================= */
+        #auth-section {
+            background: radial-gradient(circle at 50% -20%, #2a2a2a 0%, #050505 70%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            position: absolute;
+            width: 100%;
+            z-index: 10;
+        }
+
+        .auth-box {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1.logo {
+            font-family: 'Cinzel', serif;
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: 6px;
+            color: #f0ece1;
+            margin-bottom: 5px;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.8);
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            font-style: italic;
+            color: #7a756b;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+        }
+
+        .toggle-box {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #222;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #555;
+            font-family: 'Cinzel', serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            padding: 10px 0;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .toggle-btn.active {
+            color: #dcd8cc;
+            border-bottom: 1px solid #dcd8cc;
+        }
+
+        form { display: flex; flex-direction: column; gap: 25px; text-align: left; }
+
+        .input-group input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #444;
+            padding: 10px 5px;
+            color: #dcd8cc;
+            font-size: 1rem;
+            font-family: 'Lora', serif;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus { outline: none; border-bottom-color: #888; }
+        .input-group input::placeholder { color: #444; font-style: italic; }
+
+        .submit-btn {
+            background-color: transparent;
+            color: #dcd8cc;
+            border: 1px solid #555;
+            padding: 15px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.4s;
+        }
+
+        .submit-btn:hover {
+            background-color: #dcd8cc;
+            color: #000;
+            border-color: #dcd8cc;
+        }
+
+        .hidden { display: none !important; }
+
+        /* ================= Dashboard Section ================= */
+        #dash-section {
+            opacity: 0;
+            pointer-events: none;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #050505;
+            transition: opacity 1s ease;
+            position: absolute;
+            width: 100%;
+            z-index: 5;
+        }
+
+        .top-nav {
+            height: 60px;
+            border-bottom: 1px solid #222;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background: #080808;
+        }
+
+        .nav-logo { font-family: 'Cinzel', serif; font-size: 1.5rem; letter-spacing: 3px; }
+        .nav-user { font-style: italic; color: #7a756b; font-size: 0.9rem; }
+
+        .workspace { display: flex; flex: 1; overflow: hidden; }
+
+        .panel-left { width: 260px; border-right: 1px solid #222; background: #0a0a0a; display: flex; flex-direction: column; }
+        .panel-right { flex: 1; display: flex; flex-direction: column; }
+
+        .panel-editor {
+            flex: 1; 
+            background: #0d0d0d; 
+            padding: 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            position: relative;
+        }
+
+        .panel-iot {
+            height: 220px; 
+            border-top: 1px solid #222; 
+            background: #050505; 
+            display: flex; 
+            flex-direction: column;
+        }
+
+        .panel-header {
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            color: #555;
+            padding: 12px 20px;
+            border-bottom: 1px solid #1a1a1a;
+            background: #080808;
+            text-transform: uppercase;
+        }
+
+        .editor-header { position: absolute; top: 0; left: 0; width: 100%; border-bottom: 1px solid #1a1a1a; }
+
+        .file-list { list-style: none; padding: 15px; color: #888; font-size: 0.95rem; }
+        .file-list li { margin-bottom: 15px; cursor: pointer; transition: 0.2s; }
+        .file-list li:hover { color: #dcd8cc; }
+        .file-icon { color: #555; margin-right: 5px; }
+
+        .placeholder-text { color: #333; font-style: italic; text-align: center; font-size: 1.2rem; }
+        .sub-text { font-size: 0.8rem; color: #222; }
+
+        .iot-terminal {
+            font-family: 'Courier Prime', monospace;
+            padding: 15px 20px;
+            color: #666;
+            font-size: 0.9rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .iot-terminal p { margin-bottom: 8px; }
+        .log-success { color: #5a7a5a; } 
+        .log-warn { color: #8a7a4a; }
+    </style>
 </head>
 <body>
 
@@ -82,6 +279,45 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // ฟังก์ชันสลับหน้า Login กับ Sign Up
+        function switchForm(type) {
+            const formLogin = document.getElementById('form-login');
+            const formSignup = document.getElementById('form-signup');
+            const btnLogin = document.getElementById('btn-login');
+            const btnSignup = document.getElementById('btn-signup');
+
+            if (type === 'login') {
+                formLogin.classList.remove('hidden');
+                formSignup.classList.add('hidden');
+                btnLogin.classList.add('active');
+                btnSignup.classList.remove('active');
+            } else {
+                formLogin.classList.add('hidden');
+                formSignup.classList.remove('hidden');
+                btnLogin.classList.remove('active');
+                btnSignup.classList.add('active');
+            }
+        }
+
+        // ฟังก์ชันตอนกดปุ่ม ENTER STAGE / REGISTER
+        function handleLogin(event) {
+            event.preventDefault(); // กันไม่ให้เว็บ Refresh ตัวเอง
+            
+            const authSection = document.getElementById('auth-section');
+            const dashSection = document.getElementById('dash-section');
+
+            // เฟดหน้า Login ออก พร้อมซูมเข้านิดๆ
+            authSection.style.opacity = '0';
+            authSection.style.transform = 'scale(1.05)'; 
+            
+            // รอ 0.8 วินาทีให้แอนิเมชันจบ ค่อยโชว์พื้นที่ทำงาน
+            setTimeout(() => {
+                authSection.style.display = 'none';
+                dashSection.style.pointerEvents = 'all';
+                dashSection.style.opacity = '1';
+            }, 800);
+        }
+    </script>
 </body>
 </html>
