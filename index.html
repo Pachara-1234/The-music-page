@@ -47,9 +47,24 @@
         .toggle-btn.active { color: #dcd8cc; border-bottom: 1px solid #dcd8cc; }
 
         form { display: flex; flex-direction: column; gap: 20px; text-align: left; }
-        .input-group input { width: 100%; background: transparent; border: none; border-bottom: 1px solid #444; padding: 10px 5px; color: #dcd8cc; font-size: 1rem; font-family: 'Lora', serif; transition: 0.3s; }
+        .input-group input[type="text"],
+        .input-group input[type="email"],
+        .input-group input[type="password"] { 
+            width: 100%; background: transparent; border: none; border-bottom: 1px solid #444; 
+            padding: 10px 5px; color: #dcd8cc; font-size: 1rem; font-family: 'Lora', serif; transition: 0.3s; 
+        }
         .input-group input:focus { outline: none; border-bottom-color: #888; }
         .input-group input::placeholder { color: #444; font-style: italic; }
+
+        /* อัปโหลดรูปโปรไฟล์ */
+        .file-label { display: block; color: #7a756b; font-size: 0.85rem; margin-bottom: 5px; font-style: italic; }
+        .file-input { color: #dcd8cc; font-size: 0.85rem; width: 100%; }
+        .file-input::file-selector-button {
+            background: transparent; color: #dcd8cc; border: 1px solid #444; 
+            padding: 5px 10px; margin-right: 10px; cursor: pointer; 
+            font-family: 'Lora', serif; transition: 0.3s; border-radius: 3px;
+        }
+        .file-input::file-selector-button:hover { background: #dcd8cc; color: #000; }
 
         input:-webkit-autofill {
             -webkit-box-shadow: 0 0 0 30px #080808 inset !important;
@@ -73,27 +88,25 @@
         .top-nav { height: 70px; border-bottom: 1px solid #222; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #080808; }
         .nav-logo { font-family: 'Cinzel', serif; font-size: 1.5rem; letter-spacing: 3px; }
         
-        /* แก้ไขส่วน Profile ผู้ใช้มุมขวาบน */
-        .user-profile-container { display: flex; align-items: center; gap: 15px; }
-        .nav-user { font-style: italic; color: #dcd8cc; font-size: 1.1rem; font-weight: bold; }
+        /* แก้ไข Profile กลับเป็นสไตล์เดิมและลดขนาดรูป */
+        .user-profile-container { display: flex; align-items: center; gap: 12px; }
+        .nav-user { font-style: italic; color: #7a756b; font-size: 0.95rem; }
         .user-avatar { 
-            width: 45px; height: 45px; border-radius: 50%; 
-            background: #2a2a2a; border: 2px solid #555;
+            width: 35px; height: 35px; border-radius: 50%; /* ลดขนาดลงเหลือ 35px */
+            background-color: #1a1a1a; border: 1px solid #444;
             display: flex; justify-content: center; align-items: center; 
-            font-family: 'Cinzel', serif; font-size: 1.5rem; color: #f0ece1;
+            font-family: 'Cinzel', serif; font-size: 1.2rem; color: #f0ece1;
+            background-size: cover; background-position: center;
         }
 
         .workspace { display: flex; flex: 1; overflow: hidden; }
         
-        /* แก้ไขความกว้างโซนซ้ายเหลือ 3/5 (ประมาณ 156px แต่ปัดเป็น 160px ให้สวย) */
         .panel-left { width: 160px; border-right: 1px solid #222; background: #0a0a0a; display: flex; flex-direction: column; }
         .panel-right { flex: 1; display: flex; flex-direction: column; }
         
-        /* แก้ไขพื้นหลังโซนขวาบน เป็นสีครีมกระดาษโน้ตเก่า */
         .panel-editor { 
-            flex: 1; 
-            background: #f4ecd8; /* สีขาวครีมคลาสสิก */
-            padding: 20px; display: flex; justify-content: center; align-items: center; position: relative; 
+            flex: 1; background: #f4ecd8; padding: 20px; display: flex; 
+            justify-content: center; align-items: center; position: relative; 
         }
         
         .panel-iot { height: 220px; border-top: 1px solid #222; background: #050505; display: flex; flex-direction: column; }
@@ -103,7 +116,6 @@
             padding: 12px 20px; border-bottom: 1px solid #1a1a1a; background: #080808; text-transform: uppercase;
         }
 
-        /* ปรับสี Header ของ Editor ให้เข้ากับพื้นหลังสีสว่าง */
         .editor-header { 
             position: absolute; top: 0; left: 0; width: 100%; 
             border-bottom: 1px solid #d4c8b2; background: #e8dcc4; color: #333; font-weight: bold;
@@ -114,22 +126,18 @@
         .file-list li:hover { color: #dcd8cc; }
         .file-icon { color: #555; margin-right: 5px; }
         
-        /* ปุ่มเพิ่มไฟล์ใหม่ */
         .btn-new-score {
             width: 100%; background: transparent; border: 1px dashed #444; color: #777;
-            padding: 8px 0; margin-bottom: 15px; cursor: pointer; font-family: 'Cinzel', serif;
-            transition: 0.3s;
+            padding: 8px 0; margin-bottom: 15px; cursor: pointer; font-family: 'Cinzel', serif; transition: 0.3s;
         }
         .btn-new-score:hover { color: #dcd8cc; border-color: #dcd8cc; }
 
-        /* กล่องพิมพ์ชื่อไฟล์ */
         .new-file-input {
             width: 100%; background: #111; border: 1px solid #444; color: #dcd8cc;
             padding: 5px; font-family: 'Lora', serif; font-size: 0.85rem; margin-bottom: 15px;
         }
         .new-file-input:focus { outline: none; border-color: #888; }
 
-        /* ปรับสีตัวอักษรใน Editor ให้เข้มขึ้นเพื่อให้อ่านบนสีขาวครีมได้ */
         .placeholder-text { color: #4a4235; font-style: italic; text-align: center; font-size: 1.2rem; }
         .sub-text { font-size: 0.8rem; color: #6d6251; }
 
@@ -172,6 +180,11 @@
                 <div class="input-group">
                     <input type="password" id="reg-pass" placeholder="Password" required>
                 </div>
+                <div class="input-group">
+                    <label class="file-label" for="reg-avatar">Profile Picture (Optional)</label>
+                    <input type="file" id="reg-avatar" accept="image/*" class="file-input">
+                </div>
+                
                 <div id="reg-msg" class="error-msg"></div>
                 <button type="submit" class="submit-btn">REGISTER</button>
             </form>
@@ -243,6 +256,7 @@
             const name = document.getElementById('reg-name').value.trim();
             const email = document.getElementById('reg-email').value.trim();
             const pass = document.getElementById('reg-pass').value;
+            const avatarInput = document.getElementById('reg-avatar');
             const msgBox = document.getElementById('reg-msg');
 
             let users = JSON.parse(localStorage.getItem('flonters_users')) || {};
@@ -251,12 +265,26 @@
                 msgBox.className = 'error-msg'; msgBox.textContent = 'อีเมลนี้ถูกใช้ลงชื่อบนเวทีไปแล้ว!'; return;
             }
 
-            users[email] = { name: name, password: pass };
-            localStorage.setItem('flonters_users', JSON.stringify(users));
+            // ฟังก์ชันย่อยสำหรับบันทึกข้อมูล (รับรูปภาพมาด้วยถ้ามี)
+            const saveUser = (avatarBase64) => {
+                users[email] = { name: name, password: pass, avatar: avatarBase64 };
+                localStorage.setItem('flonters_users', JSON.stringify(users));
 
-            msgBox.className = 'error-msg success-msg';
-            msgBox.textContent = 'Audition Passed. Please Login...';
-            setTimeout(() => { switchForm('login'); }, 1500);
+                msgBox.className = 'error-msg success-msg';
+                msgBox.textContent = 'Audition Passed. Please Login...';
+                setTimeout(() => { switchForm('login'); }, 1500);
+            };
+
+            // เช็คว่ามีการแนบรูปภาพมาไหม
+            if (avatarInput.files && avatarInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    saveUser(e.target.result); // เซฟเป็น Base64 String
+                };
+                reader.readAsDataURL(avatarInput.files[0]);
+            } else {
+                saveUser(""); // ไม่มีรูป
+            }
         }
 
         function processLogin(event) {
@@ -277,10 +305,20 @@
 
             msgBox.textContent = '';
             const userName = users[email].name;
+            const userAvatar = users[email].avatar;
             
-            // เปลี่ยนชื่อให้เหลือแค่ชื่อ และโชว์ Avatar เป็นตัวอักษรตัวแรกของชื่อ
+            // อัปเดตชื่อสไตล์เก่า
             document.getElementById('dashboard-username').textContent = userName;
-            document.getElementById('dashboard-avatar').textContent = userName.charAt(0).toUpperCase();
+            
+            // จัดการรูปโปรไฟล์
+            const avatarEl = document.getElementById('dashboard-avatar');
+            if (userAvatar) {
+                avatarEl.style.backgroundImage = `url(${userAvatar})`;
+                avatarEl.textContent = ''; // ลบตัวอักษรออกถ้ารูปมา
+            } else {
+                avatarEl.style.backgroundImage = 'none';
+                avatarEl.textContent = userName.charAt(0).toUpperCase(); // ใช้ตัวอักษรแรกถ้าไม่มีรูป
+            }
 
             const authSection = document.getElementById('auth-section');
             const dashSection = document.getElementById('dash-section');
@@ -298,28 +336,21 @@
         // ================= ระบบจัดการไฟล์ =================
         function showNewFileInput() {
             const list = document.getElementById('score-list');
-            
-            // สร้างกล่อง input
             const input = document.createElement('input');
             input.type = 'text';
             input.className = 'new-file-input';
             input.placeholder = 'Score name... (Press Enter)';
             
-            // ใส่ไว้ล่างสุดของ list
             const li = document.createElement('li');
             li.appendChild(input);
             list.appendChild(li);
             
             input.focus();
 
-            // พอกด Enter ให้บันทึกชื่อไฟล์
             input.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    saveFile(this, li);
-                }
+                if (e.key === 'Enter') saveFile(this, li);
             });
 
-            // ถ้ากดคลิกที่อื่น (หลุดโฟกัส) ก็ให้บันทึกเหมือนกัน
             input.addEventListener('blur', function() {
                 saveFile(this, li);
             });
@@ -328,14 +359,12 @@
         function saveFile(inputElement, liElement) {
             let fileName = inputElement.value.trim();
             if (fileName === '') {
-                liElement.remove(); // ถ้าไม่พิมพ์อะไรเลย ให้ลบช่องนั้นทิ้ง
+                liElement.remove(); 
                 return;
             }
             
-            // เปลี่ยนจาก input box ให้กลายเป็น Text ธรรมดา
             liElement.innerHTML = `<span class="file-icon">></span> ${fileName}`;
             
-            // สร้าง Event ว่าถ้าดับเบิ้ลคลิกไฟล์นี้ ให้เปลี่ยนชื่อ Title ตรง Composition
             liElement.ondblclick = function() {
                 document.getElementById('editor-title').textContent = 'Composition - ' + fileName;
                 document.getElementById('editor-placeholder').innerHTML = `Now composing: <strong>${fileName}</strong>...<br><span class="sub-text">(พื้นที่สำหรับระบบเขียนโน้ตเพลง 5 เส้น)</span>`;
