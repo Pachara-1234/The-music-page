@@ -59,7 +59,7 @@
 
         .toggle-box {
             display: flex;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             border-bottom: 1px solid #222;
         }
 
@@ -82,7 +82,7 @@
             border-bottom: 1px solid #dcd8cc;
         }
 
-        form { display: flex; flex-direction: column; gap: 25px; text-align: left; }
+        form { display: flex; flex-direction: column; gap: 20px; text-align: left; }
 
         .input-group input {
             width: 100%;
@@ -99,6 +99,16 @@
         .input-group input:focus { outline: none; border-bottom-color: #888; }
         .input-group input::placeholder { color: #444; font-style: italic; }
 
+        /* แก้ปัญหาช่องกรอกกลายเป็นสีขาวเวลา Autofill */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active{
+            -webkit-box-shadow: 0 0 0 30px #080808 inset !important;
+            -webkit-text-fill-color: #dcd8cc !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
         .submit-btn {
             background-color: transparent;
             color: #dcd8cc;
@@ -109,7 +119,7 @@
             font-weight: 600;
             letter-spacing: 2px;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 5px;
             transition: all 0.4s;
         }
 
@@ -118,6 +128,16 @@
             color: #000;
             border-color: #dcd8cc;
         }
+
+        /* กล่องข้อความแจ้งเตือน (Error Message) */
+        .error-msg {
+            color: #9e2a2b; /* สีแดงเลือดนก */
+            font-size: 0.85rem;
+            font-style: italic;
+            min-height: 20px;
+            text-align: center;
+        }
+        .success-msg { color: #5a7a5a; } /* สีเขียวหม่น */
 
         .hidden { display: none !important; }
 
@@ -149,27 +169,10 @@
         .nav-user { font-style: italic; color: #7a756b; font-size: 0.9rem; }
 
         .workspace { display: flex; flex: 1; overflow: hidden; }
-
         .panel-left { width: 260px; border-right: 1px solid #222; background: #0a0a0a; display: flex; flex-direction: column; }
         .panel-right { flex: 1; display: flex; flex-direction: column; }
-
-        .panel-editor {
-            flex: 1; 
-            background: #0d0d0d; 
-            padding: 20px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            position: relative;
-        }
-
-        .panel-iot {
-            height: 220px; 
-            border-top: 1px solid #222; 
-            background: #050505; 
-            display: flex; 
-            flex-direction: column;
-        }
+        .panel-editor { flex: 1; background: #0d0d0d; padding: 20px; display: flex; justify-content: center; align-items: center; position: relative; }
+        .panel-iot { height: 220px; border-top: 1px solid #222; background: #050505; display: flex; flex-direction: column; }
 
         .panel-header {
             font-family: 'Cinzel', serif;
@@ -183,24 +186,14 @@
         }
 
         .editor-header { position: absolute; top: 0; left: 0; width: 100%; border-bottom: 1px solid #1a1a1a; }
-
         .file-list { list-style: none; padding: 15px; color: #888; font-size: 0.95rem; }
         .file-list li { margin-bottom: 15px; cursor: pointer; transition: 0.2s; }
         .file-list li:hover { color: #dcd8cc; }
         .file-icon { color: #555; margin-right: 5px; }
-
         .placeholder-text { color: #333; font-style: italic; text-align: center; font-size: 1.2rem; }
         .sub-text { font-size: 0.8rem; color: #222; }
 
-        .iot-terminal {
-            font-family: 'Courier Prime', monospace;
-            padding: 15px 20px;
-            color: #666;
-            font-size: 0.9rem;
-            overflow-y: auto;
-            flex: 1;
-        }
-
+        .iot-terminal { font-family: 'Courier Prime', monospace; padding: 15px 20px; color: #666; font-size: 0.9rem; overflow-y: auto; flex: 1; }
         .iot-terminal p { margin-bottom: 8px; }
         .log-success { color: #5a7a5a; } 
         .log-warn { color: #8a7a4a; }
@@ -218,26 +211,30 @@
                 <button class="toggle-btn" id="btn-signup" onclick="switchForm('signup')">SIGN UP</button>
             </div>
 
-            <form id="form-login" onsubmit="handleLogin(event)">
+            <form id="form-login" onsubmit="processLogin(event)">
                 <div class="input-group">
-                    <input type="email" placeholder="Email" required>
+                    <input type="email" id="log-email" placeholder="Email" required>
                 </div>
                 <div class="input-group">
-                    <input type="password" placeholder="Password" required>
+                    <input type="password" id="log-pass" placeholder="Password" required>
                 </div>
+                <div id="log-msg" class="error-msg"></div>
+                
                 <button type="submit" class="submit-btn">ENTER STAGE</button>
             </form>
 
-            <form id="form-signup" class="hidden" onsubmit="handleLogin(event)">
+            <form id="form-signup" class="hidden" onsubmit="processRegister(event)">
                 <div class="input-group">
-                    <input type="text" placeholder="Conductor Name" required>
+                    <input type="text" id="reg-name" placeholder="Conductor Name" required>
                 </div>
                 <div class="input-group">
-                    <input type="email" placeholder="Email" required>
+                    <input type="email" id="reg-email" placeholder="Email" required>
                 </div>
                 <div class="input-group">
-                    <input type="password" placeholder="Password" required>
+                    <input type="password" id="reg-pass" placeholder="Password" required>
                 </div>
+                <div id="reg-msg" class="error-msg"></div>
+
                 <button type="submit" class="submit-btn">REGISTER</button>
             </form>
         </div>
@@ -246,26 +243,22 @@
     <div id="dash-section">
         <div class="top-nav">
             <div class="nav-logo">FLONTERS</div>
-            <div class="nav-user">Conductor: Master</div>
+            <div class="nav-user" id="dashboard-username">Conductor: Unknown</div>
         </div>
 
         <div class="workspace">
-            
             <div class="panel-left">
                 <div class="panel-header">Repertoire (Library)</div>
                 <ul class="file-list">
                     <li><span class="file-icon">></span> Untitled_Score_01</li>
                     <li><span class="file-icon">></span> Whiplash_Draft</li>
-                    <li><span class="file-icon">></span> Pico_Test_Tune</li>
                 </ul>
             </div>
-
             <div class="panel-right">
                 <div class="panel-editor">
                     <div class="panel-header editor-header">Composition</div>
                     <div class="placeholder-text">The stage is empty. Ready for your notes...<br><span class="sub-text">(พื้นที่สำหรับระบบเขียนโน้ตเพลง 5 เส้น)</span></div>
                 </div>
-
                 <div class="panel-iot">
                     <div class="panel-header">System Telemetry (IoT Monitor)</div>
                     <div class="iot-terminal">
@@ -280,8 +273,16 @@
     </div>
 
     <script>
-        // ฟังก์ชันสลับหน้า Login กับ Sign Up
+        // เคลียร์ข้อความแจ้งเตือนทุกครั้งที่สลับหน้า
+        function clearMessages() {
+            document.getElementById('log-msg').textContent = '';
+            document.getElementById('reg-msg').textContent = '';
+            document.getElementById('reg-msg').className = 'error-msg';
+        }
+
+        // ฟังก์ชันสลับหน้า Login / Sign Up
         function switchForm(type) {
+            clearMessages();
             const formLogin = document.getElementById('form-login');
             const formSignup = document.getElementById('form-signup');
             const btnLogin = document.getElementById('btn-login');
@@ -300,18 +301,73 @@
             }
         }
 
-        // ฟังก์ชันตอนกดปุ่ม ENTER STAGE / REGISTER
-        function handleLogin(event) {
-            event.preventDefault(); // กันไม่ให้เว็บ Refresh ตัวเอง
+        // ================= ระบบจำลองฐานข้อมูล =================
+        
+        // ฟังก์ชันสมัครสมาชิก
+        function processRegister(event) {
+            event.preventDefault();
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const pass = document.getElementById('reg-pass').value;
+            const msgBox = document.getElementById('reg-msg');
+
+            // ดึงข้อมูลผู้ใช้เก่าจาก localStorage ถ้าไม่มีให้สร้าง Object เปล่า
+            let users = JSON.parse(localStorage.getItem('flonters_users')) || {};
+
+            if (users[email]) {
+                msgBox.className = 'error-msg';
+                msgBox.textContent = 'อีเมลนี้ถูกใช้ลงชื่อบนเวทีไปแล้ว!';
+                return;
+            }
+
+            // บันทึกผู้ใช้ใหม่
+            users[email] = { name: name, password: pass };
+            localStorage.setItem('flonters_users', JSON.stringify(users));
+
+            // โชว์ข้อความสำเร็จสีเขียว และเด้งกลับไปหน้า Login
+            msgBox.className = 'error-msg success-msg';
+            msgBox.textContent = 'Audition Passed. Please Login...';
             
+            setTimeout(() => {
+                switchForm('login');
+            }, 1500);
+        }
+
+        // ฟังก์ชันเข้าสู่ระบบ
+        function processLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('log-email').value.trim();
+            const pass = document.getElementById('log-pass').value;
+            const msgBox = document.getElementById('log-msg');
+
+            // โหลดรายชื่อผู้ใช้
+            let users = JSON.parse(localStorage.getItem('flonters_users')) || {};
+
+            if (!users[email]) {
+                // เคสไม่พบอีเมล
+                msgBox.textContent = 'ไม่พบผู้ใช้! (Not quite my tempo)';
+                return;
+            }
+
+            if (users[email].password !== pass) {
+                // เคสรหัสผ่านผิด
+                msgBox.textContent = 'รหัสผ่านไม่ถูกต้อง! (Were you rushing or dragging?)';
+                return;
+            }
+
+            // ถ้าทุกอย่างถูก เคลียร์ข้อความและเข้าสู่ระบบ
+            msgBox.textContent = '';
+            
+            // เปลี่ยนชื่อ Conductor มุมขวาบน
+            document.getElementById('dashboard-username').textContent = 'Conductor: ' + users[email].name;
+
+            // เฟดหน้าจอเข้า Workspace
             const authSection = document.getElementById('auth-section');
             const dashSection = document.getElementById('dash-section');
 
-            // เฟดหน้า Login ออก พร้อมซูมเข้านิดๆ
             authSection.style.opacity = '0';
             authSection.style.transform = 'scale(1.05)'; 
             
-            // รอ 0.8 วินาทีให้แอนิเมชันจบ ค่อยโชว์พื้นที่ทำงาน
             setTimeout(() => {
                 authSection.style.display = 'none';
                 dashSection.style.pointerEvents = 'all';
