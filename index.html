@@ -103,10 +103,10 @@
         .panel-iot { height: 220px; background: #050505; display: flex; flex-direction: column; flex-shrink: 0; }
         .panel-header { font-family: 'Cinzel', serif; font-size: 0.85rem; letter-spacing: 2px; color: #555; padding: 12px 20px; border-bottom: 1px solid #1a1a1a; background: #080808; text-transform: uppercase; }
         
-        /* ================= Editor Zone (Restored Old Vintage Look) ================= */
+        /* ================= Editor Zone ================= */
         .panel-editor-wrapper { flex: 1; display: flex; flex-direction: column; background: #f4ecd8; overflow: hidden; }
         .editor-header { border-bottom: 1px solid #d4c8b2; background: #e8dcc4; color: #333; font-weight: bold; flex-shrink: 0; }
-        .panel-editor-content { flex: 1; padding: 40px; overflow-y: auto; display: flex; justify-content: center; align-items: flex-start; position: relative; color: #111; }
+        .panel-editor-content { flex: 1; padding: 50px 60px; overflow-y: auto; display: flex; justify-content: center; align-items: flex-start; position: relative; color: #111; }
 
         .file-list { list-style: none; padding: 0 10px 10px 10px; color: #888; font-size: 0.85rem; overflow-y: auto; flex: 1; }
         .file-list li { padding: 10px 8px; cursor: pointer; transition: 0.2s; border-bottom: 1px solid #222; word-break: break-all; display: flex; align-items: center; }
@@ -145,58 +145,85 @@
         .context-item.delete { color: #e63946; border-top: 1px solid #222; }
         .context-item.delete:hover { background: #3a1115; color: #ffebf0; }
 
-        /* ================= Sheet Music Layout (Integrated Style) ================= */
+        /* ================= Professional Sheet Music Layout ================= */
         .sheet-music-container {
-            width: 100%; max-width: 900px;
+            width: 100%; max-width: 950px;
             display: flex; flex-direction: column;
+            color: #000;
         }
 
-        .sheet-header { width: 100%; margin-bottom: 60px; position: relative; }
+        .sheet-header { width: 100%; margin-bottom: 50px; position: relative; }
         
         .sheet-title {
-            font-family: 'Cinzel', serif; font-size: 2.5rem; font-weight: 800;
-            text-align: center; text-transform: uppercase; margin-bottom: 30px;
-            letter-spacing: 2px; color: #000;
+            /* เปลี่ยนเป็นฟอนต์ Serif มาตรฐานงานพิมพ์โน้ตเพลง */
+            font-family: 'Times New Roman', Times, serif; 
+            font-size: 3.5rem; 
+            font-weight: normal;
+            text-align: center; 
+            margin-bottom: 30px;
+            color: #000;
         }
 
         .sheet-meta {
             display: flex; justify-content: space-between; align-items: flex-end;
-            font-family: 'Lora', serif; font-size: 1.1rem; color: #000;
+            font-family: 'Times New Roman', Times, serif; 
+            font-size: 1.25rem; 
+            color: #000;
         }
-        .sheet-instrument { font-weight: bold; }
+        .sheet-instrument { font-style: normal; font-weight: bold; }
         .sheet-composer { font-weight: normal; }
 
-        .sheet-body { width: 100%; position: relative; margin-top: 30px; }
+        .sheet-body { width: 100%; position: relative; margin-top: 40px; }
 
         .tempo-marking {
-            font-family: 'Lora', serif; font-size: 1rem; font-weight: bold;
-            position: absolute; top: -40px; left: 60px; color: #000;
+            font-family: 'Times New Roman', Times, serif; 
+            font-size: 1.1rem; 
+            font-weight: bold;
+            position: absolute; top: -35px; left: 0; color: #000;
+            display: flex; align-items: center;
         }
-        .tempo-note { font-size: 1.2rem; margin-right: 5px; }
+        .tempo-note { font-size: 1.3rem; margin-right: 6px; line-height: 1; }
 
-        .stave-container { position: relative; width: 100%; height: 40px; }
+        /* กล่องบรรทัด 5 เส้น */
+        .stave-container { position: relative; width: 100%; height: 48px; }
         
         .stave-lines {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: space-between;
             z-index: 1;
         }
-        .stave-line { width: 100%; height: 1px; background-color: #000; }
+        .stave-line { width: 100%; height: 1.5px; background-color: #000; }
 
         .stave-elements {
             position: absolute; top: 0; left: 0; height: 100%; width: 100%;
             z-index: 2; display: flex; align-items: center; padding-left: 0;
         }
 
-        .clef {
-            font-family: 'Times New Roman', serif; font-size: 75px; 
-            margin-top: -12px; margin-right: 15px; color: #000;
+        /* เส้นกั้นห้องหัว-ท้าย */
+        .barline-start { width: 2px; height: 100%; background-color: #000; }
+        .barline-end { 
+            position: absolute; right: 0; top: 0;
+            width: 7px; height: 100%; 
+            border-left: 1.5px solid #000; 
+            border-right: 4px solid #000; 
         }
 
+        /* ภาพกุญแจซอล (Treble Clef) แบบ Vector คมชัด */
+        .clef-img {
+            height: 95px; /* ขนาดให้คล่อมบรรทัดพอดี */
+            margin-top: -12px;
+            margin-left: 12px;
+            margin-right: 18px;
+        }
+
+        /* สัดส่วน Time Signature แบบเป๊ะๆ */
         .time-signature {
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            font-family: 'Times New Roman', serif; font-weight: bold; font-size: 26px;
-            line-height: 0.75; margin-top: -2px; color: #000;
+            font-family: 'Times New Roman', Times, serif; 
+            font-weight: bold; 
+            font-size: 32px;
+            line-height: 0.72; 
+            color: #000;
         }
         .time-signature span { display: block; }
 
@@ -486,7 +513,6 @@
             inputInst.addEventListener('blur', () => { setTimeout(() => { if(document.activeElement !== inputName) finishNewFile(); }, 100) });
         }
 
-        // ================= Injecting UI into the classic cream background =================
         function renderScoreItem(fileName, instrument, prepend = false) {
             const list = document.getElementById('score-list');
             const li = document.createElement('li');
@@ -498,7 +524,7 @@
                 document.getElementById('editor-title').textContent = 'Composition - ' + fileName;
                 const editorArea = document.getElementById('editor-content-area');
                 
-                // ถอดกรอบขาวออก ให้เนื้อหาลอยอยู่บนพื้นครีมแบบเต็มๆ แทน
+                // Injecting Professional Sheet Music UI
                 editorArea.innerHTML = `
                     <div class="sheet-music-container">
                         <div class="sheet-header">
@@ -522,12 +548,17 @@
                                     <div class="stave-line"></div>
                                 </div>
                                 <div class="stave-elements">
-                                    <div class="clef">&#119074;</div> 
+                                    <div class="barline-start"></div>
+                                    
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Treble_clef.svg" alt="Treble Clef" class="clef-img">
+                                    
                                     <div class="time-signature">
                                         <span>4</span>
                                         <span>4</span>
                                     </div>
                                 </div>
+                                
+                                <div class="barline-end"></div>
                             </div>
                         </div>
                     </div>
