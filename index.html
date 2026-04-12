@@ -1,98 +1,51 @@
 <!DOCTYPE html>
-<html lang="th">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pico IoT Control - Flonters</title>
+    <title>Pico Chat Control</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { 
-            background-color: #121212; 
-            color: white; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            text-align: center; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            height: 100vh; 
-            margin: 0; 
-        }
-        h1 { font-weight: 300; margin-bottom: 30px; }
-        .btn {
-            width: 200px; height: 200px; border-radius: 50%; border: none;
-            background: #333; color: #777; font-size: 24px; font-weight: bold;
-            cursor: pointer; box-shadow: 0 0 15px rgba(0,0,0,0.5);
-            transition: all 0.3s ease; border: 5px solid #222;
-        }
-        /* สถานะตอนไฟเปิด */
-        .btn.on { 
-            background: #00ff88; color: #121212; 
-            box-shadow: 0 0 50px #00ff88; border: 5px solid #fff;
-        }
-        .status-text { margin-top: 20px; font-size: 18px; color: #aaa; }
+        body { background: #121212; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
+        input, select, button { padding: 10px; margin: 10px; border-radius: 5px; border: none; width: 80%; max-width: 300px; }
+        button { background: #1DB954; color: white; font-weight: bold; cursor: pointer; }
+        .log { background: #222; padding: 10px; text-align: left; margin: 20px auto; max-width: 400px; border-radius: 10px; }
     </style>
 </head>
 <body>
+    <h1>Pico OLED Chat</h1>
+    <select id="sender">
+        <option value="P1">P1</option>
+        <option value="P2">P2</option>
+    </select><br>
+    <input type="text" id="message" placeholder="พิมพ์ข้อความ..."><br>
+    <button onclick="sendMsg()">ส่งไปที่จอ OLED</button>
 
-    <h1>IoT Light Control</h1>
-    
-    <button id="ledBtn" class="btn" onclick="toggleLED()">OFF</button>
-    
-    <div id="status" class="status-text">กำลังโหลดสถานะ...</div>
+    <div class="log" id="history">
+        <small>ประวัติข้อความ:</small>
+        <div id="lastSent">ไม่มีข้อมูล</div>
+    </div>
 
     <script>
-        // ลิงก์ Firebase ของคุณ
-        const dbURL = "https://flonters-default-rtdb.asia-southeast1.firebasedatabase.app/ledStatus.json";
+        const dbURL = "https://flonters-default-rtdb.asia-southeast1.firebasedatabase.app/chat.json";
 
-        // ฟังก์ชันดึงสถานะล่าสุดจาก Firebase มาโชว์ตอนเปิดเว็บครั้งแรก
-        function checkStatus() {
-            fetch(dbURL)
-            .then(res => res.json())
-            .then(data => {
-                const btn = document.getElementById('ledBtn');
-                const statusDiv = document.getElementById('status');
-                if(data === 1) {
-                    btn.innerText = "ON";
-                    btn.classList.add('on');
-                    statusDiv.innerText = "ไฟกำลังเปิดอยู่";
-                } else {
-                    btn.innerText = "OFF";
-                    btn.classList.remove('on');
-                    statusDiv.innerText = "ไฟปิดอยู่";
-                }
-            });
-        }
-
-        // ฟังก์ชันตอนกดปุ่ม
-        function toggleLED() {
-            const btn = document.getElementById('ledBtn');
-            const statusDiv = document.getElementById('status');
-            const isTurningOn = !btn.classList.contains('on');
+        function sendMsg() {
+            const sender = document.getElementById('sender').value;
+            const msg = document.getElementById('message').value;
+            const time = new Date().toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'});
             
-            statusDiv.innerText = "กำลังส่งคำสั่ง...";
+            const payload = {
+                user: sender,
+                text: msg,
+                time: time,
+                full: sender + ": " + msg
+            };
 
-            // ส่งค่า 1 หรือ 0 ไปที่ Firebase
-            fetch(dbURL, {
-                method: 'PUT',
-                body: JSON.stringify(isTurningOn ? 1 : 0)
-            })
+            fetch(dbURL, { method: 'PUT', body: JSON.stringify(payload) })
             .then(() => {
-                if(isTurningOn) {
-                    btn.innerText = "ON";
-                    btn.classList.add('on');
-                    statusDiv.innerText = "เปิดไฟสำเร็จ!";
-                } else {
-                    btn.innerText = "OFF";
-                    btn.classList.remove('on');
-                    statusDiv.innerText = "ปิดไฟสำเร็จ!";
-                }
-            })
-            .catch(err => {
-                statusDiv.innerText = "เกิดข้อผิดพลาด: " + err;
+                document.getElementById('lastSent').innerText = payload.full + " (" + time + ")";
+                document.getElementById('message').value = "";
             });
         }
-
-        // รันเช็คสถานะทันทีที่เปิดเว็บ
-        checkStatus();
     </script>
 </body>
 </html>
