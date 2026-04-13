@@ -672,19 +672,32 @@
                 staveCount = 0; 
                 container.innerHTML = ""; 
                 
-                // โหลด Title กับ Composer จากไฟล์เซฟมาทับ (ถ้าเปลี่ยนชื่อไฟล์มา Title จะยังเป็นของเดิมไม่เปลี่ยนตาม)
+                // โหลด Title กับ Composer จากไฟล์เซฟมาทับ
                 if (titleEl && data.sheetTitle !== undefined) titleEl.textContent = data.sheetTitle;
                 if (instEl && data.sheetInstrument !== undefined) instEl.textContent = data.sheetInstrument;
                 if (compEl && data.sheetComposer !== undefined) compEl.textContent = data.sheetComposer;
 
-                if (initialBtn) initialBtn.remove(); 
-
-                for (let i = 0; i < data.bars; i++) {
-                    drawNewBar();
+                // ==========================================
+                // [จุดที่แก้บัค] เช็คจำนวนบาร์ก่อนลบปุ่ม + ADD NOTE
+                // ==========================================
+                if (data.bars > 0) {
+                    // ถ้ามีบรรทัดโน้ต ให้ลบปุ่มเริ่มต้นทิ้ง แล้ววาดบรรทัดตามที่เซฟไว้
+                    if (initialBtn) initialBtn.remove(); 
+                    for (let i = 0; i < data.bars; i++) {
+                        drawNewBar();
+                    }
+                } else {
+                    // ถ้าจำนวนบรรทัดเป็น 0 (ลบไปหมดแล้ว) ให้ตรวจสอบและสร้างปุ่ม + ADD NOTE กลับมา
+                    const actionArea = document.getElementById("action-area");
+                    if (actionArea && !document.getElementById("initial-add-btn")) {
+                        actionArea.innerHTML = `<button class="action-btn" id="initial-add-btn" onclick="addEmptyStave()">+ ADD NOTE</button>`;
+                    }
                 }
+                // ==========================================
+
             } else {
                 staveCount = 0;
-                // [สำคัญสุด] ถ้าเปิดไฟล์ใหม่ครั้งแรก ให้บังคับเซฟแยก Title กับ Composer ลงไปเลย เพื่อตัดขาดจากระบบหลัก
+                // ถ้าเปิดไฟล์ใหม่ครั้งแรก ให้บังคับเซฟแยก Title กับ Composer ลงไปเลย เพื่อตัดขาดจากระบบหลัก
                 saveData();
             }
         }
