@@ -151,10 +151,15 @@
 
         .sheet-header { width: 100%; margin-bottom: 30px; position: relative; }
         
+        .sheet-title-wrapper {
+            text-align: center; /* บังคับให้ Title อยู่ตรงกลาง */
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
         .sheet-title {
             font-family: 'Times New Roman', Times, serif; 
             font-size: 3.5rem; font-weight: normal;
-            text-align: center; margin-bottom: 20px;
         }
 
         .sheet-meta {
@@ -173,7 +178,7 @@
             text-decoration-color: transparent; 
             text-underline-offset: 6px;
             text-decoration-thickness: 1px;
-            display: inline-block;
+            display: inline-block; /* ทำให้แสดงผลตีกรอบเฉพาะคำได้ */
         }
         .editable-text:hover {
             text-decoration-color: #000; 
@@ -282,8 +287,9 @@
                     <div class="panel-header">System Telemetry (IoT Monitor)</div>
                     <div class="iot-terminal">
                         <p>> System initialized...</p>
-                        <p class="log-success">> Database hooked.</p>
-                        <p>> Awaiting connection...</p>
+                        <p class="log-warn">> Awaiting connection from Raspberry Pi Pico...</p>
+                        <p class="log-success">> Firebase real-time database hooked.</p>
+                        <p>> Loading Audio Context (Tone.js)...</p>
                     </div>
                 </div>
             </div>
@@ -291,187 +297,318 @@
     </div>
 
     <script>
-        let currentUserEmail = null, currentUserName = "Unknown", activeFileLi = null, activeFileName = "", activeFileInst = "";
-        let isCreatingScore = false, editorContextTarget = null, editorContextType = "";
+        // ================= Core State =================
+        let currentUserEmail = null;
+        let currentUserName = "Unknown";
+        let activeFileLi = null;   
+        let activeFileName = "";   
+        let activeFileInst = "";
+        
+        let isCreatingFile = false; // Flag ป้องกันกดรัว
+        let isProcessing = false;   // Flag ป้องกันอีเวนต์ตีกัน
+        
+        let editorContextTarget = null;
+        let editorContextType = "";
 
-        // Layout
+        // ================= Layout & Navigation =================
         const menuToggle = document.getElementById('menu-toggle');
         const sideTabPanel = document.getElementById('side-tab-panel');
-        menuToggle.onclick = (e) => { e.stopPropagation(); sideTabPanel.classList.toggle('open-panel'); };
 
-        const resizerX = document.getElementById('resizer-x'), resizerY = document.getElementById('resizer-y');
-        const panelLeft = document.getElementById('panel-left'), panelIoT = document.getElementById('panel-iot');
-        let rx = false, ry = false;
-        resizerX.onmousedown = () => { rx = true; document.body.classList.add('no-select'); };
-        resizerY.onmousedown = () => { ry = true; document.body.classList.add('no-select'); };
-        document.onmousemove = (e) => {
-            if (rx) { let w = e.clientX; if(w > 150 && w < 500) panelLeft.style.width = w + 'px'; }
-            if (ry) { let h = window.innerHeight - e.clientY; if(h > 50 && h < 500) panelIoT.style.height = h + 'px'; }
-        };
-        document.onmouseup = () => { rx = ry = false; document.body.classList.remove('no-select'); };
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); sideTabPanel.classList.toggle('open-panel');
+        });
 
-        document.onclick = (e) => {
-            if (!e.target.closest('#context-menu')) document.getElementById('context-menu').classList.add('hidden');
-            if (!e.target.closest('#editor-context-menu')) document.getElementById('editor-context-menu').classList.add('hidden');
-            if (!e.target.closest('#side-tab-panel') && sideTabPanel.classList.contains('open-panel')) sideTabPanel.classList.remove('open-panel');
-        };
+        const resizerX = document.getElementById('resizer-x');
+        const resizerY = document.getElementById('resizer-y');
+        const panelLeft = document.getElementById('panel-left');
+        const panelIoT = document.getElementById('panel-iot');
+        
+        let isResizingX = false, isResizingY = false;
 
-        // Auth Logic
+        resizerX.addEventListener('mousedown', () => { isResizingX = true; document.body.classList.add('no-select'); resizerX.classList.add('active'); });
+        resizerY.addEventListener('mousedown', () => { isResizingY = true; document.body.classList.add('no-select'); resizerY.classList.add('active'); });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isResizingX) { let newWidth = e.clientX; if(newWidth > 150 && newWidth < 500) panelLeft.style.width = `${newWidth}px`; }
+            if (isResizingY) { let newHeight = window.innerHeight - e.clientY; if(newHeight > 50 && newHeight < window.innerHeight - 100) panelIoT.style.height = `${newHeight}px`; }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isResizingX = false; isResizingY = false; document.body.classList.remove('no-select');
+            resizerX.classList.remove('active'); resizerY.classList.remove('active');
+        });
+
+        // จัดการคลิกซ่อนเมนูต่างๆ
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#context-menu') === null) document.getElementById('context-menu').classList.add('hidden');
+            if (e.target.closest('#editor-context-menu') === null) document.getElementById('editor-context-menu').classList.add('hidden');
+            if (e.target.closest('#side-tab-panel') === null && sideTabPanel.classList.contains('open-panel')) sideTabPanel.classList.remove('open-panel');
+        });
+
+        // ================= Auth Logic =================
         function switchForm(type) {
-            document.getElementById('form-login').classList.toggle('hidden', type !== 'login');
-            document.getElementById('form-signup').classList.toggle('hidden', type === 'login');
-            document.getElementById('btn-login').classList.toggle('active', type === 'login');
-            document.getElementById('btn-signup').classList.toggle('active', type !== 'login');
+            document.getElementById('log-msg').textContent = ''; document.getElementById('reg-msg').textContent = '';
+            const formLogin = document.getElementById('form-login'), formSignup = document.getElementById('form-signup');
+            const btnLogin = document.getElementById('btn-login'), btnSignup = document.getElementById('btn-signup');
+            if (type === 'login') {
+                formLogin.classList.remove('hidden'); formSignup.classList.add('hidden');
+                btnLogin.classList.add('active'); btnSignup.classList.remove('active');
+            } else {
+                formLogin.classList.add('hidden'); formSignup.classList.remove('hidden');
+                btnLogin.classList.remove('active'); btnSignup.classList.add('active');
+            }
         }
 
-        function processRegister(e) {
-            e.preventDefault();
-            const n = document.getElementById('reg-name').value, em = document.getElementById('reg-email').value, p = document.getElementById('reg-pass').value;
+        function processRegister(event) {
+            event.preventDefault();
+            const name = document.getElementById('reg-name').value.trim(), email = document.getElementById('reg-email').value.trim(), pass = document.getElementById('reg-pass').value;
             let users = JSON.parse(localStorage.getItem('flonters_users')) || {};
-            if (users[em]) return alert('Email exists');
-            users[em] = { name: n, password: p, scores: [] };
+            if (users[email]) { document.getElementById('reg-msg').textContent = 'Email already exists!'; return; }
+            users[email] = { name: name, password: pass, scores: [] };
             localStorage.setItem('flonters_users', JSON.stringify(users));
-            switchForm('login');
+            document.getElementById('reg-msg').className = 'error-msg success-msg'; document.getElementById('reg-msg').textContent = 'Registered successfully!';
+            setTimeout(() => { switchForm('login'); }, 1000);
         }
 
-        function processLogin(e) {
-            e.preventDefault();
-            const em = document.getElementById('log-email').value, p = document.getElementById('log-pass').value;
+        function processLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('log-email').value.trim(), pass = document.getElementById('log-pass').value;
             let users = JSON.parse(localStorage.getItem('flonters_users')) || {};
-            if (!users[em] || users[em].password !== p) return alert('Invalid');
-            currentUserEmail = em; currentUserName = users[em].name;
+            if (!users[email] || users[email].password !== pass) { document.getElementById('log-msg').textContent = 'Invalid credentials!'; return; }
+
+            currentUserEmail = email; currentUserName = users[email].name; 
             document.getElementById('dashboard-username').textContent = currentUserName;
             document.getElementById('dashboard-avatar').textContent = currentUserName.charAt(0).toUpperCase();
+
             loadUserScores();
-            document.getElementById('auth-section').style.display = 'none';
-            document.getElementById('dash-section').style.opacity = '1';
-            document.getElementById('dash-section').style.pointerEvents = 'all';
+            const authSection = document.getElementById('auth-section'), dashSection = document.getElementById('dash-section');
+            authSection.style.opacity = '0'; authSection.style.transform = 'scale(1.05)'; 
+            setTimeout(() => { authSection.style.display = 'none'; dashSection.style.pointerEvents = 'all'; dashSection.style.opacity = '1'; }, 800);
         }
 
-        function handleLogout() { location.reload(); }
+        function handleLogout() {
+            location.reload(); 
+        }
 
-        // Files
+        // ================= File Management =================
         function loadUserScores() {
-            const list = document.getElementById('score-list'); list.innerHTML = '';
+            const list = document.getElementById('score-list'); list.innerHTML = ''; 
             let users = JSON.parse(localStorage.getItem('flonters_users'));
-            (users[currentUserEmail].scores || []).forEach(s => { let p = s.split('|'); renderScoreItem(p[0], p[1] || "Piano"); });
+            (users[currentUserEmail].scores || []).forEach(scoreData => { 
+                let parts = scoreData.split('|'); renderScoreItem(parts[0], parts[1] || "Piano"); 
+            });
         }
 
-        function saveScoreToDB(old, n, inst) {
+        function saveScoreToDB(oldData, newName, newInst) {
+            if (!currentUserEmail) return;
             let users = JSON.parse(localStorage.getItem('flonters_users'));
-            let scores = users[currentUserEmail].scores;
-            let newData = `${n}|${inst}`;
-            if (!old) scores.push(newData);
-            else { let idx = scores.indexOf(old); if(idx > -1) scores[idx] = newData; }
+            let scores = users[currentUserEmail].scores || [];
+            let newData = `${newName}|${newInst}`;
+            if (oldData === null) { if (!scores.includes(newData)) scores.push(newData); } 
+            else { let index = scores.findIndex(s => s === oldData || s.startsWith(oldData + '|')); if (index > -1) scores[index] = newData; }
+            users[currentUserEmail].scores = scores;
             localStorage.setItem('flonters_users', JSON.stringify(users));
         }
 
         function showNewFileInput() {
-            if (isCreatingScore) return;
-            isCreatingScore = true;
-            const li = document.createElement('li');
-            li.innerHTML = `<div class="new-file-group"><input type="text" class="new-file-input" placeholder="Name..."><input type="text" class="new-inst-input" placeholder="Instrument..."></div>`;
-            document.getElementById('score-list').prepend(li);
-            const i1 = li.querySelector('.new-file-input'), i2 = li.querySelector('.new-inst-input');
-            i1.focus();
-            let done = false;
-            const finish = () => {
-                if (done) return; done = true;
-                if (i1.value.trim()) { saveScoreToDB(null, i1.value.trim(), i2.value.trim() || "Piano"); loadUserScores(); }
-                else li.remove();
-                isCreatingScore = false;
-            };
-            i1.onkeypress = (e) => { if(e.key === 'Enter') i2.focus(); };
-            i2.onkeypress = (e) => { if(e.key === 'Enter') finish(); };
-            i1.onblur = i2.onblur = () => setTimeout(() => { if(!li.contains(document.activeElement)) finish(); }, 150);
-        }
+            if (isCreatingFile) return;
+            isCreatingFile = true;
+            isProcessing = false; // รีเซ็ตสถานะเผื่อไว้
+            document.getElementById('btn-add-score').classList.add('disabled');
 
-        // Render Score & Editor
-        function renderScoreItem(name, inst) {
             const list = document.getElementById('score-list');
             const li = document.createElement('li');
-            li.innerHTML = `<span class="file-icon">></span><span class="file-name">${name}</span>`;
-            li.ondblclick = () => {
-                activeFileName = name; activeFileInst = inst; activeFileLi = li;
-                document.getElementById('editor-title').textContent = 'Composition - ' + name;
-                document.getElementById('editor-content-area').innerHTML = `
+            li.style.flexDirection = 'column'; li.style.alignItems = 'flex-start';
+            li.innerHTML = `<div class="new-file-group"><input type="text" class="new-file-input" placeholder="Score Name..."><input type="text" class="new-inst-input" placeholder="Instrument (e.g. Piano)..."></div>`;
+            list.insertBefore(li, list.firstChild); 
+            
+            const inputName = li.querySelector('.new-file-input'), inputInst = li.querySelector('.new-inst-input');
+            inputName.focus();
+
+            const finishNewFile = () => {
+                if (isProcessing) return; // ป้องกันเรียกซ้ำ 2 รอบ (จาก blur และ Enter ตีกัน)
+                isProcessing = true; 
+                let fileName = inputName.value.trim(), fileInst = inputInst.value.trim() || "Piano";
+                if (fileName !== '') { 
+                    saveScoreToDB(null, fileName, fileInst); 
+                    renderScoreItem(fileName, fileInst, true); 
+                }
+                li.remove();
+                isCreatingFile = false; // ปลดล็อก
+                document.getElementById('btn-add-score').classList.remove('disabled');
+            };
+
+            inputName.addEventListener('keypress', function(e) { if (e.key === 'Enter') inputInst.focus(); });
+            inputInst.addEventListener('keypress', function(e) { if (e.key === 'Enter') finishNewFile(); });
+            const handleBlur = () => { setTimeout(() => { if (document.activeElement !== inputName && document.activeElement !== inputInst) finishNewFile(); }, 150); };
+            inputName.addEventListener('blur', handleBlur); inputInst.addEventListener('blur', handleBlur);
+        }
+
+        // ================= VexFlow & UI Rendering =================
+        function renderScoreItem(fileName, instrument, prepend = false) {
+            const list = document.getElementById('score-list');
+            const li = document.createElement('li');
+            li.setAttribute('data-inst', instrument);
+            li.innerHTML = `<span class="file-icon">></span><span class="file-name">${fileName}</span>`;
+            
+            li.ondblclick = function() {
+                activeFileLi = li; activeFileName = fileName; activeFileInst = instrument;
+                document.getElementById('editor-title').textContent = 'Composition - ' + fileName;
+                const editorArea = document.getElementById('editor-content-area');
+                
+                // แก้ไข Title wrapper ให้อยู่ตรงกลาง
+                editorArea.innerHTML = `
                     <div class="sheet-music-container">
                         <div class="sheet-header">
-                            <div class="sheet-title editable-text" oncontextmenu="openEditorMenu(event, 'title', this)">${name}</div>
+                            <div class="sheet-title-wrapper">
+                                <div class="sheet-title editable-text" oncontextmenu="openEditorMenu(event, 'title', this)">${fileName}</div>
+                            </div>
                             <div class="sheet-meta">
-                                <div class="sheet-instrument editable-text" oncontextmenu="openEditorMenu(event, 'instrument', this)">${inst}</div>
+                                <div class="sheet-instrument editable-text" oncontextmenu="openEditorMenu(event, 'instrument', this)">${instrument}</div>
                                 <div class="sheet-composer editable-text" oncontextmenu="openEditorMenu(event, 'composer', this)">${currentUserName}</div>
                             </div>
                         </div>
+                        
                         <div class="sheet-actions">
-                            <button class="action-btn">+ ADD NOTE</button>
+                            <button class="action-btn" onclick="alert('Interaction: Insert Mode Active')">+ ADD NOTE</button>
                         </div>
-                        <div class="sheet-body"><div id="notation-canvas"></div></div>
+
+                        <div class="sheet-body">
+                            <div id="notation-canvas"></div>
+                        </div>
                     </div>
                 `;
-                renderStaff();
+
+                renderVexFlowStaff();
             };
-            li.oncontextmenu = (e) => {
-                e.preventDefault(); activeFileName = name; activeFileInst = inst; activeFileLi = li;
-                const m = document.getElementById('context-menu');
-                m.style.left = e.pageX + 'px'; m.style.top = e.pageY + 'px'; m.classList.remove('hidden');
+
+            li.oncontextmenu = function(e) {
+                e.preventDefault(); activeFileLi = li; activeFileName = fileName; activeFileInst = instrument;
+                const menu = document.getElementById('context-menu');
+                menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px'; menu.classList.remove('hidden');
             };
-            list.appendChild(li);
+
+            if (prepend) list.insertBefore(li, list.firstChild); else list.appendChild(li); 
         }
 
-        function renderStaff() {
-            const { Renderer, Stave } = Vex.Flow;
-            const div = document.getElementById("notation-canvas");
-            const renderer = new Renderer(div, Renderer.Backends.SVG);
-            renderer.resize(600, 150);
+        function renderVexFlowStaff() {
+            const { Renderer, Stave, StaveNote, Voice, Formatter } = Vex.Flow;
+            const container = document.getElementById("notation-canvas");
+            container.innerHTML = ""; 
+            const renderer = new Renderer(container, Renderer.Backends.SVG);
+            renderer.resize(600, 150); 
             const context = renderer.getContext();
             const stave = new Stave(10, 20, 550);
             stave.addClef("treble").addTimeSignature("4/4");
             stave.setContext(context).draw();
+
+            const notes = [
+                new StaveNote({ clef: "treble", keys: ["c/4"], duration: "q" }),
+                new StaveNote({ clef: "treble", keys: ["d/4"], duration: "q" }),
+                new StaveNote({ clef: "treble", keys: ["e/4"], duration: "q" }),
+                new StaveNote({ clef: "treble", keys: ["f/4"], duration: "q" })
+            ];
+            const voice = new Voice({ num_beats: 4, beat_value: 4 });
+            voice.addTickables(notes);
+            new Formatter().joinVoices([voice]).format([voice], 450);
+            voice.draw(context, stave);
         }
 
-        // Editor Context Logic
-        function openEditorMenu(e, type, el) {
-            e.preventDefault();
-            editorContextTarget = el; editorContextType = type;
-            const m = document.getElementById('editor-context-menu');
-            const a = document.getElementById('editor-menu-action');
-            a.textContent = type === 'instrument' ? 'Change Instrument' : (type === 'title' ? 'Edit Title' : 'Edit Composer');
-            m.style.left = e.pageX + 'px'; m.style.top = e.pageY + 'px'; m.classList.remove('hidden');
+        // ================= Editor Inline Editing (ฟังชั่นใหม่) =================
+        function openEditorMenu(e, type, element) {
+            e.preventDefault(); // ปิดเมนูคลิกขวาปกติของเบราว์เซอร์
+            editorContextTarget = element;
+            editorContextType = type;
+
+            const menu = document.getElementById('editor-context-menu');
+            const actionBtn = document.getElementById('editor-menu-action');
+
+            if (type === 'instrument') actionBtn.textContent = 'Change Instrument';
+            else if (type === 'title') actionBtn.textContent = 'Fix Name (Title)';
+            else if (type === 'composer') actionBtn.textContent = 'Fix Name (Composer)';
+
+            menu.style.left = e.pageX + 'px';
+            menu.style.top = e.pageY + 'px';
+            menu.classList.remove('hidden');
         }
 
         function executeEditorEdit() {
             document.getElementById('editor-context-menu').classList.add('hidden');
-            const old = editorContextTarget.textContent;
-            editorContextTarget.innerHTML = `<input type="text" value="${old}" style="background:transparent; border:none; border-bottom:1px solid #000; outline:none; font:inherit; width:200px; color:#000;">`;
-            const i = editorContextTarget.querySelector('input');
-            i.focus(); i.select();
-            i.onblur = i.onkeypress = (e) => {
-                if (e.type === 'keypress' && e.key !== 'Enter') return;
-                let val = i.value.trim() || old;
-                editorContextTarget.innerHTML = val;
-                if (editorContextType === 'title') {
-                    saveScoreToDB(`${activeFileName}|${activeFileInst}`, val, activeFileInst);
-                    activeFileName = val; loadUserScores();
-                } else if (editorContextType === 'instrument') {
-                    saveScoreToDB(`${activeFileName}|${activeFileInst}`, activeFileName, val);
-                    activeFileInst = val; loadUserScores();
-                } else if (editorContextType === 'composer') {
-                    currentUserName = val; document.getElementById('dashboard-username').textContent = val;
-                    let u = JSON.parse(localStorage.getItem('flonters_users'));
-                    u[currentUserEmail].name = val; localStorage.setItem('flonters_users', JSON.stringify(u));
+            if (!editorContextTarget) return;
+
+            const oldVal = editorContextTarget.textContent;
+            
+            // เปลี่ยนข้อความเป็นช่อง Input เนียนๆ
+            editorContextTarget.innerHTML = `
+                <input type="text" value="${oldVal}" style="background:transparent; border:none; border-bottom:1px solid #000; outline:none; font-family:inherit; font-size:inherit; font-weight:inherit; font-style:inherit; color:#000; text-align:inherit; width:${Math.max(80, oldVal.length * 15)}px;">
+            `;
+            
+            const input = editorContextTarget.querySelector('input');
+            input.focus();
+            input.select();
+
+            const finishEdit = () => {
+                let newVal = input.value.trim() || oldVal;
+                editorContextTarget.innerHTML = newVal;
+
+                // อัปเดตข้อมูลลงฐานข้อมูลและ UI ตามประเภทที่ถูกแก้
+                if (editorContextType === 'title' && newVal !== activeFileName) {
+                    saveScoreToDB(`${activeFileName}|${activeFileInst}`, newVal, activeFileInst);
+                    if(activeFileLi) activeFileLi.querySelector('.file-name').textContent = newVal;
+                    activeFileName = newVal;
+                    document.getElementById('editor-title').textContent = 'Composition - ' + newVal;
+                } else if (editorContextType === 'instrument' && newVal !== activeFileInst) {
+                    saveScoreToDB(`${activeFileName}|${activeFileInst}`, activeFileName, newVal);
+                    activeFileInst = newVal;
+                    if(activeFileLi) activeFileLi.setAttribute('data-inst', newVal);
+                } else if (editorContextType === 'composer' && newVal !== currentUserName) {
+                    currentUserName = newVal;
+                    document.getElementById('dashboard-username').textContent = newVal;
+                    let users = JSON.parse(localStorage.getItem('flonters_users'));
+                    users[currentUserEmail].name = newVal;
+                    localStorage.setItem('flonters_users', JSON.stringify(users));
                 }
             };
+
+            input.addEventListener('keypress', (e) => { if(e.key === 'Enter') finishEdit(); });
+            input.addEventListener('blur', finishEdit);
         }
 
-        function executeRename() { /* ... similar logic to sidebar rename ... */ }
+        // ================= Sidebar Menu Operations =================
+        function executeRename() {
+            document.getElementById('context-menu').classList.add('hidden'); if(!activeFileLi) return;
+            const li = activeFileLi, oldName = activeFileName, oldInst = activeFileInst;
+            li.innerHTML = `<span class="file-icon">></span><input type="text" class="rename-input" value="${oldName}">`;
+            const input = li.querySelector('input'); input.focus(); input.select(); 
+
+            const finishRename = () => {
+                let newName = input.value.trim() || oldName; 
+                if (newName !== oldName) saveScoreToDB(`${oldName}|${oldInst}`, newName, oldInst); 
+                li.innerHTML = `<span class="file-icon">></span><span class="file-name">${newName}</span>`;
+                activeFileName = newName; 
+                if (document.getElementById('editor-title').textContent === 'Composition - ' + oldName) {
+                    document.getElementById('editor-title').textContent = 'Composition - ' + newName;
+                    // อัปเดตตรงกลางด้วยถ้ากำลังเปิดไฟล์นี้อยู่
+                    const sheetTitle = document.querySelector('.sheet-title');
+                    if (sheetTitle) sheetTitle.textContent = newName;
+                }
+            };
+            input.addEventListener('keypress', function(evt) { if (evt.key === 'Enter') finishRename(); });
+            input.addEventListener('blur', finishRename);
+        }
+
         function executeDelete() {
-            if(!confirm('Delete?')) return;
-            let u = JSON.parse(localStorage.getItem('flonters_users'));
-            u[currentUserEmail].scores = u[currentUserEmail].scores.filter(s => !s.startsWith(activeFileName + '|'));
-            localStorage.setItem('flonters_users', JSON.stringify(u));
-            loadUserScores();
-            document.getElementById('editor-content-area').innerHTML = '<div class="placeholder-text">The stage is empty...</div>';
+            document.getElementById('context-menu').classList.add('hidden'); if(!activeFileLi) return;
+            if(confirm(`Are you sure you want to delete "${activeFileName}"?`)) {
+                let users = JSON.parse(localStorage.getItem('flonters_users'));
+                users[currentUserEmail].scores = users[currentUserEmail].scores.filter(s => s !== `${activeFileName}|${activeFileInst}`);
+                localStorage.setItem('flonters_users', JSON.stringify(users));
+                activeFileLi.remove(); 
+                if (document.getElementById('editor-title').textContent === 'Composition - ' + activeFileName) {
+                    document.getElementById('editor-title').textContent = 'Composition';
+                    document.getElementById('editor-content-area').innerHTML = `<div class="placeholder-text">The stage is empty. Select or create a score...</div>`;
+                }
+            }
         }
     </script>
 </body>
