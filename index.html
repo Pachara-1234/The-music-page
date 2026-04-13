@@ -642,7 +642,7 @@
         function saveData() {
             if (!activeFileName) return;
             
-            // ดึงค่ามาจาก "หน้าจอของเพลงนี้เท่านั้น" ไม่ไปยุ่งกับตัวแปร Global
+            // ดึงค่าปัจจุบันที่โชว์อยู่บนหัวกระดาษมาเซฟ
             const titleEl = document.querySelector('.sheet-title');
             const instEl = document.querySelector('.sheet-instrument');
             const compEl = document.querySelector('.sheet-composer');
@@ -651,10 +651,9 @@
                 bars: staveCount,
                 sheetTitle: titleEl ? titleEl.textContent : activeFileName,
                 sheetInstrument: instEl ? instEl.textContent : activeFileInst,
-                sheetComposer: compEl ? compEl.textContent : "Unknown" 
+                sheetComposer: compEl ? compEl.textContent : (typeof currentUserName !== 'undefined' ? currentUserName : 'Unknown')
             };
-            
-            // เซฟลงกล่องของเพลงนั้นๆ
+            // เซฟแยกตามชื่อไฟล์
             localStorage.setItem("flonters_save_" + activeFileName, JSON.stringify(data));
         }
 
@@ -672,10 +671,10 @@
                 staveCount = 0; 
                 container.innerHTML = ""; 
                 
-                // โหลด Title กับ Composer จากไฟล์เซฟมาทับ (ถ้าเปลี่ยนชื่อไฟล์มา Title จะยังเป็นของเดิมไม่เปลี่ยนตาม)
-                if (titleEl && data.sheetTitle !== undefined) titleEl.textContent = data.sheetTitle;
-                if (instEl && data.sheetInstrument !== undefined) instEl.textContent = data.sheetInstrument;
-                if (compEl && data.sheetComposer !== undefined) compEl.textContent = data.sheetComposer;
+                // โหลดข้อมูลหัวกระดาษกลับมา (ทำให้เป็นอิสระจากชื่อไฟล์และชื่อยูสเซอร์)
+                if (titleEl && data.sheetTitle) titleEl.textContent = data.sheetTitle;
+                if (instEl && data.sheetInstrument) instEl.textContent = data.sheetInstrument;
+                if (compEl && data.sheetComposer) compEl.textContent = data.sheetComposer;
 
                 if (initialBtn) initialBtn.remove(); 
 
@@ -684,8 +683,6 @@
                 }
             } else {
                 staveCount = 0;
-                // [สำคัญสุด] ถ้าเปิดไฟล์ใหม่ครั้งแรก ให้บังคับเซฟแยก Title กับ Composer ลงไปเลย เพื่อตัดขาดจากระบบหลัก
-                saveData();
             }
         }
 
@@ -770,7 +767,7 @@
         }
 
         // ================= Sidebar Menu Operations =================
-        function executeRename() {
+function executeRename() {
             document.getElementById('context-menu').classList.add('hidden'); 
             if(!activeFileLi) return;
             
@@ -782,13 +779,13 @@
             input.focus(); input.select(); 
 
             const finishRename = () => {
-                if (!activeFileLi.contains(input)) return; 
+                if (!activeFileLi.contains(input)) return; // กันบัคกด Enter แล้วคลิกที่อื่นเบิ้ล 2 รอบ
 
                 let newName = input.value.trim() || currentName; 
                 if (newName !== currentName) {
                     saveScoreToDB(`${currentName}|${oldInst}`, newName, oldInst); 
                     
-                    // ย้ายไฟล์เซฟไปชื่อใหม่ (ข้อมูล Title/Composer ในกระดาษจะตามมาด้วยโดยไม่ถูกแก้)
+                    // วิทยายุทธย้ายไฟล์: ถ้าเปลี่ยนชื่อ ต้องย้ายข้อมูลโน้ตตามไปด้วย
                     const savedData = localStorage.getItem("flonters_save_" + currentName);
                     if (savedData) {
                         localStorage.setItem("flonters_save_" + newName, savedData);
@@ -799,43 +796,26 @@
                 activeFileLi.innerHTML = `<span class="file-icon">></span><span class="file-name animate-fade-up">${newName}</span>`;
                 activeFileName = newName; 
                 
-                // เปลี่ยนแค่หัวข้อ Composition - ... เท่านั้น (ไม่แตะต้อง .sheet-title)
-                const editorTitleArea = document.getElementById('editor-title');
-                if (editorTitleArea && editorTitleArea.textContent.startsWith('Composition -')) {
-                    editorTitleArea.textContent = 'Composition - ' + newName;
+                if (document.getElementById('editor-title').textContent === 'Composition - ' + currentName) {
+                    document.getElementById('editor-title').textContent = 'Composition - ' + newName;
                 }
             };
             
             input.addEventListener('keypress', function(evt) { if (evt.key === 'Enter') finishRename(); });
             input.addEventListener('blur', finishRename);
         }
-        function executeEditorEdit() {
-            document.getElementById('editor-context-menu').classList.add('hidden');
-            if (!editorContextTarget) return;
-
-            const oldVal = editorContextTarget.textContent;
-            editorContextTarget.innerHTML = `<input type="text" value="${oldVal}" style="background:transparent; border:none; border-bottom:1px solid #000; outline:none; font-family:inherit; font-size:inherit; font-weight:inherit; font-style:inherit; color:#000; text-align:inherit; width:${Math.max(80, oldVal.length * 15)}px;">`;
-            
-            const input = editorContextTarget.querySelector('input');
-            input.focus(); input.select();
-
-            const finishEdit = () => {
-                if (!editorContextTarget.contains(input)) return; 
-                let newVal = input.value.trim() || oldVal;
-                editorContextTarget.innerHTML = newVal;
-
-                if (editorContextType === 'instrument' && newVal !== activeFileInst) {
-                    saveScoreToDB(`${activeFileName}|${activeFileInst}`, activeFileName, newVal);
-                    activeFileInst = newVal;
-                    if(activeFileLi) activeFileLi.setAttribute('data-inst', newVal);
+        function executeDelete() {
+            document.getElementById('context-menu').classList.add('hidden'); if(!activeFileLi) return;
+            if(confirm(`Are you sure you want to delete "${activeFileName}"?`)) {
+                let users = JSON.parse(localStorage.getItem('flonters_users'));
+                users[currentUserEmail].scores = users[currentUserEmail].scores.filter(s => s !== `${activeFileName}|${activeFileInst}`);
+                localStorage.setItem('flonters_users', JSON.stringify(users));
+                activeFileLi.remove(); 
+                if (document.getElementById('editor-title').textContent === 'Composition - ' + activeFileName) {
+                    document.getElementById('editor-title').textContent = 'Composition';
+                    document.getElementById('editor-content-area').innerHTML = `<div class="placeholder-text">The stage is empty. Select or create a score...</div>`;
                 }
-                
-                // สั่งเซฟทันทีเมื่อแก้เสร็จ (ข้อมูลถูกจับโยนลง LocalStorage โดยไม่แตะ currentUserName)
-                saveData(); 
-            };
-
-            input.addEventListener('keypress', (e) => { if(e.key === 'Enter') finishEdit(); });
-            input.addEventListener('blur', finishEdit);
+            }
         }
         // ตัวแปรสำหรับจำว่าคลิกขวาที่บรรทัดไหน
         let targetStaveRow = null;
@@ -882,7 +862,6 @@
                     }
                 }
             }
-
 
             // 4. เซฟข้อมูลทันที
             saveData();
