@@ -525,6 +525,15 @@
                 loadSavedData(fileName);
             };
 
+            // เมนูคลิกขวาที่ไฟล์ดนตรีทางซ้าย
+            li.oncontextmenu = function(e) {
+                e.preventDefault(); 
+                activeFileLi = li; activeFileName = fileName; activeFileInst = instrument;
+                const menu = document.getElementById('context-menu');
+                menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px'; 
+                menu.classList.remove('hidden');
+            };
+
             if (prepend) list.insertBefore(li, list.firstChild); else list.appendChild(li); 
         }
 
@@ -545,7 +554,7 @@
                 const rowDiv = document.createElement("div");
                 rowDiv.className = "stave-row";
                 
-                // 📍 ฟังก์ชันคลิกขวาที่บรรทัด
+                // 📍 ฟังก์ชันคลิกขวาที่บรรทัด (เพื่อลบ)
                 rowDiv.oncontextmenu = function(e) {
                     e.preventDefault();
                     showDeleteMenu(e, rowDiv);
@@ -585,7 +594,7 @@
             }
         }
 
-// ================= ระบบลบบรรทัด (คลิกขวา) =================
+        // ================= ระบบลบบรรทัด (คลิกขวา) =================
         function showDeleteMenu(event, rowElement) {
             // ลบเมนูเก่าทิ้งถ้ามีค้างอยู่
             const oldMenu = document.getElementById("stave-delete-menu");
@@ -602,7 +611,7 @@
             deleteBtn.className = "menu-item";
             deleteBtn.innerHTML = "🗑️ Delete Line";
             
-            // 📍 แก้ตรงนี้: ตัด confirm ออก กดแล้วลบทันที
+            // 📍 ตัด confirm ออก กดแล้วลบทันที
             deleteBtn.onclick = function() {
                 menu.remove(); 
                 deleteLine(rowElement); 
@@ -619,6 +628,35 @@
                     window.removeEventListener('click', clickOutside);
                 });
             }, 10);
+        }
+
+        // ฟังก์ชันลบเส้นจริงๆ (จัดการปุ่ม + ให้ด้วย)
+        function deleteLine(rowElement) {
+            rowElement.remove(); // ลบบรรทัดนั้นทิ้ง
+            staveCount--;
+            saveData(); // เซฟข้อมูลอัปเดต
+
+            // จัดการปุ่ม + หลังจากลบ
+            const container = document.getElementById("notation-canvas");
+            const allRows = container.querySelectorAll('.stave-row');
+            
+            if (allRows.length > 0) {
+                // ถ้ายังพอบรรทัดเหลือ ให้เอาปุ่ม + ไปแปะท้ายสุด
+                const lastRow = allRows[allRows.length - 1];
+                if (!lastRow.querySelector('.add-bar-inline-btn')) {
+                    const plusBtn = document.createElement("div");
+                    plusBtn.className = "add-bar-inline-btn";
+                    plusBtn.innerHTML = "+";
+                    plusBtn.onclick = drawNewBar;
+                    lastRow.appendChild(plusBtn);
+                }
+            } else {
+                // ถ้าลบจนเกลี้ยงหน้ากระดาษ เอาปุ่มเริ่มต้นกลับมา
+                const actionArea = document.getElementById("action-area");
+                if (actionArea) {
+                    actionArea.innerHTML = `<button class="action-btn" id="initial-add-btn" onclick="addEmptyStave()">+ ADD NOTE</button>`;
+                }
+            }
         }
 
         // ================= ระบบ Auto-Save & Load =================
@@ -647,7 +685,8 @@
                 staveCount = 0;
             }
         }
-// ================= ระบบจัดการไฟล์ (Rename / Delete) =================
+
+        // ================= ระบบจัดการไฟล์ (Rename / Delete) =================
         
         // ซ่อนเมนูไฟล์เมื่อคลิกที่อื่น
         window.addEventListener('click', function(e) {
