@@ -454,7 +454,7 @@
             inputInst.addEventListener('blur', () => { setTimeout(() => { if(document.activeElement !== inputName) finishNewFile(); }, 100) });
         }
 
-        // ================= VexFlow & Tone.js Integration (The Magic Part) =================
+        // ================= VexFlow & Tone.js Integration =================
         function renderScoreItem(fileName, instrument, prepend = false) {
             const list = document.getElementById('score-list');
             const li = document.createElement('li');
