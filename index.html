@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FLONTERS | The First Music IoT</title>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vexflow/4.2.2/vexflow.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Lora:ital,wght@0,400;0,700;1,400&family=Courier+Prime&display=swap" rel="stylesheet">
     
@@ -490,18 +490,20 @@
         // ฟังก์ชันสำหรับเพิ่มบรรทัด 5 เส้น (Stave) แบบว่างเปล่า
         function addEmptyStave() {
             try {
-                // เช็คให้ชัวร์ว่า VexFlow ถูกโหลดเข้ามาในเว็บหรือยัง
-                if (typeof Vex === 'undefined') {
-                    alert("ไม่พบระบบ VexFlow! ลองเช็คดูว่าในไฟล์ HTML มีแท็ก script ที่ดึง VexFlow มาหรือยังครับ");
+                // ดักจับให้รองรับทั้ง VexFlow v4 (Vex.Flow) และ v5 (VexFlow)
+                const VF = window.Vex ? window.Vex.Flow : window.VexFlow;
+
+                if (!VF) {
+                    alert("ไม่พบระบบ VexFlow! ลิ้งก์ใน <head> อาจจะโหลดไม่ขึ้นครับ ลองเช็คเน็ตหรือกด Ctrl+F5 ดูนะ");
                     return;
                 }
 
-                const { Renderer, Stave } = Vex.Flow;
+                const { Renderer, Stave } = VF;
                 const container = document.getElementById("notation-canvas");
                 
                 if (!container) return;
 
-                // เช็คว่าเคยวาดไปหรือยัง ถ้ามีแล้วไม่ให้วาดซ้ำ
+                // เช็คว่าเคยวาดไปหรือยัง
                 if (container.innerHTML.trim() !== "") {
                     alert("มีบรรทัด 5 เส้นอยู่แล้วครับ (เดี๋ยวระบบเพิ่มตัวโน้ตจะตามมาทีหลังนะ)");
                     return;
@@ -509,13 +511,13 @@
 
                 // สร้างพื้นที่วาด (SVG)
                 const renderer = new Renderer(container, Renderer.Backends.SVG);
-                renderer.resize(750, 150); // ปรับความกว้างพื้นที่ให้สวยงาม
+                renderer.resize(750, 150); 
                 const context = renderer.getContext();
 
-                // สร้างบรรทัด 5 เส้น (เริ่มที่พิกัด x=10, y=40, ความกว้าง=700)
+                // สร้างบรรทัด 5 เส้น
                 const stave = new Stave(10, 40, 700);
                 
-                // ใส่กุญแจซอล (Treble Clef) และเครื่องหมายกำหนดจังหวะ (Time Signature) 4/4
+                // ใส่กุญแจซอล (Treble Clef) และ 4/4
                 stave.addClef("treble").addTimeSignature("4/4");
                 
                 // วาดลงหน้าจอ
