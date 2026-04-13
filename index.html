@@ -27,7 +27,7 @@
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #555; }
 
-        /* ================= Auth Section ================= */
+        /* ================= Auth Section (อัปเดตตามที่ผู้ใช้ต้องการ) ================= */
         #auth-section {
             background: radial-gradient(circle at 50% -20%, #2a2a2a 0%, #050505 70%);
             height: 100vh; display: flex; justify-content: center; align-items: center;
@@ -47,7 +47,6 @@
 
         form { display: flex; flex-direction: column; gap: 20px; text-align: left; }
         
-        /* สไตล์ Input สีดำ-เทา */
         .input-group input[type="text"], .input-group input[type="email"], .input-group input[type="password"] { 
             width: 100%; background: transparent; border: none; border-bottom: 1px solid #444; 
             padding: 10px 5px; color: #dcd8cc; font-size: 1rem; font-family: 'Lora', serif; transition: 0.3s; 
@@ -55,23 +54,17 @@
         .input-group input:focus { outline: none; border-bottom-color: #888; }
         .input-group input::placeholder { color: #444; font-style: italic; }
 
-        /* แก้ปัญหา Browser Autofill สาดสีขาวใส่ช่อง Input */
-        .input-group input:-webkit-autofill,
-        .input-group input:-webkit-autofill:hover, 
-        .input-group input:-webkit-autofill:focus, 
-        .input-group input:-webkit-autofill:active {
-            transition: background-color 5000s ease-in-out 0s;
-            -webkit-text-fill-color: #dcd8cc !important;
+        .file-label { display: block; color: #7a756b; font-size: 0.85rem; margin-bottom: 5px; font-style: italic; }
+        .file-input { color: #dcd8cc; font-size: 0.85rem; width: 100%; }
+        .file-input::file-selector-button {
+            background: transparent; color: #dcd8cc; border: 1px solid #444; 
+            padding: 5px 10px; margin-right: 10px; cursor: pointer; 
+            font-family: 'Lora', serif; transition: 0.3s; border-radius: 3px;
         }
 
-        /* อัปโหลดรูปโปรไฟล์ */
-        .avatar-upload-wrapper { display: flex; align-items: center; gap: 10px; margin-top: -5px; }
-        .avatar-upload-btn {
-            background: transparent; border: 1px solid #444; color: #888; padding: 6px 12px;
-            font-family: 'Cinzel', serif; font-size: 0.75rem; cursor: pointer; transition: 0.3s; border-radius: 3px;
+        input:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0 30px #080808 inset !important; -webkit-text-fill-color: #dcd8cc !important; transition: background-color 5000s ease-in-out 0s;
         }
-        .avatar-upload-btn:hover { color: #dcd8cc; border-color: #dcd8cc; }
-        #avatar-preview-name { font-size: 0.8rem; color: #777; font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
 
         .submit-btn { background-color: transparent; color: #dcd8cc; border: 1px solid #555; padding: 15px; font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: 600; letter-spacing: 2px; cursor: pointer; margin-top: 5px; transition: all 0.4s; }
         .submit-btn:hover { background-color: #dcd8cc; color: #000; border-color: #dcd8cc; }
@@ -209,13 +202,10 @@
                 <div class="input-group"><input type="text" id="reg-name" placeholder="Name" required></div>
                 <div class="input-group"><input type="email" id="reg-email" placeholder="Email" required></div>
                 <div class="input-group"><input type="password" id="reg-pass" placeholder="Password" required></div>
-                
-                <div class="avatar-upload-wrapper">
-                    <label for="reg-avatar" class="avatar-upload-btn">+ Add Profile Picture</label>
-                    <input type="file" id="reg-avatar" accept="image/*" class="hidden" onchange="previewAvatar(this)">
-                    <span id="avatar-preview-name">No file chosen</span>
+                <div class="input-group">
+                    <label class="file-label" for="reg-avatar">Profile Picture (Optional)</label>
+                    <input type="file" id="reg-avatar" accept="image/*" class="file-input">
                 </div>
-
                 <div id="reg-msg" class="error-msg"></div>
                 <button type="submit" class="submit-btn">REGISTER</button>
             </form>
@@ -320,9 +310,14 @@
             if (e.target.closest('#side-tab-panel') === null && sideTabPanel.classList.contains('open-panel')) sideTabPanel.classList.remove('open-panel');
         });
 
-        // ================= Auth & Profile Logic =================
-        function switchForm(type) {
+        // ================= Auth & Profile Logic (อัปเดตตามที่ผู้ใช้ต้องการ) =================
+        function clearMessages() {
             document.getElementById('log-msg').textContent = ''; document.getElementById('reg-msg').textContent = '';
+            document.getElementById('reg-msg').className = 'error-msg';
+        }
+
+        function switchForm(type) {
+            clearMessages();
             const formLogin = document.getElementById('form-login'), formSignup = document.getElementById('form-signup');
             const btnLogin = document.getElementById('btn-login'), btnSignup = document.getElementById('btn-signup');
             if (type === 'login') {
@@ -334,61 +329,46 @@
             }
         }
 
-        function previewAvatar(input) {
-            if (input.files && input.files[0]) {
-                document.getElementById('avatar-preview-name').textContent = input.files[0].name;
-            } else {
-                document.getElementById('avatar-preview-name').textContent = "No file chosen";
-            }
-        }
-
         function processRegister(event) {
             event.preventDefault();
-            const name = document.getElementById('reg-name').value.trim();
-            const email = document.getElementById('reg-email').value.trim();
-            const pass = document.getElementById('reg-pass').value;
-            const fileInput = document.getElementById('reg-avatar');
-            
+            const name = document.getElementById('reg-name').value.trim(), email = document.getElementById('reg-email').value.trim(), pass = document.getElementById('reg-pass').value;
+            const avatarInput = document.getElementById('reg-avatar'), msgBox = document.getElementById('reg-msg');
             let users = JSON.parse(localStorage.getItem('flonters_users')) || {};
-            if (users[email]) { document.getElementById('reg-msg').textContent = 'Email already exists!'; return; }
-
-            const finalizeSignup = (avatarBase64) => {
-                users[email] = { name: name, password: pass, scores: [], avatar: avatarBase64 };
+            if (users[email]) { msgBox.className = 'error-msg'; msgBox.textContent = 'This email is already registered!'; return; }
+            
+            const saveUser = (avatarBase64) => {
+                users[email] = { name: name, password: pass, avatar: avatarBase64, scores: [] };
                 localStorage.setItem('flonters_users', JSON.stringify(users));
-                document.getElementById('reg-msg').className = 'error-msg success-msg'; 
-                document.getElementById('reg-msg').textContent = 'Registered successfully!';
-                setTimeout(() => { switchForm('login'); }, 1000);
+                msgBox.className = 'error-msg success-msg'; msgBox.textContent = 'Audition Passed. Please Login...';
+                setTimeout(() => { switchForm('login'); }, 1500);
             };
 
-            if (fileInput.files && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) { finalizeSignup(e.target.result); };
-                reader.readAsDataURL(fileInput.files[0]);
-            } else {
-                finalizeSignup(null);
+            if (avatarInput.files && avatarInput.files[0]) {
+                const reader = new FileReader(); 
+                reader.onload = function(e) { saveUser(e.target.result); }; 
+                reader.readAsDataURL(avatarInput.files[0]);
+            } else { 
+                saveUser(""); 
             }
         }
 
         function processLogin(event) {
             event.preventDefault();
-            const email = document.getElementById('log-email').value.trim();
-            const pass = document.getElementById('log-pass').value;
+            const email = document.getElementById('log-email').value.trim(), pass = document.getElementById('log-pass').value, msgBox = document.getElementById('log-msg');
             let users = JSON.parse(localStorage.getItem('flonters_users')) || {};
             
-            if (!users[email] || users[email].password !== pass) { 
-                document.getElementById('log-msg').textContent = 'Invalid credentials!'; return; 
-            }
+            if (!users[email]) { msgBox.textContent = 'User not found!'; return; }
+            if (users[email].password !== pass) { msgBox.textContent = 'Incorrect password!'; return; }
 
-            currentUserEmail = email; currentUserName = users[email].name; 
-            document.getElementById('dashboard-username').textContent = currentUserName;
+            msgBox.textContent = ''; currentUserEmail = email; currentUserName = users[email].name; 
             
+            document.getElementById('dashboard-username').textContent = currentUserName;
             const avatarEl = document.getElementById('dashboard-avatar');
-            if (users[email].avatar) {
-                avatarEl.style.backgroundImage = `url(${users[email].avatar})`;
-                avatarEl.textContent = '';
-            } else {
-                avatarEl.style.backgroundImage = 'none';
-                avatarEl.textContent = currentUserName.charAt(0).toUpperCase();
+            
+            if (users[email].avatar) { 
+                avatarEl.style.backgroundImage = `url(${users[email].avatar})`; avatarEl.textContent = ''; 
+            } else { 
+                avatarEl.style.backgroundImage = 'none'; avatarEl.textContent = currentUserName.charAt(0).toUpperCase(); 
             }
 
             loadUserScores();
