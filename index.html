@@ -47,13 +47,22 @@
 
         form { display: flex; flex-direction: column; gap: 20px; text-align: left; }
         
-        /* เอาเส้นใต้โทนสีดำ-เทากลับมา ไม่ใช่กรอบขาว */
+        /* สไตล์ Input สีดำ-เทา */
         .input-group input[type="text"], .input-group input[type="email"], .input-group input[type="password"] { 
             width: 100%; background: transparent; border: none; border-bottom: 1px solid #444; 
             padding: 10px 5px; color: #dcd8cc; font-size: 1rem; font-family: 'Lora', serif; transition: 0.3s; 
         }
         .input-group input:focus { outline: none; border-bottom-color: #888; }
         .input-group input::placeholder { color: #444; font-style: italic; }
+
+        /* แก้ปัญหา Browser Autofill สาดสีขาวใส่ช่อง Input */
+        .input-group input:-webkit-autofill,
+        .input-group input:-webkit-autofill:hover, 
+        .input-group input:-webkit-autofill:focus, 
+        .input-group input:-webkit-autofill:active {
+            transition: background-color 5000s ease-in-out 0s;
+            -webkit-text-fill-color: #dcd8cc !important;
+        }
 
         /* อัปโหลดรูปโปรไฟล์ */
         .avatar-upload-wrapper { display: flex; align-items: center; gap: 10px; margin-top: -5px; }
