@@ -46,32 +46,12 @@
         .toggle-btn.active { color: #dcd8cc; border-bottom: 1px solid #dcd8cc; }
 
         form { display: flex; flex-direction: column; gap: 20px; text-align: left; }
-        
-        /* สไตล์ Input สีดำ-เทา */
         .input-group input[type="text"], .input-group input[type="email"], .input-group input[type="password"] { 
             width: 100%; background: transparent; border: none; border-bottom: 1px solid #444; 
             padding: 10px 5px; color: #dcd8cc; font-size: 1rem; font-family: 'Lora', serif; transition: 0.3s; 
         }
         .input-group input:focus { outline: none; border-bottom-color: #888; }
         .input-group input::placeholder { color: #444; font-style: italic; }
-
-        /* แก้ปัญหา Browser Autofill สาดสีขาวใส่ช่อง Input */
-        .input-group input:-webkit-autofill,
-        .input-group input:-webkit-autofill:hover, 
-        .input-group input:-webkit-autofill:focus, 
-        .input-group input:-webkit-autofill:active {
-            transition: background-color 5000s ease-in-out 0s;
-            -webkit-text-fill-color: #dcd8cc !important;
-        }
-
-        /* อัปโหลดรูปโปรไฟล์ */
-        .avatar-upload-wrapper { display: flex; align-items: center; gap: 10px; margin-top: -5px; }
-        .avatar-upload-btn {
-            background: transparent; border: 1px solid #444; color: #888; padding: 6px 12px;
-            font-family: 'Cinzel', serif; font-size: 0.75rem; cursor: pointer; transition: 0.3s; border-radius: 3px;
-        }
-        .avatar-upload-btn:hover { color: #dcd8cc; border-color: #dcd8cc; }
-        #avatar-preview-name { font-size: 0.8rem; color: #777; font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
 
         .submit-btn { background-color: transparent; color: #dcd8cc; border: 1px solid #555; padding: 15px; font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: 600; letter-spacing: 2px; cursor: pointer; margin-top: 5px; transition: all 0.4s; }
         .submit-btn:hover { background-color: #dcd8cc; color: #000; border-color: #dcd8cc; }
@@ -150,32 +130,79 @@
         .main-menu-list li:hover { background-color: #1a1a1a; color: #dcd8cc; }
 
         /* ================= Context Menus ================= */
+        /* Dark Theme - Side List */
         #context-menu { position: absolute; background: #0a0a0a; border: 1px solid #333; border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); z-index: 1000; overflow: hidden; min-width: 130px; }
         .context-item { padding: 10px 15px; cursor: pointer; font-size: 0.85rem; color: #dcd8cc; font-family: 'Lora', serif; transition: 0.2s; }
         .context-item:hover { background: #1a1a1a; }
         .context-item.delete { color: #e63946; border-top: 1px solid #222; }
         .context-item.delete:hover { background: #3a1115; color: #ffebf0; }
 
+        /* Light Theme - Editor Sheet */
         #editor-context-menu { position: absolute; background: #f4ecd8; border: 1px solid #d4c8b2; border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1000; overflow: hidden; min-width: 160px; }
         #editor-context-menu .context-item { color: #111; border-bottom: 1px solid #e8dcc4; font-weight: bold; }
         #editor-context-menu .context-item:hover { background: #e8dcc4; }
 
         /* ================= Professional Sheet Music Layout ================= */
-        .sheet-music-container { width: 100%; max-width: 950px; display: flex; flex-direction: column; color: #000; }
+        .sheet-music-container {
+            width: 100%; max-width: 950px;
+            display: flex; flex-direction: column;
+            color: #000;
+        }
+
         .sheet-header { width: 100%; margin-bottom: 30px; position: relative; }
-        .sheet-title-wrapper { text-align: center; width: 100%; margin-bottom: 20px; }
-        .sheet-title { font-family: 'Times New Roman', Times, serif; font-size: 3.5rem; font-weight: normal; }
-        .sheet-meta { display: flex; justify-content: space-between; align-items: flex-end; font-family: 'Times New Roman', Times, serif; font-size: 1.25rem; }
+        
+        .sheet-title-wrapper {
+            text-align: center; /* บังคับให้ Title อยู่ตรงกลาง */
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .sheet-title {
+            font-family: 'Times New Roman', Times, serif; 
+            font-size: 3.5rem; font-weight: normal;
+        }
+
+        .sheet-meta {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            font-family: 'Times New Roman', Times, serif; 
+            font-size: 1.25rem; 
+        }
         .sheet-instrument { font-style: normal; font-weight: bold; }
         .sheet-composer { font-weight: normal; }
-        .editable-text { cursor: pointer; transition: 0.2s; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 6px; text-decoration-thickness: 1px; display: inline-block; }
-        .editable-text:hover { text-decoration-color: #000; }
 
-        .sheet-actions { display: flex; justify-content: center; margin-bottom: 20px; }
-        .action-btn { background-color: transparent; border: 1px solid #000; color: #000; padding: 8px 25px; font-family: 'Cinzel', serif; font-size: 0.9rem; font-weight: 600; letter-spacing: 2px; cursor: pointer; transition: 0.3s; border-radius: 3px; }
+        /* Editable Text Logic */
+        .editable-text {
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: underline;
+            text-decoration-color: transparent; 
+            text-underline-offset: 6px;
+            text-decoration-thickness: 1px;
+            display: inline-block; /* ทำให้แสดงผลตีกรอบเฉพาะคำได้ */
+        }
+        .editable-text:hover {
+            text-decoration-color: #000; 
+        }
+
+        .sheet-actions {
+            display: flex; justify-content: center; margin-bottom: 20px;
+        }
+        .action-btn {
+            background-color: transparent; border: 1px solid #000; color: #000;
+            padding: 8px 25px; font-family: 'Cinzel', serif; font-size: 0.9rem;
+            font-weight: 600; letter-spacing: 2px; cursor: pointer; transition: 0.3s; border-radius: 3px;
+        }
         .action-btn:hover { background-color: #000; color: #f4ecd8; }
-        .sheet-body { width: 100%; position: relative; padding: 20px 0; background: transparent; display: flex; justify-content: center; }
-        #notation-canvas svg { max-width: 100%; height: auto; display: block; }
+
+        .sheet-body { 
+            width: 100%; position: relative; padding: 20px 0;
+            background: transparent; display: flex; justify-content: center;
+        }
+
+        #notation-canvas svg {
+            max-width: 100%; height: auto; display: block;
+        }
+
     </style>
 </head>
 <body>
@@ -184,6 +211,7 @@
         <div class="context-item" onclick="executeRename()">Rename</div>
         <div class="context-item delete" onclick="executeDelete()">Delete</div>
     </div>
+
     <div id="editor-context-menu" class="hidden">
         <div class="context-item" id="editor-menu-action" onclick="executeEditorEdit()">Action</div>
     </div>
@@ -209,13 +237,6 @@
                 <div class="input-group"><input type="text" id="reg-name" placeholder="Name" required></div>
                 <div class="input-group"><input type="email" id="reg-email" placeholder="Email" required></div>
                 <div class="input-group"><input type="password" id="reg-pass" placeholder="Password" required></div>
-                
-                <div class="avatar-upload-wrapper">
-                    <label for="reg-avatar" class="avatar-upload-btn">+ Add Profile Picture</label>
-                    <input type="file" id="reg-avatar" accept="image/*" class="hidden" onchange="previewAvatar(this)">
-                    <span id="avatar-preview-name">No file chosen</span>
-                </div>
-
                 <div id="reg-msg" class="error-msg"></div>
                 <button type="submit" class="submit-btn">REGISTER</button>
             </form>
@@ -282,8 +303,10 @@
         let activeFileLi = null;   
         let activeFileName = "";   
         let activeFileInst = "";
-        let isCreatingFile = false; 
-        let isProcessing = false;   
+        
+        let isCreatingFile = false; // Flag ป้องกันกดรัว
+        let isProcessing = false;   // Flag ป้องกันอีเวนต์ตีกัน
+        
         let editorContextTarget = null;
         let editorContextType = "";
 
@@ -299,6 +322,7 @@
         const resizerY = document.getElementById('resizer-y');
         const panelLeft = document.getElementById('panel-left');
         const panelIoT = document.getElementById('panel-iot');
+        
         let isResizingX = false, isResizingY = false;
 
         resizerX.addEventListener('mousedown', () => { isResizingX = true; document.body.classList.add('no-select'); resizerX.classList.add('active'); });
@@ -314,13 +338,14 @@
             resizerX.classList.remove('active'); resizerY.classList.remove('active');
         });
 
+        // จัดการคลิกซ่อนเมนูต่างๆ
         document.addEventListener('click', (e) => {
             if (e.target.closest('#context-menu') === null) document.getElementById('context-menu').classList.add('hidden');
             if (e.target.closest('#editor-context-menu') === null) document.getElementById('editor-context-menu').classList.add('hidden');
             if (e.target.closest('#side-tab-panel') === null && sideTabPanel.classList.contains('open-panel')) sideTabPanel.classList.remove('open-panel');
         });
 
-        // ================= Auth & Profile Logic =================
+        // ================= Auth Logic =================
         function switchForm(type) {
             document.getElementById('log-msg').textContent = ''; document.getElementById('reg-msg').textContent = '';
             const formLogin = document.getElementById('form-login'), formSignup = document.getElementById('form-signup');
@@ -334,62 +359,26 @@
             }
         }
 
-        function previewAvatar(input) {
-            if (input.files && input.files[0]) {
-                document.getElementById('avatar-preview-name').textContent = input.files[0].name;
-            } else {
-                document.getElementById('avatar-preview-name').textContent = "No file chosen";
-            }
-        }
-
         function processRegister(event) {
             event.preventDefault();
-            const name = document.getElementById('reg-name').value.trim();
-            const email = document.getElementById('reg-email').value.trim();
-            const pass = document.getElementById('reg-pass').value;
-            const fileInput = document.getElementById('reg-avatar');
-            
+            const name = document.getElementById('reg-name').value.trim(), email = document.getElementById('reg-email').value.trim(), pass = document.getElementById('reg-pass').value;
             let users = JSON.parse(localStorage.getItem('flonters_users')) || {};
             if (users[email]) { document.getElementById('reg-msg').textContent = 'Email already exists!'; return; }
-
-            const finalizeSignup = (avatarBase64) => {
-                users[email] = { name: name, password: pass, scores: [], avatar: avatarBase64 };
-                localStorage.setItem('flonters_users', JSON.stringify(users));
-                document.getElementById('reg-msg').className = 'error-msg success-msg'; 
-                document.getElementById('reg-msg').textContent = 'Registered successfully!';
-                setTimeout(() => { switchForm('login'); }, 1000);
-            };
-
-            if (fileInput.files && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) { finalizeSignup(e.target.result); };
-                reader.readAsDataURL(fileInput.files[0]);
-            } else {
-                finalizeSignup(null);
-            }
+            users[email] = { name: name, password: pass, scores: [] };
+            localStorage.setItem('flonters_users', JSON.stringify(users));
+            document.getElementById('reg-msg').className = 'error-msg success-msg'; document.getElementById('reg-msg').textContent = 'Registered successfully!';
+            setTimeout(() => { switchForm('login'); }, 1000);
         }
 
         function processLogin(event) {
             event.preventDefault();
-            const email = document.getElementById('log-email').value.trim();
-            const pass = document.getElementById('log-pass').value;
+            const email = document.getElementById('log-email').value.trim(), pass = document.getElementById('log-pass').value;
             let users = JSON.parse(localStorage.getItem('flonters_users')) || {};
-            
-            if (!users[email] || users[email].password !== pass) { 
-                document.getElementById('log-msg').textContent = 'Invalid credentials!'; return; 
-            }
+            if (!users[email] || users[email].password !== pass) { document.getElementById('log-msg').textContent = 'Invalid credentials!'; return; }
 
             currentUserEmail = email; currentUserName = users[email].name; 
             document.getElementById('dashboard-username').textContent = currentUserName;
-            
-            const avatarEl = document.getElementById('dashboard-avatar');
-            if (users[email].avatar) {
-                avatarEl.style.backgroundImage = `url(${users[email].avatar})`;
-                avatarEl.textContent = '';
-            } else {
-                avatarEl.style.backgroundImage = 'none';
-                avatarEl.textContent = currentUserName.charAt(0).toUpperCase();
-            }
+            document.getElementById('dashboard-avatar').textContent = currentUserName.charAt(0).toUpperCase();
 
             loadUserScores();
             const authSection = document.getElementById('auth-section'), dashSection = document.getElementById('dash-section');
@@ -423,7 +412,8 @@
 
         function showNewFileInput() {
             if (isCreatingFile) return;
-            isCreatingFile = true; isProcessing = false;
+            isCreatingFile = true;
+            isProcessing = false; // รีเซ็ตสถานะเผื่อไว้
             document.getElementById('btn-add-score').classList.add('disabled');
 
             const list = document.getElementById('score-list');
@@ -436,7 +426,7 @@
             inputName.focus();
 
             const finishNewFile = () => {
-                if (isProcessing) return; 
+                if (isProcessing) return; // ป้องกันเรียกซ้ำ 2 รอบ (จาก blur และ Enter ตีกัน)
                 isProcessing = true; 
                 let fileName = inputName.value.trim(), fileInst = inputInst.value.trim() || "Piano";
                 if (fileName !== '') { 
@@ -444,7 +434,7 @@
                     renderScoreItem(fileName, fileInst, true); 
                 }
                 li.remove();
-                isCreatingFile = false;
+                isCreatingFile = false; // ปลดล็อก
                 document.getElementById('btn-add-score').classList.remove('disabled');
             };
 
@@ -466,6 +456,7 @@
                 document.getElementById('editor-title').textContent = 'Composition - ' + fileName;
                 const editorArea = document.getElementById('editor-content-area');
                 
+                // แก้ไข Title wrapper ให้อยู่ตรงกลาง
                 editorArea.innerHTML = `
                     <div class="sheet-music-container">
                         <div class="sheet-header">
@@ -523,10 +514,12 @@
             voice.draw(context, stave);
         }
 
-        // ================= Editor Inline Editing =================
+        // ================= Editor Inline Editing (ฟังชั่นใหม่) =================
         function openEditorMenu(e, type, element) {
-            e.preventDefault(); 
-            editorContextTarget = element; editorContextType = type;
+            e.preventDefault(); // ปิดเมนูคลิกขวาปกติของเบราว์เซอร์
+            editorContextTarget = element;
+            editorContextType = type;
+
             const menu = document.getElementById('editor-context-menu');
             const actionBtn = document.getElementById('editor-menu-action');
 
@@ -534,7 +527,9 @@
             else if (type === 'title') actionBtn.textContent = 'Fix Name (Title)';
             else if (type === 'composer') actionBtn.textContent = 'Fix Name (Composer)';
 
-            menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px'; menu.classList.remove('hidden');
+            menu.style.left = e.pageX + 'px';
+            menu.style.top = e.pageY + 'px';
+            menu.classList.remove('hidden');
         }
 
         function executeEditorEdit() {
@@ -542,15 +537,21 @@
             if (!editorContextTarget) return;
 
             const oldVal = editorContextTarget.textContent;
-            editorContextTarget.innerHTML = `<input type="text" value="${oldVal}" style="background:transparent; border:none; border-bottom:1px solid #000; outline:none; font-family:inherit; font-size:inherit; font-weight:inherit; font-style:inherit; color:#000; text-align:inherit; width:${Math.max(80, oldVal.length * 15)}px;">`;
+            
+            // เปลี่ยนข้อความเป็นช่อง Input เนียนๆ
+            editorContextTarget.innerHTML = `
+                <input type="text" value="${oldVal}" style="background:transparent; border:none; border-bottom:1px solid #000; outline:none; font-family:inherit; font-size:inherit; font-weight:inherit; font-style:inherit; color:#000; text-align:inherit; width:${Math.max(80, oldVal.length * 15)}px;">
+            `;
             
             const input = editorContextTarget.querySelector('input');
-            input.focus(); input.select();
+            input.focus();
+            input.select();
 
             const finishEdit = () => {
                 let newVal = input.value.trim() || oldVal;
                 editorContextTarget.innerHTML = newVal;
 
+                // อัปเดตข้อมูลลงฐานข้อมูลและ UI ตามประเภทที่ถูกแก้
                 if (editorContextType === 'title' && newVal !== activeFileName) {
                     saveScoreToDB(`${activeFileName}|${activeFileInst}`, newVal, activeFileInst);
                     if(activeFileLi) activeFileLi.querySelector('.file-name').textContent = newVal;
@@ -587,6 +588,7 @@
                 activeFileName = newName; 
                 if (document.getElementById('editor-title').textContent === 'Composition - ' + oldName) {
                     document.getElementById('editor-title').textContent = 'Composition - ' + newName;
+                    // อัปเดตตรงกลางด้วยถ้ากำลังเปิดไฟล์นี้อยู่
                     const sheetTitle = document.querySelector('.sheet-title');
                     if (sheetTitle) sheetTitle.textContent = newName;
                 }
