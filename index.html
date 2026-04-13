@@ -436,10 +436,6 @@
 
         // ================= VexFlow & UI Rendering =================
         function renderScoreItem(fileName, instrument, prepend = false) {
-            // เติมบรรทัดนี้เข้าไปทดสอบ
-            alert("ปุ่มทำงานแล้ว! กำลังจะวาดเส้น..."); 
-            console.log("Button clicked!");
-
             const { Renderer, Stave } = Vex.Flow;
             const container = document.getElementById("notation-canvas");
             const list = document.getElementById('score-list');
@@ -487,12 +483,45 @@
 
         // ฟังก์ชันสำหรับเพิ่มบรรทัด 5 เส้น (Stave) แบบว่างเปล่า
         window.addEmptyStave = function() {
-            const { Renderer, Stave } = Vex.Flow;
-            const container = document.getElementById("notation-canvas");
-            // เช็คว่าเคยวาดไปหรือยัง ถ้ามีแล้วไม่ให้วาดซ้ำ
-            if (container.innerHTML !== "") {
-                alert("มีบรรทัด 5 เส้นอยู่แล้วครับ (เดี๋ยวระบบเพิ่มตัวโน้ตจะตามมาทีหลังนะ)");
-                return;
+            console.log("กำลังเริ่มกระบวนการวาดเส้น...");
+            
+            try {
+                const { Renderer, Stave } = Vex.Flow;
+                const container = document.getElementById("notation-canvas");
+                
+                // เช็คว่าเจอพื้นที่วาดไหม
+                if (!container) {
+                    console.error("❌ หาพื้นที่วาด (id='notation-canvas') ไม่เจอ!");
+                    return;
+                }
+
+                // เช็คว่าเคยวาดไปหรือยัง (ใช้ .trim() เผื่อมีช่องว่างซ่อนอยู่)
+                if (container.innerHTML.trim() !== "") {
+                    alert("มีบรรทัด 5 เส้นอยู่แล้วครับ");
+                    return;
+                }
+
+                // สร้างพื้นที่วาด (SVG)
+                const renderer = new Renderer(container, Renderer.Backends.SVG);
+                renderer.resize(750, 150); 
+                const context = renderer.getContext();
+
+                // สร้างบรรทัด 5 เส้น
+                const stave = new Stave(10, 40, 700);
+                
+                // ใส่กุญแจซอล และ 4/4
+                stave.addClef("treble").addTimeSignature("4/4");
+                
+                // วาดลงหน้าจอ
+                stave.setContext(context).draw();
+                
+                console.log("✅ วาดเส้นสำเร็จเรียบร้อย!");
+
+            } catch (error) {
+                // ถ้ามีอะไรพัง มันจะแสดงผลตรงนี้
+                console.error("❌ เกิดข้อผิดพลาดตอนวาด VexFlow:", error);
+                alert("มีบั๊กซ่อนอยู่ตอนวาดเส้น! ลองดู Error สีแดงใน Console นะครับ");
+            }
         }
 
     // สร้างพื้นที่วาด (SVG)
