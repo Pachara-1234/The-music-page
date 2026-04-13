@@ -194,10 +194,10 @@
         .add-bar-inline-btn {
             width: 40px;
             height: 40px;
-            background: rgba(220, 216, 204, 0.1);
-            border: 1px dashed #dcd8cc;
-            border-radius: 8px; /* ความมน */
-            color: #dcd8cc;
+            background: transparent; /* พื้นหลังใสเพื่อให้กลืนกับสีกระดาษ */
+            border: 1px solid #000; /* เส้นขอบทึบสีดำ ขนาด 1px (ไม่หนา) */
+            border-radius: 8px; /* ความมนของขอบ */
+            color: #000; /* สีของเครื่องหมาย + เป็นสีดำ */
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -208,11 +208,10 @@
         }
 
         .add-bar-inline-btn:hover {
-            background: rgba(220, 216, 204, 0.2);
-            border-style: solid;
+            background: rgba(0, 0, 0, 0.05); /* เวลาเอาเมาส์ชี้ให้มีแรเงาสีเทาอ่อนๆ บางๆ */
+            border: 1px solid #000;
             transform: scale(1.05);
         }
-
         /* ซ่อนปุ่มเริ่มต้น */
         .hidden-btn {
             display: none !important;
