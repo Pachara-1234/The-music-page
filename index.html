@@ -185,10 +185,10 @@
         .add-bar-inline-btn {
             width: 40px;
             height: 40px;
-            background: rgba(220, 216, 204, 0.25); /* พื้นหลังสว่างขึ้น */
-            border: 2px dashed #ffffff; /* ขอบหนาและสีขาวชัดเจน */
+            background: rgba(220, 216, 204, 0.25); 
+            border: 2px solid #000000; /* ขอบสีดำ เส้นเต็ม */
             border-radius: 8px;
-            color: #ffffff; /* เครื่องหมายบวกสีขาว */
+            color: #000000; /* เครื่องหมายบวกสีดำ */
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -198,9 +198,9 @@
             transition: all 0.3s;
             margin-left: 10px;
         }
+
         .add-bar-inline-btn:hover {
-            background: rgba(220, 216, 204, 0.4);
-            border-style: solid;
+            background: rgba(0, 0, 0, 0.1); /* เวลาเอาเมาส์ชี้ให้พื้นหลังดูมีมิติขึ้นนิดนึง */
             transform: scale(1.1);
         }
 
