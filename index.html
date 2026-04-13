@@ -847,7 +847,7 @@
                 staveMenu.classList.add('hidden');
             }
         });
-        // ===== [ฟังก์ชันใหม่: สำหรับลบบรรทัดโน้ตโดยเฉพาะ] =====
+// ===== [ฟังก์ชันใหม่: สำหรับลบบรรทัดโน้ตโดยเฉพาะ] =====
         function executeStaveDelete() {
             document.getElementById('stave-context-menu').classList.add('hidden');
             if (!targetStaveRow) return;
@@ -863,11 +863,9 @@
             const container = document.getElementById("notation-canvas");
             const existingBtn = document.querySelector(".add-bar-inline-btn");
             
-            // ถ้าลบบรรทัดที่มีปุ่ม + ไป (ปุ่มหาย) ต้องสร้างปุ่มใหม่ให้บรรทัดสุดท้าย
             if (!existingBtn) {
                 const rows = container.querySelectorAll(".stave-row");
                 if (rows.length > 0) {
-                    // ถ้ายังพอบรรทัดเหลืออยู่ เอาปุ่ม + ไปต่อท้ายบรรทัดล่างสุด
                     const lastRow = rows[rows.length - 1];
                     const plusBtn = document.createElement("div");
                     plusBtn.className = "add-bar-inline-btn";
@@ -875,32 +873,35 @@
                     plusBtn.onclick = drawNewBar;
                     lastRow.appendChild(plusBtn);
                 } else {
-                    // ถ้าลบจนเกลี้ยงหน้ากระดาษ (0 บรรทัด) ให้ปุ่ม + ADD NOTE อันใหญ่กลับมา
                     const actionArea = document.getElementById("action-area");
                     if(actionArea && !document.getElementById("initial-add-btn")) {
                         actionArea.innerHTML = `<button class="action-btn" id="initial-add-btn" onclick="addEmptyStave()">+ ADD NOTE</button>`;
                     }
                 }
             }
-        }
-            // ================= ฟังก์ชันลบไฟล์เพลง (ซ้ายมือ) =================
+
+            // 4. เซฟข้อมูลทันที
+            saveData();
+            targetStaveRow = null;
+        } // <--- ต้องปิดปีกกาของ executeStaveDelete ตรงนี้!!!
+
+        // ================= ฟังก์ชันลบไฟล์เพลง (ซ้ายมือ) =================
         function executeDelete() {
             // 1. ซ่อนเมนูคลิกขวา
             document.getElementById('context-menu').classList.add('hidden'); 
-        
+            
             if (!activeFileLi) return;
-    
+
             // 2. ดึงชื่อไฟล์ที่กำลังจะโดนลบ
             const fileNameToDelete = activeFileLi.querySelector('.file-name').textContent;
 
-             // 3. ลบตัวไฟล์ออกจากแถบซ้ายมือ (DOM)
+            // 3. ลบตัวไฟล์ออกจากแถบซ้ายมือ (DOM)
             activeFileLi.remove();
 
-                // 4. ลบข้อมูลที่เซฟไว้ใน LocalStorage ด้วย (จะได้ไม่เปลืองพื้นที่และไม่เป็นขยะ)
+            // 4. ลบข้อมูลที่เซฟไว้ใน LocalStorage ด้วย 
             localStorage.removeItem("flonters_save_" + fileNameToDelete);
 
-                // 5. เช็คว่า "ไฟล์ที่ลบ" คือ "ไฟล์ที่เปิดอยู่บนกระดาน" หรือเปล่า?
-                // ถ้าใช่ ต้องเคลียร์หน้ากระดานให้กลับเป็นหน้าว่างๆ
+            // 5. เคลียร์หน้ากระดานถ้าไฟล์ที่เปิดอยู่โดนลบ
             if (activeFileName === fileNameToDelete) {
                 document.getElementById('editor-title').textContent = 'Composition';
                 document.getElementById('editor-content-area').innerHTML = `<div class="placeholder-text animate-fade-up">The stage is empty. Select or create a score...</div>`;
@@ -911,11 +912,6 @@
 
             // 6. คืนค่าตัวแปรให้ว่าง
             activeFileLi = null;
-        }
-
-            // 4. เซฟข้อมูลทันที
-            saveData();
-            targetStaveRow = null;
         }
     </script>
 </body>
