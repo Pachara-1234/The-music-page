@@ -320,9 +320,6 @@
             </div>
         </div>
     </div>
-    <div id="editor-context-menu" class="hidden" style="position: absolute; background: white; border: 1px solid #ccc; padding: 5px; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); cursor: pointer; z-index: 1000;">
-    <div id="editor-menu-action" onclick="executeEditorEdit()" style="padding: 5px 10px; font-family: sans-serif; font-size: 14px;">Fix Name</div>
-</div>
 
     <script>
         // ================= Core State =================
@@ -493,18 +490,9 @@
             inputName.addEventListener('blur', handleBlur); inputInst.addEventListener('blur', handleBlur);
         }
 
-// ================= Global Variables =================
+// ================= VexFlow & UI Logic =================
         let staveCount = 0;
-        let activeFileLi = null;
-        let activeFileName = null;
-        let activeFileInst = null;
-        
-        // ตัวแปรสำหรับ Editor Inline Editing
-        let editorContextTarget = null;
-        let editorContextType = '';
-        let currentUserName = window.currentUserName || "Unknown Composer"; // ป้องกัน error ถ้าไม่มีตัวแปรนี้
 
-        // ================= VexFlow & UI Rendering =================
         function renderScoreItem(fileName, instrument, prepend = false) {
             const list = document.getElementById('score-list');
             const li = document.createElement('li');
@@ -516,106 +504,30 @@
                 document.getElementById('editor-title').textContent = 'Composition - ' + fileName;
                 const editorArea = document.getElementById('editor-content-area');
                 
-                // 📍 ใช้โครงสร้าง HTML และระบบคลิกขวา (oncontextmenu) ตามแบบที่คุณต้องการ
                 editorArea.innerHTML = `
                     <div class="sheet-music-container">
                         <div class="sheet-header">
                             <div class="sheet-title-wrapper">
-                                <div class="sheet-title editable-text" oncontextmenu="openEditorMenu(event, 'title', this)">${fileName}</div>
+                                <div class="sheet-title editable-text">${fileName}</div>
                             </div>
                             <div class="sheet-meta">
-                                <div class="sheet-instrument editable-text" oncontextmenu="openEditorMenu(event, 'instrument', this)">${instrument}</div>
-                                <div class="sheet-composer editable-text" oncontextmenu="openEditorMenu(event, 'composer', this)">${currentUserName}</div>
+                                <div class="sheet-instrument editable-text">${instrument}</div>
                             </div>
                         </div>
-                        
                         <div class="sheet-actions" id="action-area">
                             <button class="action-btn" id="initial-add-btn" onclick="addEmptyStave()">+ ADD NOTE</button>
                         </div>
-
                         <div class="sheet-body">
                             <div id="notation-canvas"></div>
                         </div>
                     </div>
                 `;
-
-                // โหลดข้อมูลบรรทัดที่เคยเซฟไว้
                 loadSavedData(fileName);
-            };
-
-            // เมนูคลิกขวาที่ไฟล์ดนตรีทางซ้าย
-            li.oncontextmenu = function(e) {
-                e.preventDefault(); activeFileLi = li; activeFileName = fileName; activeFileInst = instrument;
-                const menu = document.getElementById('context-menu');
-                menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px'; menu.classList.remove('hidden');
             };
 
             if (prepend) list.insertBefore(li, list.firstChild); else list.appendChild(li); 
         }
 
-        // ================= Editor Inline Editing (แก้ไขหัวกระดาษ) =================
-        function openEditorMenu(e, type, element) {
-            e.preventDefault(); 
-            editorContextTarget = element; editorContextType = type;
-            const menu = document.getElementById('editor-context-menu');
-            const actionBtn = document.getElementById('editor-menu-action');
-
-            if (type === 'instrument') actionBtn.textContent = 'Change Instrument';
-            else if (type === 'title') actionBtn.textContent = 'Fix Name (Title)';
-            else if (type === 'composer') actionBtn.textContent = 'Fix Name (Composer)';
-
-            if(menu) {
-                menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px'; menu.classList.remove('hidden');
-            } else {
-                console.warn("ไม่พบ #editor-context-menu ใน HTML โปรดตรวจสอบว่ามี element นี้อยู่");
-            }
-        }
-
-        function executeEditorEdit() {
-            const menu = document.getElementById('editor-context-menu');
-            if(menu) menu.classList.add('hidden');
-            
-            if (!editorContextTarget) return;
-
-            const oldVal = editorContextTarget.textContent;
-            editorContextTarget.innerHTML = `<input type="text" value="${oldVal}" style="background:transparent; border:none; border-bottom:1px solid #000; outline:none; font-family:inherit; font-size:inherit; font-weight:inherit; font-style:inherit; color:#000; text-align:inherit; width:${Math.max(80, oldVal.length * 15)}px;">`;
-            
-            const input = editorContextTarget.querySelector('input');
-            input.focus(); input.select();
-
-            const finishEdit = () => {
-                let newVal = input.value.trim() || oldVal;
-                editorContextTarget.innerHTML = newVal;
-
-                if (editorContextType === 'title' && newVal !== activeFileName) {
-                    if(typeof saveScoreToDB === 'function') saveScoreToDB(`${activeFileName}|${activeFileInst}`, newVal, activeFileInst);
-                    if(activeFileLi) activeFileLi.querySelector('.file-name').textContent = newVal;
-                    activeFileName = newVal;
-                    document.getElementById('editor-title').textContent = 'Composition - ' + newVal;
-                } else if (editorContextType === 'instrument' && newVal !== activeFileInst) {
-                    if(typeof saveScoreToDB === 'function') saveScoreToDB(`${activeFileName}|${activeFileInst}`, activeFileName, newVal);
-                    activeFileInst = newVal;
-                    if(activeFileLi) activeFileLi.setAttribute('data-inst', newVal);
-                } else if (editorContextType === 'composer' && newVal !== currentUserName) {
-                    currentUserName = newVal;
-                    const dashUser = document.getElementById('dashboard-username');
-                    if(dashUser) dashUser.textContent = newVal;
-                    
-                    try {
-                        let users = JSON.parse(localStorage.getItem('flonters_users'));
-                        if(users && typeof currentUserEmail !== 'undefined' && users[currentUserEmail]) {
-                            users[currentUserEmail].name = newVal;
-                            localStorage.setItem('flonters_users', JSON.stringify(users));
-                        }
-                    } catch(e) { console.error("Update User Error:", e); }
-                }
-            };
-
-            input.addEventListener('keypress', (e) => { if(e.key === 'Enter') finishEdit(); });
-            input.addEventListener('blur', finishEdit);
-        }
-
-        // ================= ระบบจัดการบรรทัด VexFlow (วาด, เพิ่ม, ลบ) =================
         function addEmptyStave() {
             const initialBtn = document.getElementById("initial-add-btn");
             if (initialBtn) initialBtn.remove(); 
@@ -633,6 +545,7 @@
                 const rowDiv = document.createElement("div");
                 rowDiv.className = "stave-row";
                 
+                // 📍 ฟังก์ชันคลิกขวาที่บรรทัด
                 rowDiv.oncontextmenu = function(e) {
                     e.preventDefault();
                     showDeleteMenu(e, rowDiv);
@@ -647,8 +560,11 @@
                 const context = renderer.getContext();
                 
                 const stave = new VF.Stave(0, 0, 690);
+                
+                // 📍 ใส่กุญแจซอล "ทุกบรรทัด"
                 stave.addClef("treble");
                 
+                // 📍 ใส่ Time Signature เฉพาะบรรทัดแรกของหน้า
                 if (container.children.length === 1) {
                     stave.addTimeSignature("4/4");
                 }
@@ -669,10 +585,13 @@
             }
         }
 
+        // ================= ระบบลบบรรทัด (คลิกขวา) =================
         function showDeleteMenu(event, rowElement) {
+            // ลบเมนูเก่าทิ้งถ้ามีค้างอยู่
             const oldMenu = document.getElementById("stave-delete-menu");
             if (oldMenu) oldMenu.remove();
 
+            // สร้างเมนูใหม่ตรงจุดที่เมาส์คลิก
             const menu = document.createElement("div");
             menu.id = "stave-delete-menu";
             menu.className = "stave-context-menu";
@@ -685,12 +604,16 @@
             
             deleteBtn.onclick = function() {
                 menu.remove(); 
-                deleteLine(rowElement); 
+                // 📍 ยืนยันก่อนลบ
+                if (confirm("Are you sure you want to delete this line?")) {
+                    deleteLine(rowElement);
+                }
             };
 
             menu.appendChild(deleteBtn);
             document.body.appendChild(menu);
 
+            // คลิกที่อื่นให้เมนูหาย
             setTimeout(() => {
                 window.addEventListener('click', function clickOutside() {
                     const activeMenu = document.getElementById("stave-delete-menu");
@@ -701,14 +624,16 @@
         }
 
         function deleteLine(rowElement) {
-            rowElement.remove(); 
+            rowElement.remove(); // ลบบรรทัดนั้นทิ้ง
             staveCount--;
-            saveData(); 
+            saveData(); // เซฟข้อมูลอัปเดต
 
+            // จัดการปุ่ม + หลังจากลบ
             const container = document.getElementById("notation-canvas");
             const allRows = container.querySelectorAll('.stave-row');
             
             if (allRows.length > 0) {
+                // ถ้ายังพอบรรทัดเหลือ ให้เอาปุ่ม + ไปแปะท้ายสุด
                 const lastRow = allRows[allRows.length - 1];
                 if (!lastRow.querySelector('.add-bar-inline-btn')) {
                     const plusBtn = document.createElement("div");
@@ -718,6 +643,7 @@
                     lastRow.appendChild(plusBtn);
                 }
             } else {
+                // ถ้าลบจนเกลี้ยงหน้ากระดาษ เอาปุ่มเริ่มต้นกลับมา
                 const actionArea = document.getElementById("action-area");
                 if (actionArea) {
                     actionArea.innerHTML = `<button class="action-btn" id="initial-add-btn" onclick="addEmptyStave()">+ ADD NOTE</button>`;
@@ -725,7 +651,7 @@
             }
         }
 
-        // ================= ระบบ Auto-Save & Load (จำนวนบรรทัด) =================
+        // ================= ระบบ Auto-Save & Load =================
         function saveData() {
             if (!activeFileName) return;
             const data = { bars: staveCount };
@@ -751,15 +677,57 @@
                 staveCount = 0;
             }
         }
+        // ================= Editor Inline Editing =================
+        function openEditorMenu(e, type, element) {
+            e.preventDefault(); 
+            editorContextTarget = element; editorContextType = type;
+            const menu = document.getElementById('editor-context-menu');
+            const actionBtn = document.getElementById('editor-menu-action');
 
-        // ================= Sidebar Menu Operations (Rename / Delete) =================
-        window.addEventListener('click', function(e) {
-            const fileMenu = document.getElementById('context-menu');
-            if (fileMenu && !fileMenu.classList.contains('hidden') && !e.target.closest('#context-menu')) {
-                fileMenu.classList.add('hidden');
-            }
-        });
+            if (type === 'instrument') actionBtn.textContent = 'Change Instrument';
+            else if (type === 'title') actionBtn.textContent = 'Fix Name (Title)';
+            else if (type === 'composer') actionBtn.textContent = 'Fix Name (Composer)';
 
+            menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px'; menu.classList.remove('hidden');
+        }
+
+        function executeEditorEdit() {
+            document.getElementById('editor-context-menu').classList.add('hidden');
+            if (!editorContextTarget) return;
+
+            const oldVal = editorContextTarget.textContent;
+            editorContextTarget.innerHTML = `<input type="text" value="${oldVal}" style="background:transparent; border:none; border-bottom:1px solid #000; outline:none; font-family:inherit; font-size:inherit; font-weight:inherit; font-style:inherit; color:#000; text-align:inherit; width:${Math.max(80, oldVal.length * 15)}px;">`;
+            
+            const input = editorContextTarget.querySelector('input');
+            input.focus(); input.select();
+
+            const finishEdit = () => {
+                let newVal = input.value.trim() || oldVal;
+                editorContextTarget.innerHTML = newVal;
+
+                if (editorContextType === 'title' && newVal !== activeFileName) {
+                    saveScoreToDB(`${activeFileName}|${activeFileInst}`, newVal, activeFileInst);
+                    if(activeFileLi) activeFileLi.querySelector('.file-name').textContent = newVal;
+                    activeFileName = newVal;
+                    document.getElementById('editor-title').textContent = 'Composition - ' + newVal;
+                } else if (editorContextType === 'instrument' && newVal !== activeFileInst) {
+                    saveScoreToDB(`${activeFileName}|${activeFileInst}`, activeFileName, newVal);
+                    activeFileInst = newVal;
+                    if(activeFileLi) activeFileLi.setAttribute('data-inst', newVal);
+                } else if (editorContextType === 'composer' && newVal !== currentUserName) {
+                    currentUserName = newVal;
+                    document.getElementById('dashboard-username').textContent = newVal;
+                    let users = JSON.parse(localStorage.getItem('flonters_users'));
+                    users[currentUserEmail].name = newVal;
+                    localStorage.setItem('flonters_users', JSON.stringify(users));
+                }
+            };
+
+            input.addEventListener('keypress', (e) => { if(e.key === 'Enter') finishEdit(); });
+            input.addEventListener('blur', finishEdit);
+        }
+
+        // ================= Sidebar Menu Operations =================
         function executeRename() {
             document.getElementById('context-menu').classList.add('hidden'); if(!activeFileLi) return;
             const li = activeFileLi, oldName = activeFileName, oldInst = activeFileInst;
@@ -768,19 +736,7 @@
 
             const finishRename = () => {
                 let newName = input.value.trim() || oldName; 
-                if (newName !== oldName && typeof saveScoreToDB === 'function') {
-                    saveScoreToDB(`${oldName}|${oldInst}`, newName, oldInst); 
-                }
-                
-                // โอนย้ายข้อมูลเซฟบรรทัดเพลง
-                if (newName !== oldName) {
-                    const oldData = localStorage.getItem("flonters_save_" + oldName);
-                    if (oldData) {
-                        localStorage.setItem("flonters_save_" + newName, oldData);
-                        localStorage.removeItem("flonters_save_" + oldName);
-                    }
-                }
-
+                if (newName !== oldName) saveScoreToDB(`${oldName}|${oldInst}`, newName, oldInst); 
                 li.innerHTML = `<span class="file-icon">></span><span class="file-name">${newName}</span>`;
                 activeFileName = newName; 
                 if (document.getElementById('editor-title').textContent === 'Composition - ' + oldName) {
@@ -796,23 +752,13 @@
         function executeDelete() {
             document.getElementById('context-menu').classList.add('hidden'); if(!activeFileLi) return;
             if(confirm(`Are you sure you want to delete "${activeFileName}"?`)) {
-                try {
-                    let users = JSON.parse(localStorage.getItem('flonters_users'));
-                    if(users && typeof currentUserEmail !== 'undefined') {
-                        users[currentUserEmail].scores = users[currentUserEmail].scores.filter(s => s !== `${activeFileName}|${activeFileInst}`);
-                        localStorage.setItem('flonters_users', JSON.stringify(users));
-                    }
-                } catch(e) { console.error(e); }
-                
-                // ลบข้อมูลบรรทัดเพลง
-                localStorage.removeItem("flonters_save_" + activeFileName);
-                
+                let users = JSON.parse(localStorage.getItem('flonters_users'));
+                users[currentUserEmail].scores = users[currentUserEmail].scores.filter(s => s !== `${activeFileName}|${activeFileInst}`);
+                localStorage.setItem('flonters_users', JSON.stringify(users));
                 activeFileLi.remove(); 
                 if (document.getElementById('editor-title').textContent === 'Composition - ' + activeFileName) {
                     document.getElementById('editor-title').textContent = 'Composition';
                     document.getElementById('editor-content-area').innerHTML = `<div class="placeholder-text">The stage is empty. Select or create a score...</div>`;
-                    activeFileName = null;
-                    staveCount = 0;
                 }
             }
         }
