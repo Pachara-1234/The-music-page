@@ -883,35 +883,6 @@
                 }
             }
 
-            // ================= ฟังก์ชันลบไฟล์เพลง (ซ้ายมือ) =================
-            function executeDelete() {
-                // 1. ซ่อนเมนูคลิกขวา
-                document.getElementById('context-menu').classList.add('hidden'); 
-            
-                if (!activeFileLi) return;
-    
-                // 2. ดึงชื่อไฟล์ที่กำลังจะโดนลบ
-                const fileNameToDelete = activeFileLi.querySelector('.file-name').textContent;
-
-                // 3. ลบตัวไฟล์ออกจากแถบซ้ายมือ (DOM)
-                activeFileLi.remove();
-
-                // 4. ลบข้อมูลที่เซฟไว้ใน LocalStorage ด้วย (จะได้ไม่เปลืองพื้นที่และไม่เป็นขยะ)
-                localStorage.removeItem("flonters_save_" + fileNameToDelete);
-
-                // 5. เช็คว่า "ไฟล์ที่ลบ" คือ "ไฟล์ที่เปิดอยู่บนกระดาน" หรือเปล่า?
-                // ถ้าใช่ ต้องเคลียร์หน้ากระดานให้กลับเป็นหน้าว่างๆ
-                if (activeFileName === fileNameToDelete) {
-                    document.getElementById('editor-title').textContent = 'Composition';
-                    document.getElementById('editor-content-area').innerHTML = `<div class="placeholder-text animate-fade-up">The stage is empty. Select or create a score...</div>`;
-                    activeFileName = null;
-                    activeFileInst = null;
-                    staveCount = 0;
-            }
-
-            // 6. คืนค่าตัวแปรให้ว่าง
-            activeFileLi = null;
-        }
 
             // 4. เซฟข้อมูลทันที
             saveData();
