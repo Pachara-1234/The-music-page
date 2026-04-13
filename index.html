@@ -232,6 +232,10 @@
         .animate-fade-up {
             animation: fadeInUp 0.4s ease-out forwards;
         }
+        
+        .animate-fade-up2 {
+            animation: fadeInUp 1s ease-out forwards;
+        }
 
         /* แอนิเมชันเด้งป๊อปอัป (สำหรับพวกเมนูคลิกขวา) */
         @keyframes popIn {
@@ -256,7 +260,7 @@
     </div>
 
     <div id="auth-section">
-        <div class="auth-box animate-fade-up">
+        <div class="auth-box animate-fade-up2">
             <h1 class="logo">FLONTERS</h1>
             <p class="subtitle">The first music IOT</p>
 
@@ -265,14 +269,14 @@
                 <button class="toggle-btn animate-fade-up" id="btn-signup" onclick="switchForm('signup')">SIGN UP</button>
             </div>
 
-            <form id="form-login" class="animate-pop" onsubmit="processLogin(event)">
+            <form id="form-login" class="animate-fade-up2" onsubmit="processLogin(event)">
                 <div class="input-group"><input type="email" id="log-email" placeholder="Email" required></div>
                 <div class="input-group"><input type="password" id="log-pass" placeholder="Password" required></div>
                 <div id="log-msg" class="error-msg"></div>
                 <button type="submit" class="submit-btn">ENTER STAGE</button>
             </form>
 
-            <form id="form-signup" class="hidden animate-pop" onsubmit="processRegister(event)">
+            <form id="form-signup" class="hidden animate-fade-up2" onsubmit="processRegister(event)">
                 <div class="input-group"><input type="text" id="reg-name" placeholder="Name" required></div>
                 <div class="input-group"><input type="email" id="reg-email" placeholder="Email" required></div>
                 <div class="input-group"><input type="password" id="reg-pass" placeholder="Password" required></div>
