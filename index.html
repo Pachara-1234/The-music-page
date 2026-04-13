@@ -312,6 +312,9 @@
             </div>
         </div>
     </div>
+    <div id="stave-context-menu" class="hidden" style="position: absolute; background: #0a0a0a; border: 1px solid #333; border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); z-index: 1000; overflow: hidden; min-width: 130px;">
+        <div class="context-item delete" onclick="executeStaveDelete()" style="border-top: none;">Delete Stave</div>
+    </div>
 
     <script>
         // ================= Core State =================
@@ -556,6 +559,17 @@
                 const rowDiv = document.createElement("div");
                 rowDiv.className = "stave-row";
                 
+                // ===== [เพิ่มโค้ดก้อนนี้เข้าไป] =====
+                rowDiv.oncontextmenu = function(e) {
+                    e.preventDefault();
+                    targetStaveRow = rowDiv; // จำว่าคลิกที่บรรทัดไหน
+                    const menu = document.getElementById('stave-context-menu');
+                    menu.style.left = e.pageX + 'px';
+                    menu.style.top = e.pageY + 'px';
+                    menu.classList.remove('hidden');
+                };
+                // ==============================
+                
                 // สร้างพื้นที่วาดโน้ต
                 const barDiv = document.createElement("div");
                 rowDiv.appendChild(barDiv);
@@ -705,6 +719,56 @@
                     document.getElementById('editor-content-area').innerHTML = `<div class="placeholder-text">The stage is empty. Select or create a score...</div>`;
                 }
             }
+        }
+        // ตัวแปรสำหรับจำว่าคลิกขวาที่บรรทัดไหน
+        let targetStaveRow = null;
+
+        // ทำให้เมนูลบบรรทัดหายไปเวลาคลิกที่อื่นบนหน้าจอ
+        document.addEventListener('click', (e) => {
+            const staveMenu = document.getElementById('stave-context-menu');
+            if (staveMenu && e.target.closest('#stave-context-menu') === null) {
+                staveMenu.classList.add('hidden');
+            }
+        });
+        // ===== [ฟังก์ชันใหม่: สำหรับลบบรรทัดโน้ตโดยเฉพาะ] =====
+        function executeStaveDelete() {
+            document.getElementById('stave-context-menu').classList.add('hidden');
+            if (!targetStaveRow) return;
+
+            // 1. ลบบรรทัดนั้นทิ้ง
+            targetStaveRow.remove();
+            
+            // 2. ลดจำนวนบรรทัดลง
+            staveCount--;
+            if (staveCount < 0) staveCount = 0;
+
+            // 3. จัดการปุ่ม + ให้กลับมาถูกที่
+            const container = document.getElementById("notation-canvas");
+            const existingBtn = document.querySelector(".add-bar-inline-btn");
+            
+            // ถ้าลบบรรทัดที่มีปุ่ม + ไป (ปุ่มหาย) ต้องสร้างปุ่มใหม่ให้บรรทัดสุดท้าย
+            if (!existingBtn) {
+                const rows = container.querySelectorAll(".stave-row");
+                if (rows.length > 0) {
+                    // ถ้ายังพอบรรทัดเหลืออยู่ เอาปุ่ม + ไปต่อท้ายบรรทัดล่างสุด
+                    const lastRow = rows[rows.length - 1];
+                    const plusBtn = document.createElement("div");
+                    plusBtn.className = "add-bar-inline-btn";
+                    plusBtn.innerHTML = "+";
+                    plusBtn.onclick = drawNewBar;
+                    lastRow.appendChild(plusBtn);
+                } else {
+                    // ถ้าลบจนเกลี้ยงหน้ากระดาษ (0 บรรทัด) ให้ปุ่ม + ADD NOTE อันใหญ่กลับมา
+                    const actionArea = document.getElementById("action-area");
+                    if(actionArea && !document.getElementById("initial-add-btn")) {
+                        actionArea.innerHTML = `<button class="action-btn" id="initial-add-btn" onclick="addEmptyStave()">+ ADD NOTE</button>`;
+                    }
+                }
+            }
+
+            // 4. เซฟข้อมูลทันที
+            saveData();
+            targetStaveRow = null;
         }
     </script>
 </body>
