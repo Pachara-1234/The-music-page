@@ -907,7 +907,7 @@
                 if (users && users[currentUserEmail]) {
                     let scores = users[currentUserEmail].scores || [];
                     // กรองเอาไฟล์ที่ถูกลบออกจาก Array
-                    users[currentUserEmail].scores = scores.filter(s => !s.startsWith(fileNameToDelete + '|'));
+                    users[currentUserEmail].scores = scores.filter(s => s !== fileNameToDelete && !s.startsWith(fileNameToDelete + '|'));
                     // เซฟรายชื่อใหม่กลับเข้าไป
                     localStorage.setItem('flonters_users', JSON.stringify(users));
                 }
