@@ -454,12 +454,12 @@
                             </div>
                             <div class="sheet-meta">
                                 <div class="sheet-instrument editable-text" oncontextmenu="openEditorMenu(event, 'instrument', this)">${instrument}</div>
-                                <div class="sheet-composer editable-text" oncontextmenu="openEditorMenu(event, 'composer', this)">${currentUserName}</div>
+                                <div class="sheet-composer editable-text" oncontextmenu="openEditorMenu(event, 'composer', this)">${typeof currentUserName !== 'undefined' ? currentUserName : 'Unknown'}</div>
                             </div>
                         </div>
                         
                         <div class="sheet-actions">
-                            <button class="action-btn" onclick="alert('Interaction: Insert Mode Active')">+ ADD NOTE</button>
+                            <button class="action-btn" id="btn-add-note">+ ADD NOTE</button>
                         </div>
 
                         <div class="sheet-body">
@@ -468,7 +468,13 @@
                     </div>
                 `;
 
-                renderVexFlowStaff();
+                // ผูกปุ่มเข้ากับฟังก์ชันวาดเส้น ทันทีที่หน้ากระดาษโหลดเสร็จ (วิธีนี้ปุ่มหาฟังก์ชันเจอ 100%)
+                const btnAddNote = document.getElementById('btn-add-note');
+                if (btnAddNote) {
+                    btnAddNote.addEventListener('click', function() {
+                        addEmptyStave();
+                    });
+                }
             };
 
             li.oncontextmenu = function(e) {
@@ -480,29 +486,45 @@
             if (prepend) list.insertBefore(li, list.firstChild); else list.appendChild(li); 
         }
 
-        function renderVexFlowStaff() {
-            const { Renderer, Stave, StaveNote, Voice, Formatter } = Vex.Flow;
-            const container = document.getElementById("notation-canvas");
-            container.innerHTML = ""; 
-            const renderer = new Renderer(container, Renderer.Backends.SVG);
-            renderer.resize(600, 150); 
-            const context = renderer.getContext();
-            const stave = new Stave(10, 20, 550);
-            stave.addClef("treble").addTimeSignature("4/4");
-            stave.setContext(context).draw();
+        // ฟังก์ชันสำหรับเพิ่มบรรทัด 5 เส้น (Stave) แบบว่างเปล่า
+        function addEmptyStave() {
+            try {
+                // เช็คให้ชัวร์ว่า VexFlow ถูกโหลดเข้ามาในเว็บหรือยัง
+                if (typeof Vex === 'undefined') {
+                    alert("ไม่พบระบบ VexFlow! ลองเช็คดูว่าในไฟล์ HTML มีแท็ก script ที่ดึง VexFlow มาหรือยังครับ");
+                    return;
+                }
 
-            const notes = [
-                new StaveNote({ clef: "treble", keys: ["c/4"], duration: "q" }),
-                new StaveNote({ clef: "treble", keys: ["d/4"], duration: "q" }),
-                new StaveNote({ clef: "treble", keys: ["e/4"], duration: "q" }),
-                new StaveNote({ clef: "treble", keys: ["f/4"], duration: "q" })
-            ];
-            const voice = new Voice({ num_beats: 4, beat_value: 4 });
-            voice.addTickables(notes);
-            new Formatter().joinVoices([voice]).format([voice], 450);
-            voice.draw(context, stave);
+                const { Renderer, Stave } = Vex.Flow;
+                const container = document.getElementById("notation-canvas");
+                
+                if (!container) return;
+
+                // เช็คว่าเคยวาดไปหรือยัง ถ้ามีแล้วไม่ให้วาดซ้ำ
+                if (container.innerHTML.trim() !== "") {
+                    alert("มีบรรทัด 5 เส้นอยู่แล้วครับ (เดี๋ยวระบบเพิ่มตัวโน้ตจะตามมาทีหลังนะ)");
+                    return;
+                }
+
+                // สร้างพื้นที่วาด (SVG)
+                const renderer = new Renderer(container, Renderer.Backends.SVG);
+                renderer.resize(750, 150); // ปรับความกว้างพื้นที่ให้สวยงาม
+                const context = renderer.getContext();
+
+                // สร้างบรรทัด 5 เส้น (เริ่มที่พิกัด x=10, y=40, ความกว้าง=700)
+                const stave = new Stave(10, 40, 700);
+                
+                // ใส่กุญแจซอล (Treble Clef) และเครื่องหมายกำหนดจังหวะ (Time Signature) 4/4
+                stave.addClef("treble").addTimeSignature("4/4");
+                
+                // วาดลงหน้าจอ
+                stave.setContext(context).draw();
+
+            } catch (error) {
+                console.error("Error drawing stave:", error);
+                alert("เกิดข้อผิดพลาดตอนวาดเส้นครับ ลองเปิด F12 ดูนะ");
+            }
         }
-
         // ================= Editor Inline Editing =================
         function openEditorMenu(e, type, element) {
             e.preventDefault(); 
