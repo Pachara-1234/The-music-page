@@ -885,7 +885,7 @@
             targetStaveRow = null;
         } // <--- ต้องปิดปีกกาของ executeStaveDelete ตรงนี้!!!
 
-        // ================= ฟังก์ชันลบไฟล์เพลง (ซ้ายมือ) =================
+// ================= ฟังก์ชันลบไฟล์เพลง (ซ้ายมือ) =================
         function executeDelete() {
             // 1. ซ่อนเมนูคลิกขวา
             document.getElementById('context-menu').classList.add('hidden'); 
@@ -898,8 +898,20 @@
             // 3. ลบตัวไฟล์ออกจากแถบซ้ายมือ (DOM)
             activeFileLi.remove();
 
-            // 4. ลบข้อมูลที่เซฟไว้ใน LocalStorage ด้วย 
+            // 4. ลบข้อมูลที่เซฟไว้ใน LocalStorage ด้วย (ไฟล์โน้ต)
             localStorage.removeItem("flonters_save_" + fileNameToDelete);
+
+            // [อัปเดตใหม่: ลบแบบถาวร!] ลบออกจากรายชื่อบัญชีของ User ด้วย
+            if (currentUserEmail) {
+                let users = JSON.parse(localStorage.getItem('flonters_users'));
+                if (users && users[currentUserEmail]) {
+                    let scores = users[currentUserEmail].scores || [];
+                    // กรองเอาไฟล์ที่ถูกลบออกจาก Array
+                    users[currentUserEmail].scores = scores.filter(s => !s.startsWith(fileNameToDelete + '|'));
+                    // เซฟรายชื่อใหม่กลับเข้าไป
+                    localStorage.setItem('flonters_users', JSON.stringify(users));
+                }
+            }
 
             // 5. เคลียร์หน้ากระดานถ้าไฟล์ที่เปิดอยู่โดนลบ
             if (activeFileName === fileNameToDelete) {
