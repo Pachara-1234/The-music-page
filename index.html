@@ -546,35 +546,33 @@
         }
 
         // ฟังก์ชันวาดบรรทัดใหม่ + ปุ่มบวกท้ายบรรทัด
+// ฟังก์ชันวาดบรรทัดใหม่ (เวอร์ชัน: มีกุญแจทุกบรรทัด + รองรับการลบ)
         function drawNewBar() {
             try {
                 const VF = window.Vex ? window.Vex.Flow : window.VexFlow;
                 const container = document.getElementById("notation-canvas");
 
-                // ลบปุ่มบวกอันเก่าออกก่อน เพื่อให้มันย้ายไปอยู่ต่อท้ายบรรทัดล่าสุด
+                // 1. ลบปุ่มบวกอันเก่าออกก่อน เพื่อย้ายมาต่อท้ายบรรทัดล่าสุด
                 const oldBtn = document.querySelector(".add-bar-inline-btn");
                 if (oldBtn) oldBtn.remove();
 
-                // สร้าง Row ใหม่ (เพื่อใส่บรรทัด กับ ปุ่ม ให้อยู่แถวเดียวกัน)
+                // 2. สร้าง Row ใหม่
                 const rowDiv = document.createElement("div");
                 rowDiv.className = "stave-row";
                 
-                // ===== [เพิ่มโค้ดก้อนนี้เข้าไป] =====
+                // [ระบบคลิกขวาลบ] - กุใส่ไว้ให้เหมือนเดิม ไม่หายแน่นอน
                 rowDiv.oncontextmenu = function(e) {
                     e.preventDefault();
-                    targetStaveRow = rowDiv; // จำว่าคลิกที่บรรทัดไหน
+                    targetStaveRow = rowDiv; 
                     const menu = document.getElementById('stave-context-menu');
                     menu.style.left = e.pageX + 'px';
                     menu.style.top = e.pageY + 'px';
                     menu.classList.remove('hidden');
                 };
-                // ==============================
                 
-                // สร้างพื้นที่วาดโน้ต
+                // 3. สร้างพื้นที่วาดโน้ต
                 const barDiv = document.createElement("div");
                 rowDiv.appendChild(barDiv);
-                
-                // นำ Row ไปใส่ใน canvas
                 container.appendChild(rowDiv);
 
                 const renderer = new VF.Renderer(barDiv, VF.Renderer.Backends.SVG);
@@ -583,14 +581,12 @@
                 
                 const stave = new VF.Stave(0, 0, 690);
                 
-                // ใส่กุญแจซอลเฉพาะบรรทัดแรกสุด
-                if (staveCount === 0) {
-                    stave.addClef("treble").addTimeSignature("4/4");
-                }
+                // [จุดที่แก้ไข] - สั่งให้ใส่กุญแจซอลและ Time Signature เสมอ ไม่ต้องเช็คว่าเป็นบรรทัดแรกไหม
+                stave.addClef("treble").addTimeSignature("4/4");
 
                 stave.setContext(context).draw();
                 
-                // สร้างปุ่มสี่เหลี่ยมมน "+" ต่อท้าย
+                // 4. สร้างปุ่ม "+" ต่อท้ายบรรทัด
                 const plusBtn = document.createElement("div");
                 plusBtn.className = "add-bar-inline-btn";
                 plusBtn.innerHTML = "+";
@@ -598,7 +594,7 @@
                 rowDiv.appendChild(plusBtn);
 
                 staveCount++; 
-                saveData(); // เซฟข้อมูลทุกครั้งที่วาดใหม่
+                saveData(); // เซฟข้อมูล
 
             } catch (e) {
                 console.error("Error drawing bar:", e);
