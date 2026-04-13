@@ -504,14 +504,16 @@
                 document.getElementById('editor-title').textContent = 'Composition - ' + fileName;
                 const editorArea = document.getElementById('editor-content-area');
                 
+                // 📍 เพิ่ม Composer และฟังก์ชัน onClick สำหรับแก้ไขข้อความ
                 editorArea.innerHTML = `
                     <div class="sheet-music-container">
                         <div class="sheet-header">
                             <div class="sheet-title-wrapper">
-                                <div class="sheet-title editable-text">${fileName}</div>
+                                <div class="sheet-title editable-text" onclick="editSheetText(this, 'title')" title="Click to edit title">${fileName}</div>
                             </div>
                             <div class="sheet-meta">
-                                <div class="sheet-instrument editable-text">${instrument}</div>
+                                <div class="sheet-composer editable-text" onclick="editSheetText(this, 'composer')" title="Click to edit composer">Composer: Unknown</div>
+                                <div class="sheet-instrument editable-text" onclick="editSheetText(this, 'instrument')" title="Click to edit instrument">${instrument}</div>
                             </div>
                         </div>
                         <div class="sheet-actions" id="action-area">
@@ -537,6 +539,32 @@
             if (prepend) list.insertBefore(li, list.firstChild); else list.appendChild(li); 
         }
 
+        // ================= ฟังก์ชันแก้ไขข้อความบนหัวกระดาษ =================
+        function editSheetText(element, type) {
+            let currentText = element.innerText;
+            let defaultVal = currentText;
+            
+            // ตัดคำว่า Composer: ออกตอนเด้ง prompt ให้แก้ จะได้ไม่งง
+            if (type === 'composer' && currentText.startsWith('Composer: ')) {
+                defaultVal = currentText.replace('Composer: ', '');
+            }
+
+            let newText = prompt(`Enter new ${type}:`, defaultVal);
+            
+            if (newText !== null && newText.trim() !== "") {
+                if (type === 'composer') {
+                    element.innerText = "Composer: " + newText.trim();
+                } else if (type === 'title') {
+                    element.innerText = newText.trim();
+                    // อัปเดตชื่อบนหัวเว็บด้วย
+                    document.getElementById('editor-title').textContent = 'Composition - ' + newText.trim();
+                } else {
+                    element.innerText = newText.trim();
+                }
+            }
+        }
+
+        // ================= ระบบจัดการบรรทัด (Stave) =================
         function addEmptyStave() {
             const initialBtn = document.getElementById("initial-add-btn");
             if (initialBtn) initialBtn.remove(); 
@@ -554,7 +582,7 @@
                 const rowDiv = document.createElement("div");
                 rowDiv.className = "stave-row";
                 
-                // 📍 ฟังก์ชันคลิกขวาที่บรรทัด (เพื่อลบ)
+                // ฟังก์ชันคลิกขวาที่บรรทัด (เพื่อลบ)
                 rowDiv.oncontextmenu = function(e) {
                     e.preventDefault();
                     showDeleteMenu(e, rowDiv);
@@ -570,10 +598,10 @@
                 
                 const stave = new VF.Stave(0, 0, 690);
                 
-                // 📍 ใส่กุญแจซอล "ทุกบรรทัด"
+                // ใส่กุญแจซอล "ทุกบรรทัด"
                 stave.addClef("treble");
                 
-                // 📍 ใส่ Time Signature เฉพาะบรรทัดแรกของหน้า
+                // ใส่ Time Signature เฉพาะบรรทัดแรกของหน้า
                 if (container.children.length === 1) {
                     stave.addTimeSignature("4/4");
                 }
@@ -596,11 +624,9 @@
 
         // ================= ระบบลบบรรทัด (คลิกขวา) =================
         function showDeleteMenu(event, rowElement) {
-            // ลบเมนูเก่าทิ้งถ้ามีค้างอยู่
             const oldMenu = document.getElementById("stave-delete-menu");
             if (oldMenu) oldMenu.remove();
 
-            // สร้างเมนูใหม่ตรงจุดที่เมาส์คลิก
             const menu = document.createElement("div");
             menu.id = "stave-delete-menu";
             menu.className = "stave-context-menu";
@@ -611,7 +637,6 @@
             deleteBtn.className = "menu-item";
             deleteBtn.innerHTML = "🗑️ Delete Line";
             
-            // 📍 ตัด confirm ออก กดแล้วลบทันที
             deleteBtn.onclick = function() {
                 menu.remove(); 
                 deleteLine(rowElement); 
@@ -620,7 +645,6 @@
             menu.appendChild(deleteBtn);
             document.body.appendChild(menu);
 
-            // คลิกที่อื่นให้เมนูหาย
             setTimeout(() => {
                 window.addEventListener('click', function clickOutside() {
                     const activeMenu = document.getElementById("stave-delete-menu");
@@ -630,18 +654,15 @@
             }, 10);
         }
 
-        // ฟังก์ชันลบเส้นจริงๆ (จัดการปุ่ม + ให้ด้วย)
         function deleteLine(rowElement) {
-            rowElement.remove(); // ลบบรรทัดนั้นทิ้ง
+            rowElement.remove(); 
             staveCount--;
-            saveData(); // เซฟข้อมูลอัปเดต
+            saveData(); 
 
-            // จัดการปุ่ม + หลังจากลบ
             const container = document.getElementById("notation-canvas");
             const allRows = container.querySelectorAll('.stave-row');
             
             if (allRows.length > 0) {
-                // ถ้ายังพอบรรทัดเหลือ ให้เอาปุ่ม + ไปแปะท้ายสุด
                 const lastRow = allRows[allRows.length - 1];
                 if (!lastRow.querySelector('.add-bar-inline-btn')) {
                     const plusBtn = document.createElement("div");
@@ -651,7 +672,6 @@
                     lastRow.appendChild(plusBtn);
                 }
             } else {
-                // ถ้าลบจนเกลี้ยงหน้ากระดาษ เอาปุ่มเริ่มต้นกลับมา
                 const actionArea = document.getElementById("action-area");
                 if (actionArea) {
                     actionArea.innerHTML = `<button class="action-btn" id="initial-add-btn" onclick="addEmptyStave()">+ ADD NOTE</button>`;
@@ -687,11 +707,8 @@
         }
 
         // ================= ระบบจัดการไฟล์ (Rename / Delete) =================
-        
-        // ซ่อนเมนูไฟล์เมื่อคลิกที่อื่น
         window.addEventListener('click', function(e) {
             const fileMenu = document.getElementById('context-menu');
-            // ตรวจสอบว่าคลิกนอกเมนูหรือไม่ (ถ้าใช่ให้ซ่อน)
             if (fileMenu && !fileMenu.classList.contains('hidden') && !e.target.closest('#context-menu')) {
                 fileMenu.classList.add('hidden');
             }
@@ -699,7 +716,7 @@
 
         function executeRename() {
             const fileMenu = document.getElementById('context-menu');
-            fileMenu.classList.add('hidden'); // ซ่อนเมนูก่อน
+            fileMenu.classList.add('hidden');
 
             if (!activeFileLi) return;
 
@@ -707,18 +724,15 @@
             if (newName && newName.trim() !== "" && newName !== activeFileName) {
                 const finalNewName = newName.trim();
 
-                // 1. โอนย้ายข้อมูลเซฟใน LocalStorage ไปชื่อใหม่
                 const oldData = localStorage.getItem("flonters_save_" + activeFileName);
                 if (oldData) {
                     localStorage.setItem("flonters_save_" + finalNewName, oldData);
                     localStorage.removeItem("flonters_save_" + activeFileName);
                 }
 
-                // 2. อัปเดตชื่อในลิสต์เมนูด้านซ้าย
                 const nameSpan = activeFileLi.querySelector('.file-name');
                 if (nameSpan) nameSpan.textContent = finalNewName;
 
-                // 3. ถ้าเปิดไฟล์นี้ค้างอยู่ ให้เปลี่ยนชื่อบนหัวกระดาษด้วย
                 const editorTitle = document.getElementById('editor-title');
                 if (editorTitle && editorTitle.textContent.includes(activeFileName)) {
                     editorTitle.textContent = 'Composition - ' + finalNewName;
@@ -726,24 +740,20 @@
                     if (sheetTitle) sheetTitle.textContent = finalNewName;
                 }
 
-                activeFileName = finalNewName; // อัปเดตตัวแปรระบบ
+                activeFileName = finalNewName;
             }
         }
 
         function executeDelete() {
             const fileMenu = document.getElementById('context-menu');
-            fileMenu.classList.add('hidden'); // ซ่อนเมนูก่อน
+            fileMenu.classList.add('hidden');
 
             if (!activeFileLi) return;
 
             if (confirm("Are you sure you want to delete '" + activeFileName + "'?")) {
-                // 1. ลบข้อมูลเซฟออกจากเครื่อง
                 localStorage.removeItem("flonters_save_" + activeFileName);
-                
-                // 2. ลบออกจากลิสต์เมนูด้านซ้าย
                 activeFileLi.remove();
 
-                // 3. ถ้าเปิดไฟล์ที่เพิ่งลบไปค้างอยู่ ให้เคลียร์หน้ากระดาษทิ้ง
                 const editorTitle = document.getElementById('editor-title');
                 if (editorTitle && editorTitle.textContent.includes(activeFileName)) {
                     editorTitle.textContent = 'Composition';
