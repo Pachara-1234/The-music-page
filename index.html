@@ -171,7 +171,16 @@
         .sheet-body { width: 100%; position: relative; padding: 20px 0; background: transparent; display: flex; justify-content: center; }
         #notation-canvas svg { max-width: 100%; height: auto; display: block; }
 
-        /* ================= CSS สำหรับปุ่มและการลบ ================= */
+        /* ================= CSS สำหรับบรรทัดโน้ต ================= */
+        /* จัดบรรทัดให้เรียงต่อกันลงมา */
+        #notation-canvas {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* ตัวหุ้มบาร์: ให้บรรทัดกับปุ่ม + อยู่แถวเดียวกัน */
         .stave-row {
             display: flex;
             align-items: center;
@@ -181,50 +190,34 @@
             margin-bottom: 10px;
         }
 
-        /* 1. ปรับปุ่มบวกให้สีเข้มและชัดขึ้น */
+        /* ปุ่ม + แบบสี่เหลี่ยมมน */
         .add-bar-inline-btn {
             width: 40px;
             height: 40px;
-            background: rgba(220, 216, 204, 0.25); 
-            border: 2px solid #000000; /* ขอบสีดำ เส้นเต็ม */
-            border-radius: 8px;
-            color: #000000; /* เครื่องหมายบวกสีดำ */
+            background: rgba(220, 216, 204, 0.1);
+            border: 1px dashed #dcd8cc;
+            border-radius: 8px; /* ความมน */
+            color: #dcd8cc;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
-            font-weight: bold;
+            font-size: 24px;
             transition: all 0.3s;
             margin-left: 10px;
         }
 
         .add-bar-inline-btn:hover {
-            background: rgba(0, 0, 0, 0.1); /* เวลาเอาเมาส์ชี้ให้พื้นหลังดูมีมิติขึ้นนิดนึง */
-            transform: scale(1.1);
+            background: rgba(220, 216, 204, 0.2);
+            border-style: solid;
+            transform: scale(1.05);
         }
 
-        /* 2. CSS สำหรับเมนูคลิกขวา (Delete Line) */
-        .stave-context-menu {
-            position: absolute;
-            background-color: #1a1a1a;
-            border: 1px solid #444;
-            border-radius: 6px;
-            padding: 5px 0;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+        /* ซ่อนปุ่มเริ่มต้น */
+        .hidden-btn {
+            display: none !important;
         }
-        .stave-context-menu .menu-item {
-            padding: 10px 20px;
-            color: #ff4d4d; /* สีแดงเตือนภัย */
-            cursor: pointer;
-            font-family: 'Lora', serif;
-            font-size: 14px;
-            transition: background 0.2s;
-        }
-        .stave-context-menu .menu-item:hover {
-            background-color: #333;
-        }
+    }
     </style>
 </head>
 <body>
@@ -504,55 +497,71 @@
                 document.getElementById('editor-title').textContent = 'Composition - ' + fileName;
                 const editorArea = document.getElementById('editor-content-area');
                 
+                // 1. สร้างหน้ากระดาษ (มีปุ่ม + ADD NOTE เริ่มต้น)
                 editorArea.innerHTML = `
                     <div class="sheet-music-container">
                         <div class="sheet-header">
                             <div class="sheet-title-wrapper">
-                                <div class="sheet-title editable-text">${fileName}</div>
+                                <div class="sheet-title editable-text" oncontextmenu="openEditorMenu(event, 'title', this)">${fileName}</div>
                             </div>
                             <div class="sheet-meta">
-                                <div class="sheet-instrument editable-text">${instrument}</div>
+                                <div class="sheet-instrument editable-text" oncontextmenu="openEditorMenu(event, 'instrument', this)">${instrument}</div>
+                                <div class="sheet-composer editable-text" oncontextmenu="openEditorMenu(event, 'composer', this)">${typeof currentUserName !== 'undefined' ? currentUserName : 'Unknown'}</div>
                             </div>
                         </div>
+                        
                         <div class="sheet-actions" id="action-area">
                             <button class="action-btn" id="initial-add-btn" onclick="addEmptyStave()">+ ADD NOTE</button>
                         </div>
+
                         <div class="sheet-body">
                             <div id="notation-canvas"></div>
                         </div>
                     </div>
                 `;
+
+                // 2. เรียกใช้ฟังก์ชันโหลดข้อมูล (ถ้าเคยเซฟไว้ บรรทัดจะเด้งกลับมา และปุ่มแรกจะหายไป)
                 loadSavedData(fileName);
+            };
+
+            li.oncontextmenu = function(e) {
+                e.preventDefault(); activeFileLi = li; activeFileName = fileName; activeFileInst = instrument;
+                const menu = document.getElementById('context-menu');
+                menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px'; menu.classList.remove('hidden');
             };
 
             if (prepend) list.insertBefore(li, list.firstChild); else list.appendChild(li); 
         }
 
+        // ฟังก์ชันเริ่มสร้างบรรทัดแรก
         function addEmptyStave() {
+            // ลบปุ่มเดิมทิ้งไปเลย
             const initialBtn = document.getElementById("initial-add-btn");
             if (initialBtn) initialBtn.remove(); 
+
+            // วาดบรรทัด
             drawNewBar();
         }
 
+        // ฟังก์ชันวาดบรรทัดใหม่ + ปุ่มบวกท้ายบรรทัด
         function drawNewBar() {
             try {
                 const VF = window.Vex ? window.Vex.Flow : window.VexFlow;
                 const container = document.getElementById("notation-canvas");
 
+                // ลบปุ่มบวกอันเก่าออกก่อน เพื่อให้มันย้ายไปอยู่ต่อท้ายบรรทัดล่าสุด
                 const oldBtn = document.querySelector(".add-bar-inline-btn");
                 if (oldBtn) oldBtn.remove();
 
+                // สร้าง Row ใหม่ (เพื่อใส่บรรทัด กับ ปุ่ม ให้อยู่แถวเดียวกัน)
                 const rowDiv = document.createElement("div");
                 rowDiv.className = "stave-row";
                 
-                // 📍 ฟังก์ชันคลิกขวาที่บรรทัด
-                rowDiv.oncontextmenu = function(e) {
-                    e.preventDefault();
-                    showDeleteMenu(e, rowDiv);
-                };
-
+                // สร้างพื้นที่วาดโน้ต
                 const barDiv = document.createElement("div");
                 rowDiv.appendChild(barDiv);
+                
+                // นำ Row ไปใส่ใน canvas
                 container.appendChild(rowDiv);
 
                 const renderer = new VF.Renderer(barDiv, VF.Renderer.Backends.SVG);
@@ -561,16 +570,14 @@
                 
                 const stave = new VF.Stave(0, 0, 690);
                 
-                // 📍 ใส่กุญแจซอล "ทุกบรรทัด"
-                stave.addClef("treble");
-                
-                // 📍 ใส่ Time Signature เฉพาะบรรทัดแรกของหน้า
-                if (container.children.length === 1) {
-                    stave.addTimeSignature("4/4");
+                // ใส่กุญแจซอลเฉพาะบรรทัดแรกสุด
+                if (staveCount === 0) {
+                    stave.addClef("treble").addTimeSignature("4/4");
                 }
 
                 stave.setContext(context).draw();
                 
+                // สร้างปุ่มสี่เหลี่ยมมน "+" ต่อท้าย
                 const plusBtn = document.createElement("div");
                 plusBtn.className = "add-bar-inline-btn";
                 plusBtn.innerHTML = "+";
@@ -578,83 +585,19 @@
                 rowDiv.appendChild(plusBtn);
 
                 staveCount++; 
-                saveData(); 
+                saveData(); // เซฟข้อมูลทุกครั้งที่วาดใหม่
 
             } catch (e) {
                 console.error("Error drawing bar:", e);
             }
         }
 
-        // ================= ระบบลบบรรทัด (คลิกขวา) =================
-        function showDeleteMenu(event, rowElement) {
-            // ลบเมนูเก่าทิ้งถ้ามีค้างอยู่
-            const oldMenu = document.getElementById("stave-delete-menu");
-            if (oldMenu) oldMenu.remove();
+        // --- ระบบ Auto-Save & Load ---
 
-            // สร้างเมนูใหม่ตรงจุดที่เมาส์คลิก
-            const menu = document.createElement("div");
-            menu.id = "stave-delete-menu";
-            menu.className = "stave-context-menu";
-            menu.style.left = event.pageX + "px";
-            menu.style.top = event.pageY + "px";
-
-            const deleteBtn = document.createElement("div");
-            deleteBtn.className = "menu-item";
-            deleteBtn.innerHTML = "🗑️ Delete Line";
-            
-            deleteBtn.onclick = function() {
-                menu.remove(); 
-                // 📍 ยืนยันก่อนลบ
-                if (confirm("Are you sure you want to delete this line?")) {
-                    deleteLine(rowElement);
-                }
-            };
-
-            menu.appendChild(deleteBtn);
-            document.body.appendChild(menu);
-
-            // คลิกที่อื่นให้เมนูหาย
-            setTimeout(() => {
-                window.addEventListener('click', function clickOutside() {
-                    const activeMenu = document.getElementById("stave-delete-menu");
-                    if (activeMenu) activeMenu.remove();
-                    window.removeEventListener('click', clickOutside);
-                });
-            }, 10);
-        }
-
-        function deleteLine(rowElement) {
-            rowElement.remove(); // ลบบรรทัดนั้นทิ้ง
-            staveCount--;
-            saveData(); // เซฟข้อมูลอัปเดต
-
-            // จัดการปุ่ม + หลังจากลบ
-            const container = document.getElementById("notation-canvas");
-            const allRows = container.querySelectorAll('.stave-row');
-            
-            if (allRows.length > 0) {
-                // ถ้ายังพอบรรทัดเหลือ ให้เอาปุ่ม + ไปแปะท้ายสุด
-                const lastRow = allRows[allRows.length - 1];
-                if (!lastRow.querySelector('.add-bar-inline-btn')) {
-                    const plusBtn = document.createElement("div");
-                    plusBtn.className = "add-bar-inline-btn";
-                    plusBtn.innerHTML = "+";
-                    plusBtn.onclick = drawNewBar;
-                    lastRow.appendChild(plusBtn);
-                }
-            } else {
-                // ถ้าลบจนเกลี้ยงหน้ากระดาษ เอาปุ่มเริ่มต้นกลับมา
-                const actionArea = document.getElementById("action-area");
-                if (actionArea) {
-                    actionArea.innerHTML = `<button class="action-btn" id="initial-add-btn" onclick="addEmptyStave()">+ ADD NOTE</button>`;
-                }
-            }
-        }
-
-        // ================= ระบบ Auto-Save & Load =================
         function saveData() {
             if (!activeFileName) return;
             const data = { bars: staveCount };
+            // เซฟแยกตามชื่อไฟล์
             localStorage.setItem("flonters_save_" + activeFileName, JSON.stringify(data));
         }
 
@@ -668,8 +611,10 @@
                 staveCount = 0; 
                 container.innerHTML = ""; 
                 
-                if (data.bars > 0 && initialBtn) initialBtn.remove(); 
+                // ถ้ามีข้อมูลเก่าอยู่แล้ว ปุ่มแรกเริ่มต้องลบทิ้งไปเลย
+                if (initialBtn) initialBtn.remove(); 
 
+                // วาดบรรทัดตามจำนวนที่เคยเซฟไว้
                 for (let i = 0; i < data.bars; i++) {
                     drawNewBar();
                 }
