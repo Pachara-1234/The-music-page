@@ -7,6 +7,9 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Lora:ital,wght@0,400;0,700;1,400&family=Courier+Prime&display=swap" rel="stylesheet">
     
+    <script src="https://cdn.jsdelivr.net/npm/vexflow/build/cjs/vexflow.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -145,89 +148,50 @@
         .context-item.delete { color: #e63946; border-top: 1px solid #222; }
         .context-item.delete:hover { background: #3a1115; color: #ffebf0; }
 
-        /* ================= Professional Sheet Music Layout ================= */
+        /* ================= Professional Sheet Music Layout (Integration) ================= */
         .sheet-music-container {
             width: 100%; max-width: 950px;
             display: flex; flex-direction: column;
             color: #000;
         }
 
-        .sheet-header { width: 100%; margin-bottom: 50px; position: relative; }
+        .sheet-header { width: 100%; margin-bottom: 30px; position: relative; }
         
         .sheet-title {
-            /* เปลี่ยนเป็นฟอนต์ Serif มาตรฐานงานพิมพ์โน้ตเพลง */
             font-family: 'Times New Roman', Times, serif; 
-            font-size: 3.5rem; 
-            font-weight: normal;
-            text-align: center; 
-            margin-bottom: 30px;
-            color: #000;
+            font-size: 3.5rem; font-weight: normal;
+            text-align: center; margin-bottom: 20px;
         }
 
         .sheet-meta {
             display: flex; justify-content: space-between; align-items: flex-end;
             font-family: 'Times New Roman', Times, serif; 
             font-size: 1.25rem; 
-            color: #000;
         }
         .sheet-instrument { font-style: normal; font-weight: bold; }
         .sheet-composer { font-weight: normal; }
 
-        .sheet-body { width: 100%; position: relative; margin-top: 40px; }
-
-        .tempo-marking {
-            font-family: 'Times New Roman', Times, serif; 
-            font-size: 1.1rem; 
-            font-weight: bold;
-            position: absolute; top: -35px; left: 0; color: #000;
-            display: flex; align-items: center;
+        /* Action Bar for Playback */
+        .sheet-actions {
+            display: flex; justify-content: center; margin-bottom: 20px; gap: 15px;
         }
-        .tempo-note { font-size: 1.3rem; margin-right: 6px; line-height: 1; }
-
-        /* กล่องบรรทัด 5 เส้น */
-        .stave-container { position: relative; width: 100%; height: 48px; }
-        
-        .stave-lines {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; justify-content: space-between;
-            z-index: 1;
+        .action-btn {
+            background-color: transparent; border: 1px solid #000; color: #000;
+            padding: 8px 25px; font-family: 'Cinzel', serif; font-size: 0.9rem;
+            font-weight: 600; letter-spacing: 2px; cursor: pointer; transition: 0.3s; border-radius: 3px;
         }
-        .stave-line { width: 100%; height: 1.5px; background-color: #000; }
+        .action-btn:hover { background-color: #000; color: #f4ecd8; }
 
-        .stave-elements {
-            position: absolute; top: 0; left: 0; height: 100%; width: 100%;
-            z-index: 2; display: flex; align-items: center; padding-left: 0;
+        /* Container for VexFlow SVG */
+        .sheet-body { 
+            width: 100%; position: relative; padding: 20px 0;
+            background: transparent; display: flex; justify-content: center;
         }
 
-        /* เส้นกั้นห้องหัว-ท้าย */
-        .barline-start { width: 2px; height: 100%; background-color: #000; }
-        .barline-end { 
-            position: absolute; right: 0; top: 0;
-            width: 7px; height: 100%; 
-            border-left: 1.5px solid #000; 
-            border-right: 4px solid #000; 
+        /* Override SVG styles to ensure crisp rendering */
+        #notation-canvas svg {
+            max-width: 100%; height: auto; display: block;
         }
-
-        /* กล่องคลุมกุญแจ SVG เพื่อจัดขนาด */
-        .clef-wrapper {
-            width: 12px; height: 95px; /* ขนาดให้คล่อมบรรทัดพอดี */
-            margin-top: -12px;
-            margin-left: 12px;
-            margin-right: 18px;
-            display: flex; align-items: center;
-        }
-        .clef-svg { height: 100%; width: auto; color: #000; }
-
-        /* สัดส่วน Time Signature แบบเป๊ะๆ */
-        .time-signature {
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            font-family: 'Times New Roman', Times, serif; 
-            font-weight: bold; 
-            font-size: 32px;
-            line-height: 0.72; 
-            color: #000;
-        }
-        .time-signature span { display: block; }
 
     </style>
 </head>
@@ -318,7 +282,8 @@
                         <p>> System initialized...</p>
                         <p class="log-warn">> Awaiting connection from Raspberry Pi Pico...</p>
                         <p class="log-success">> Firebase real-time database hooked.</p>
-                        <p>> Listening for GPIO inputs...</p>
+                        <p>> Loading Audio Context (Tone.js)...</p>
+                        <p>> Rendering Engine (VexFlow) Standby...</p>
                     </div>
                 </div>
             </div>
@@ -326,18 +291,22 @@
     </div>
 
     <script>
+        // ================= Core State =================
         let currentUserEmail = null;
         let currentUserName = "Unknown";
         let activeFileLi = null;   
         let activeFileName = "";   
         let activeFileInst = "";
+        
+        // Tone.js Synth Instance
+        let synth = null;
 
+        // ================= Layout & Navigation =================
         const menuToggle = document.getElementById('menu-toggle');
         const sideTabPanel = document.getElementById('side-tab-panel');
 
         menuToggle.addEventListener('click', (e) => {
-            e.stopPropagation(); 
-            sideTabPanel.classList.toggle('open-panel');
+            e.stopPropagation(); sideTabPanel.classList.toggle('open-panel');
         });
 
         const resizerX = document.getElementById('resizer-x');
@@ -345,8 +314,7 @@
         const panelLeft = document.getElementById('panel-left');
         const panelIoT = document.getElementById('panel-iot');
         
-        let isResizingX = false;
-        let isResizingY = false;
+        let isResizingX = false, isResizingY = false;
 
         resizerX.addEventListener('mousedown', () => { isResizingX = true; document.body.classList.add('no-select'); resizerX.classList.add('active'); });
         resizerY.addEventListener('mousedown', () => { isResizingY = true; document.body.classList.add('no-select'); resizerY.classList.add('active'); });
@@ -366,6 +334,7 @@
             if (e.target.closest('#side-tab-panel') === null && sideTabPanel.classList.contains('open-panel')) sideTabPanel.classList.remove('open-panel');
         });
 
+        // ================= Auth Logic =================
         function clearMessages() {
             document.getElementById('log-msg').textContent = ''; document.getElementById('reg-msg').textContent = '';
             document.getElementById('reg-msg').className = 'error-msg';
@@ -397,9 +366,7 @@
                 setTimeout(() => { switchForm('login'); }, 1500);
             };
             if (avatarInput.files && avatarInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) { saveUser(e.target.result); };
-                reader.readAsDataURL(avatarInput.files[0]);
+                const reader = new FileReader(); reader.onload = function(e) { saveUser(e.target.result); }; reader.readAsDataURL(avatarInput.files[0]);
             } else { saveUser(""); }
         }
 
@@ -407,20 +374,15 @@
             event.preventDefault();
             const email = document.getElementById('log-email').value.trim(), pass = document.getElementById('log-pass').value, msgBox = document.getElementById('log-msg');
             let users = JSON.parse(localStorage.getItem('flonters_users')) || {};
-            if (!users[email]) { msgBox.textContent = 'User not found! (Not quite my tempo)'; return; }
-            if (users[email].password !== pass) { msgBox.textContent = 'Incorrect password! (Were you rushing or dragging?)'; return; }
+            if (!users[email]) { msgBox.textContent = 'User not found!'; return; }
+            if (users[email].password !== pass) { msgBox.textContent = 'Incorrect password!'; return; }
 
-            msgBox.textContent = '';
-            currentUserEmail = email; 
-            currentUserName = users[email].name; 
+            msgBox.textContent = ''; currentUserEmail = email; currentUserName = users[email].name; 
             
             document.getElementById('dashboard-username').textContent = currentUserName;
             const avatarEl = document.getElementById('dashboard-avatar');
-            if (users[email].avatar) {
-                avatarEl.style.backgroundImage = `url(${users[email].avatar})`; avatarEl.textContent = ''; 
-            } else {
-                avatarEl.style.backgroundImage = 'none'; avatarEl.textContent = currentUserName.charAt(0).toUpperCase(); 
-            }
+            if (users[email].avatar) { avatarEl.style.backgroundImage = `url(${users[email].avatar})`; avatarEl.textContent = ''; } 
+            else { avatarEl.style.backgroundImage = 'none'; avatarEl.textContent = currentUserName.charAt(0).toUpperCase(); }
 
             loadUserScores();
             const authSection = document.getElementById('auth-section'), dashSection = document.getElementById('dash-section');
@@ -438,8 +400,7 @@
                 dashSection.style.pointerEvents = 'none'; dashSection.style.opacity = '0';
                 document.getElementById('log-email').value = ''; document.getElementById('log-pass').value = '';
                 switchForm('login');
-                document.getElementById('editor-title').textContent = 'Composition';
-                document.getElementById('editor-content-area').innerHTML = `<div class="placeholder-text" id="editor-placeholder">The stage is empty. Select or create a score...<br><span class="sub-text">(Music staff composition area)</span></div>`;
+                resetEditor();
             }, 50);
         }
 
@@ -449,10 +410,7 @@
             let users = JSON.parse(localStorage.getItem('flonters_users'));
             let userScores = users[currentUserEmail].scores || [];
             userScores.forEach(scoreData => { 
-                let parts = scoreData.split('|');
-                let name = parts[0];
-                let inst = parts[1] || "Piano"; 
-                renderScoreItem(name, inst); 
+                let parts = scoreData.split('|'); renderScoreItem(parts[0], parts[1] || "Piano"); 
             });
         }
 
@@ -461,13 +419,8 @@
             let users = JSON.parse(localStorage.getItem('flonters_users'));
             let scores = users[currentUserEmail].scores || [];
             let newData = `${newName}|${newInst}`;
-
-            if (oldData === null) {
-                if (!scores.includes(newData)) scores.push(newData);
-            } else {
-                let index = scores.findIndex(s => s === oldData || s.startsWith(oldData + '|'));
-                if (index > -1) scores[index] = newData;
-            }
+            if (oldData === null) { if (!scores.includes(newData)) scores.push(newData); } 
+            else { let index = scores.findIndex(s => s === oldData || s.startsWith(oldData + '|')); if (index > -1) scores[index] = newData; }
             users[currentUserEmail].scores = scores;
             localStorage.setItem('flonters_users', JSON.stringify(users));
         }
@@ -483,179 +436,161 @@
         function showNewFileInput() {
             const list = document.getElementById('score-list');
             const li = document.createElement('li');
-            li.style.flexDirection = 'column';
-            li.style.alignItems = 'flex-start';
-            li.innerHTML = `
-                <div class="new-file-group">
-                    <input type="text" class="new-file-input" placeholder="Score Name...">
-                    <input type="text" class="new-inst-input" placeholder="Instrument (e.g. Piano)...">
-                </div>
-            `;
+            li.style.flexDirection = 'column'; li.style.alignItems = 'flex-start';
+            li.innerHTML = `<div class="new-file-group"><input type="text" class="new-file-input" placeholder="Score Name..."><input type="text" class="new-inst-input" placeholder="Instrument (e.g. Piano)..."></div>`;
             list.insertBefore(li, list.firstChild); 
             
-            const inputName = li.querySelector('.new-file-input');
-            const inputInst = li.querySelector('.new-inst-input');
+            const inputName = li.querySelector('.new-file-input'), inputInst = li.querySelector('.new-inst-input');
             inputName.focus();
 
             const finishNewFile = () => {
-                let fileName = inputName.value.trim();
-                let fileInst = inputInst.value.trim() || "Piano";
-                if (fileName === '') {
-                    li.remove();
-                } else {
-                    li.remove();
-                    saveScoreToDB(null, fileName, fileInst); 
-                    renderScoreItem(fileName, fileInst, true); 
-                }
+                let fileName = inputName.value.trim(), fileInst = inputInst.value.trim() || "Piano";
+                if (fileName === '') li.remove();
+                else { li.remove(); saveScoreToDB(null, fileName, fileInst); renderScoreItem(fileName, fileInst, true); }
             };
 
             inputName.addEventListener('keypress', function(e) { if (e.key === 'Enter') inputInst.focus(); });
             inputInst.addEventListener('keypress', function(e) { if (e.key === 'Enter') finishNewFile(); });
-            
             inputInst.addEventListener('blur', () => { setTimeout(() => { if(document.activeElement !== inputName) finishNewFile(); }, 100) });
         }
 
-        // ================= Injecting UI with Professional Styling =================
+        // ================= VexFlow & Tone.js Integration (The Magic Part) =================
         function renderScoreItem(fileName, instrument, prepend = false) {
             const list = document.getElementById('score-list');
             const li = document.createElement('li');
             li.setAttribute('data-inst', instrument);
-            
             li.innerHTML = `<span class="file-icon">></span><span class="file-name">${fileName}</span>`;
             
             li.ondblclick = function() {
                 document.getElementById('editor-title').textContent = 'Composition - ' + fileName;
                 const editorArea = document.getElementById('editor-content-area');
                 
-                // ฝังโค้ด SVG กุญแจซอลโดยตรงลงใน HTML เพื่อความเสถียร 100% และคมชัดระดับ Vector
-                const trebleClefSvg = `
-                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-                        class="clef-svg" viewBox="0 0 10.3 35.5" xml:space="preserve" fill="currentColor">
-                        <path d="M7.4,12.2c0.6-0.6,1.2-1.2,1.8-1.8c0.8-0.8,1.2-1.7,1.2-2.8c0-1-0.3-1.9-0.9-2.7c-1.3-1.6-3.1-2.4-5.3-2.4
-                        c-1.4,0-2.6,0.3-3.6,0.9C0.2,3.9-0.1,4.9-0.1,6c0,1,0.2,1.9,0.7,2.7C1,9.4,1.4,9.9,2,10.2l0,0C1.8,10.5,1.5,10.7,1.3,11
-                        C0.8,11.5,0.6,12.2,0.6,12.9c0,0.8,0.3,1.6,0.8,2.2c1,1.1,2.5,1.7,4.5,1.7c1.3,0,2.4-0.3,3.3-0.8c1-0.6,1.5-1.5,1.5-2.6
-                        c0-0.7-0.2-1.3-0.5-1.9L7.4,12.2 M1.5,5.6c0-0.7,0.3-1.3,0.8-1.9c0.7-0.8,1.6-1.1,2.6-1.1c0.7,0,1.4,0.1,1.9,0.4
-                        c0.8,0.4,1.2,1.1,1.2,1.9c0,0.9-0.5,1.8-1.6,2.8C5.6,8.5,4.9,9,4.2,9.6c-0.2,0.1-0.4,0.3-0.6,0.4C2.5,8.9,1.8,8.2,1.2,7
-                        C1.4,6.5,1.5,6.1,1.5,5.6 M5.2,15.3c-1.2,0-2.1-0.3-2.7-0.9c-0.5-0.4-0.7-0.9-0.7-1.4c0-0.3,0.1-0.6,0.2-0.8
-                        c0.1-0.2,0.3-0.4,0.5-0.6c0.5-0.5,0.9-0.7,1.3-0.7c0.2,0,0.3,0.1,0.5,0.2c0.3,0.3,0.5,0.6,0.5,1.1c0,0.6-0.3,1.2-0.8,1.8
-                        C3.7,14.4,3.2,14.8,2.7,15c0.4,0.1,0.8,0.1,1.2,0.1c1,0,1.8-0.3,2.4-0.9c0.4-0.4,0.6-0.8,0.6-1.3c0-0.2-0.1-0.4-0.1-0.5
-                        C6.6,12.6,6.3,12.9,6,13.2c-0.6,0.6-1.2,0.8-1.9,0.8c-0.6,0-1.1-0.2-1.5-0.6c-0.4-0.4-0.6-0.8-0.6-1.3c0-0.5,0.2-1,0.6-1.4
-                        c0.7-0.8,1.7-1.1,3.1-1.1c1,0,1.8,0.3,2.4,0.9c0.4,0.4,0.6,0.9,0.6,1.4c0,0.6-0.3,1.2-0.8,1.8C7,14.7,6.2,15.3,5.2,15.3l0,0
-                        M10.2,20.6c0,2.1-0.6,3.9-1.9,5.5c-1.3,1.6-3.1,2.3-5.3,2.3c-1.4,0-2.6-0.3-3.6-0.9C-0.3,28-0.6,29-0.6,30.1
-                        c0,1,0.2,1.9,0.7,2.7c1,1.1,2.5,1.7,4.5,1.7c1.3,0,2.4-0.3,3.3-0.8c1-0.6,1.5-1.5,1.5-2.6c0-0.7-0.2-1.3-0.5-1.9
-                        C10,28.6,10.2,28,10.2,27.3L10.2,20.6l0,0 M0.8,19.6c0-0.8,0.3-1.6,0.8-2.2c1-1.1,2.5-1.7,4.5-1.7c1.3,0,2.4,0.3,3.3,0.8
-                        c1,0.6,1.5,1.5,1.5,2.6c0,0.7-0.2,1.3-0.5,1.9c-1,1.1-2.5,1.7-4.5,1.7c-1.3,0-2.4-0.3-3.3-0.8c-1-0.6-1.5-1.5-1.5-2.6
-                        C0.3,19.4,0.3,19.4,0.8,19.6C0.8,19.6,0.8,19.6,0.8,19.6C0.8,19.6,0.8,19.6,0.8,19.6C0.8,19.6,0.8,19.6,0.8,19.6
-                        C0.8,19.6,0.8,19.6,0.8,19.6z"/>
-                    </svg>
-                `;
-
-                // Injecting Professional Sheet Music UI with SVG embedded
+                // 1. สร้าง UI โครงสร้างโน้ตเพลงระดับโปร + ปุ่มเล่นเสียง
                 editorArea.innerHTML = `
                     <div class="sheet-music-container">
                         <div class="sheet-header">
                             <div class="sheet-title">${fileName}</div>
-                            
                             <div class="sheet-meta">
                                 <div class="sheet-instrument">${instrument}</div>
                                 <div class="sheet-composer">${currentUserName}</div>
                             </div>
                         </div>
+                        
+                        <div class="sheet-actions">
+                            <button id="btn-play-music" class="action-btn">▶ PLAY AUDIO</button>
+                            <button class="action-btn" onclick="alert('Interaction: Insert Mode Active (Future feature)')">+ ADD NOTE</button>
+                        </div>
 
                         <div class="sheet-body">
-                            <div class="tempo-marking"><span class="tempo-note">&#9833;</span> = 140</div>
-                            
-                            <div class="stave-container">
-                                <div class="stave-lines">
-                                    <div class="stave-line"></div>
-                                    <div class="stave-line"></div>
-                                    <div class="stave-line"></div>
-                                    <div class="stave-line"></div>
-                                    <div class="stave-line"></div>
-                                </div>
-                                <div class="stave-elements">
-                                    <div class="barline-start"></div>
-                                    
-                                    <div class="clef-wrapper">${trebleClefSvg}</div>
-                                    
-                                    <div class="time-signature">
-                                        <span>4</span>
-                                        <span>4</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="barline-end"></div>
-                            </div>
+                            <div id="notation-canvas"></div>
                         </div>
                     </div>
                 `;
+
+                // 2. เรียกใช้งาน VexFlow Rendering Engine
+                renderVexFlowStaff();
+
+                // 3. ผูก Logic ปุ่มเล่นเสียงกับ Tone.js
+                document.getElementById('btn-play-music').addEventListener('click', async () => {
+                    await Tone.start(); // จำเป็นต้องมีสำหรับ Web Audio API
+                    playToneJsSequence();
+                });
             };
 
             li.oncontextmenu = function(e) {
-                e.preventDefault(); 
-                activeFileLi = li;
-                activeFileName = fileName;
-                activeFileInst = instrument;
-                
+                e.preventDefault(); activeFileLi = li; activeFileName = fileName; activeFileInst = instrument;
                 const menu = document.getElementById('context-menu');
-                menu.style.left = e.pageX + 'px';
-                menu.style.top = e.pageY + 'px';
-                menu.classList.remove('hidden');
+                menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px'; menu.classList.remove('hidden');
             };
 
-            if (prepend) list.insertBefore(li, list.firstChild); 
-            else list.appendChild(li); 
+            if (prepend) list.insertBefore(li, list.firstChild); else list.appendChild(li); 
         }
 
+        function renderVexFlowStaff() {
+            const { Renderer, Stave, StaveNote, Voice, Formatter } = Vex.Flow;
+            const container = document.getElementById("notation-canvas");
+            container.innerHTML = ""; // Clear existing
+
+            // สร้าง SVG Renderer
+            const renderer = new Renderer(container, Renderer.Backends.SVG);
+            renderer.resize(600, 150); // ขนาดพื้นที่วาด
+            const context = renderer.getContext();
+
+            // สร้างบรรทัด 5 เส้น (กว้าง 550px)
+            const stave = new Stave(10, 20, 550);
+            stave.addClef("treble").addTimeSignature("4/4");
+            stave.setContext(context).draw();
+
+            // สร้าง Data โน้ตเพลง (C4, D4, E4, F4)
+            const notes = [
+                new StaveNote({ clef: "treble", keys: ["c/4"], duration: "q" }),
+                new StaveNote({ clef: "treble", keys: ["d/4"], duration: "q" }),
+                new StaveNote({ clef: "treble", keys: ["e/4"], duration: "q" }),
+                new StaveNote({ clef: "treble", keys: ["f/4"], duration: "q" })
+            ];
+
+            // สร้าง Voice รวบรวมโน้ตให้ครบ 4/4 ห้อง
+            const voice = new Voice({ num_beats: 4, beat_value: 4 });
+            voice.addTickables(notes);
+
+            // คำนวณระยะห่าง (Dynamic Spacing) อัตโนมัติ
+            new Formatter().joinVoices([voice]).format([voice], 450);
+            
+            // วาดตัวโน้ตลงไป!
+            voice.draw(context, stave);
+        }
+
+        function playToneJsSequence() {
+            // สร้าง Synth ถ้ายังไม่มี (PolySynth รองรับหลายเสียงพร้อมกัน)
+            if (!synth) {
+                synth = new Tone.PolySynth(Tone.Synth).toDestination();
+                Tone.Transport.bpm.value = 120; // ตั้งค่า BPM
+            }
+
+            // ดึงเวลาปัจจุบันเพื่ออ้างอิงลำดับ
+            const now = Tone.now();
+            
+            // เล่นโน้ตให้ตรงกับภาพ (C4, D4, E4, F4) จังหวะละ 1 Quarter note (0.5 วินาทีที่ 120bpm)
+            synth.triggerAttackRelease("C4", "4n", now);
+            synth.triggerAttackRelease("D4", "4n", now + 0.5);
+            synth.triggerAttackRelease("E4", "4n", now + 1.0);
+            synth.triggerAttackRelease("F4", "4n", now + 1.5);
+        }
+
+        // ================= Context Menu Operations =================
         function executeRename() {
-            document.getElementById('context-menu').classList.add('hidden'); 
-            if(!activeFileLi) return;
-            
-            const li = activeFileLi;
-            const oldName = activeFileName;
-            const oldInst = activeFileInst;
-            
+            document.getElementById('context-menu').classList.add('hidden'); if(!activeFileLi) return;
+            const li = activeFileLi, oldName = activeFileName, oldInst = activeFileInst;
             li.innerHTML = `<span class="file-icon">></span><input type="text" class="rename-input" value="${oldName}">`;
-            const input = li.querySelector('input');
-            input.focus();
-            input.select(); 
+            const input = li.querySelector('input'); input.focus(); input.select(); 
 
             const finishRename = () => {
                 let newName = input.value.trim();
-                if (newName === '' || newName === oldName) {
-                    newName = oldName; 
-                } else {
-                    saveScoreToDB(`${oldName}|${oldInst}`, newName, oldInst); 
-                }
+                if (newName === '' || newName === oldName) newName = oldName; 
+                else saveScoreToDB(`${oldName}|${oldInst}`, newName, oldInst); 
                 
                 li.innerHTML = `<span class="file-icon">></span><span class="file-name">${newName}</span>`;
                 activeFileName = newName; 
-                
-                let currentTitle = document.getElementById('editor-title').textContent;
-                if (currentTitle === 'Composition - ' + oldName) {
+                if (document.getElementById('editor-title').textContent === 'Composition - ' + oldName) {
                     document.getElementById('editor-title').textContent = 'Composition - ' + newName;
                     li.ondblclick();
                 }
             };
-
             input.addEventListener('keypress', function(evt) { if (evt.key === 'Enter') finishRename(); });
             input.addEventListener('blur', finishRename);
         }
 
         function executeDelete() {
-            document.getElementById('context-menu').classList.add('hidden'); 
-            if(!activeFileLi) return;
-
+            document.getElementById('context-menu').classList.add('hidden'); if(!activeFileLi) return;
             if(confirm(`Are you sure you want to delete "${activeFileName}"?`)) {
-                deleteScoreFromDB(activeFileName); 
-                activeFileLi.remove(); 
-                
-                let currentTitle = document.getElementById('editor-title').textContent;
-                if (currentTitle === 'Composition - ' + activeFileName) {
-                    document.getElementById('editor-title').textContent = 'Composition';
-                    document.getElementById('editor-content-area').innerHTML = `<div class="placeholder-text" id="editor-placeholder">The stage is empty. Select or create a score...<br><span class="sub-text">(Music staff composition area)</span></div>`;
-                }
+                deleteScoreFromDB(activeFileName); activeFileLi.remove(); 
+                if (document.getElementById('editor-title').textContent === 'Composition - ' + activeFileName) resetEditor();
             }
+        }
+
+        function resetEditor() {
+            document.getElementById('editor-title').textContent = 'Composition';
+            document.getElementById('editor-content-area').innerHTML = `<div class="placeholder-text" id="editor-placeholder">The stage is empty. Select or create a score...<br><span class="sub-text">(Music staff composition area)</span></div>`;
         }
     </script>
 </body>
