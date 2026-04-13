@@ -480,7 +480,7 @@
         }
 
         // ฟังก์ชันสำหรับเพิ่มบรรทัด 5 เส้น (Stave) แบบว่างเปล่า
-        function addEmptyStave() {
+        window.addEmptyStave = function() {
             const { Renderer, Stave } = Vex.Flow;
             const container = document.getElementById("notation-canvas");
             // เช็คว่าเคยวาดไปหรือยัง ถ้ามีแล้วไม่ให้วาดซ้ำ
