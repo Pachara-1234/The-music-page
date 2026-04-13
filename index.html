@@ -170,6 +170,28 @@
         .action-btn:hover { background-color: #000; color: #f4ecd8; }
         .sheet-body { width: 100%; position: relative; padding: 20px 0; background: transparent; display: flex; justify-content: center; }
         #notation-canvas svg { max-width: 100%; height: auto; display: block; }
+
+        /* ================= CSS สำหรับบรรทัดโน้ต ================= */
+        #notation-canvas {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0px; 
+        }
+        .stave-bar {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        #add-bar-btn {
+            border-style: dashed;
+            opacity: 0.7;
+        }
+        #add-bar-btn:hover {
+            opacity: 1;
+            border-style: solid;
+        }
     </style>
 </head>
 <body>
@@ -436,6 +458,8 @@
         }
 
         // ================= VexFlow & UI Rendering =================
+        let staveCount = 0; // ตัวแปรเก็บจำนวนบรรทัด
+
         function renderScoreItem(fileName, instrument, prepend = false) {
             const list = document.getElementById('score-list');
             const li = document.createElement('li');
@@ -447,6 +471,9 @@
                 document.getElementById('editor-title').textContent = 'Composition - ' + fileName;
                 const editorArea = document.getElementById('editor-content-area');
                 
+                // รีเซ็ตจำนวนบรรทัดเวลาเปิดไฟล์ใหม่
+                staveCount = 0; 
+
                 editorArea.innerHTML = `
                     <div class="sheet-music-container">
                         <div class="sheet-header">
@@ -459,8 +486,8 @@
                             </div>
                         </div>
                         
-                        <div class="sheet-actions">
-                            <button class="action-btn" id="btn-add-note">+ ADD NOTE</button>
+                        <div class="sheet-actions" id="action-area">
+                            <button class="action-btn" id="initial-add-btn">+ ADD NOTE</button>
                         </div>
 
                         <div class="sheet-body">
@@ -469,10 +496,10 @@
                     </div>
                 `;
 
-                // ผูกปุ่มเข้ากับฟังก์ชันวาดเส้น ทันทีที่หน้ากระดาษโหลดเสร็จ (วิธีนี้ปุ่มหาฟังก์ชันเจอ 100%)
-                const btnAddNote = document.getElementById('btn-add-note');
-                if (btnAddNote) {
-                    btnAddNote.addEventListener('click', function() {
+                // ผูกคำสั่งกับปุ่มแรก
+                const initialBtn = document.getElementById('initial-add-btn');
+                if (initialBtn) {
+                    initialBtn.addEventListener('click', function() {
                         addEmptyStave();
                     });
                 }
@@ -487,46 +514,134 @@
             if (prepend) list.insertBefore(li, list.firstChild); else list.appendChild(li); 
         }
 
-        // ฟังก์ชันสำหรับเพิ่มบรรทัด 5 เส้น (Stave) แบบว่างเปล่า
+        // เริ่มสร้างบรรทัดแรก
         function addEmptyStave() {
+            // ซ่อนปุ่มเดิม
+            const initialBtn = document.getElementById("initial-add-btn");
+            if (initialBtn) initialBtn.style.display = "none";
+
+            // สร้างปุ่ม "+" และวาดบรรทัด
+            createAddBarButton();
+            drawNewBar();
+        }
+
+        // ฟังก์ชันวาดบรรทัดใหม่
+        function drawNewBar() {
             try {
-                // ดักจับให้รองรับทั้ง VexFlow v4 (Vex.Flow) และ v5 (VexFlow)
                 const VF = window.Vex ? window.Vex.Flow : window.VexFlow;
-
-                if (!VF) {
-                    alert("ไม่พบระบบ VexFlow! ลิ้งก์ใน <head> อาจจะโหลดไม่ขึ้นครับ ลองเช็คเน็ตหรือกด Ctrl+F5 ดูนะ");
-                    return;
-                }
-
-                const { Renderer, Stave } = VF;
                 const container = document.getElementById("notation-canvas");
-                
-                if (!container) return;
 
-                // เช็คว่าเคยวาดไปหรือยัง
-                if (container.innerHTML.trim() !== "") {
-                    alert("มีบรรทัด 5 เส้นอยู่แล้วครับ (เดี๋ยวระบบเพิ่มตัวโน้ตจะตามมาทีหลังนะ)");
-                    return;
-                }
+                const barDiv = document.createElement("div");
+                barDiv.className = "stave-bar";
+                container.appendChild(barDiv);
 
-                // สร้างพื้นที่วาด (SVG)
-                const renderer = new Renderer(container, Renderer.Backends.SVG);
-                renderer.resize(750, 150); 
+                const renderer = new VF.Renderer(barDiv, VF.Renderer.Backends.SVG);
+                renderer.resize(750, 130);
                 const context = renderer.getContext();
 
-                // สร้างบรรทัด 5 เส้น
-                const stave = new Stave(10, 40, 700);
+                const stave = new VF.Stave(10, 20, 700);
                 
-                // ใส่กุญแจซอล (Treble Clef) และ 4/4
-                stave.addClef("treble").addTimeSignature("4/4");
-                
-                // วาดลงหน้าจอ
-                stave.setContext(context).draw();
+                // ใส่กุญแจซอลเฉพาะบรรทัดแรก
+                if (staveCount === 0) {
+                    stave.addClef("treble").addTimeSignature("4/4");
+                }
 
-            } catch (error) {
-                console.error("Error drawing stave:", error);
-                alert("เกิดข้อผิดพลาดตอนวาดเส้นครับ ลองเปิด F12 ดูนะ");
+                stave.setContext(context).draw();
+                
+                staveCount++; 
+                saveData(); // เซฟข้อมูล
+
+            } catch (e) {
+                console.error("Error drawing bar:", e);
             }
+        }
+
+        // ฟังก์ชันสร้างปุ่มเพิ่มบรรทัด
+        function createAddBarButton() {
+            const actionArea = document.getElementById("action-area");
+            if (document.getElementById("add-bar-btn")) return;
+
+            const addBarBtn = document.createElement("button");
+            addBarBtn.id = "add-bar-btn";
+            addBarBtn.className = "action-btn";
+            addBarBtn.innerHTML = "+ Add Next Bar";
+            addBarBtn.style.marginTop = "10px";
+            
+            // ผูกคำสั่งวาดบรรทัดใหม่
+            addBarBtn.addEventListener('click', drawNewBar);
+            
+            actionArea.appendChild(addBarBtn);
+        }
+
+        // ระบบ Auto-Save
+        function saveData() {
+            const titleEl = document.querySelector(".sheet-title");
+            const scoreData = {
+                totalBars: staveCount,
+                lastUpdated: new Date().getTime(),
+                title: titleEl ? titleEl.innerText : "Untitled"
+            };
+            localStorage.setItem("flonters_save_data", JSON.stringify(scoreData));
+            console.log("Auto-saved! Total bars:", staveCount);
+        }
+        // ฟังก์ชันวาดบรรทัดใหม่
+        function drawNewBar() {
+            try {
+                const VF = window.Vex ? window.Vex.Flow : window.VexFlow;
+                const container = document.getElementById("notation-canvas");
+
+                const barDiv = document.createElement("div");
+                barDiv.className = "stave-bar";
+                container.appendChild(barDiv);
+
+                const renderer = new VF.Renderer(barDiv, VF.Renderer.Backends.SVG);
+                renderer.resize(750, 130);
+                const context = renderer.getContext();
+
+                const stave = new VF.Stave(10, 20, 700);
+                
+                // ใส่กุญแจซอลเฉพาะบรรทัดแรก
+                if (staveCount === 0) {
+                    stave.addClef("treble").addTimeSignature("4/4");
+                }
+
+                stave.setContext(context).draw();
+                
+                staveCount++; 
+                saveData(); // เซฟข้อมูล
+
+            } catch (e) {
+                console.error("Error drawing bar:", e);
+            }
+        }
+
+        // ฟังก์ชันสร้างปุ่มเพิ่มบรรทัด
+        function createAddBarButton() {
+            const actionArea = document.getElementById("action-area");
+            if (document.getElementById("add-bar-btn")) return;
+
+            const addBarBtn = document.createElement("button");
+            addBarBtn.id = "add-bar-btn";
+            addBarBtn.className = "action-btn";
+            addBarBtn.innerHTML = "+ Add Next Bar";
+            addBarBtn.style.marginTop = "10px";
+            
+            // ผูกคำสั่งวาดบรรทัดใหม่
+            addBarBtn.addEventListener('click', drawNewBar);
+            
+            actionArea.appendChild(addBarBtn);
+        }
+
+        // ระบบ Auto-Save
+        function saveData() {
+            const titleEl = document.querySelector(".sheet-title");
+            const scoreData = {
+                totalBars: staveCount,
+                lastUpdated: new Date().getTime(),
+                title: titleEl ? titleEl.innerText : "Untitled"
+            };
+            localStorage.setItem("flonters_save_data", JSON.stringify(scoreData));
+            console.log("Auto-saved! Total bars:", staveCount);
         }
         // ================= Editor Inline Editing =================
         function openEditorMenu(e, type, element) {
