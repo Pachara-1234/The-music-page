@@ -216,6 +216,32 @@
         .hidden-btn {
             display: none !important;
         }
+        /* ================= อนิเมชัน ================= */
+        /* แอนิเมชันลอยขึ้นและเฟดอิน (สำหรับหน้ากระดาษ, บรรทัดโน้ต, ไฟล์เพลง) */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-up {
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+
+        /* แอนิเมชันเด้งป๊อปอัป (สำหรับพวกเมนูคลิกขวา) */
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .animate-pop {
+            animation: popIn 0.15s ease-out forwards;
+        }
     }
     </style>
 </head>
@@ -491,6 +517,7 @@
         function renderScoreItem(fileName, instrument, prepend = false) {
             const list = document.getElementById('score-list');
             const li = document.createElement('li');
+            li.classList.add('animate-fade-up');
             li.setAttribute('data-inst', instrument);
             li.innerHTML = `<span class="file-icon">></span><span class="file-name">${fileName}</span>`;
             
@@ -501,7 +528,7 @@
                 
                 // 1. สร้างหน้ากระดาษ (มีปุ่ม + ADD NOTE เริ่มต้น)
                 editorArea.innerHTML = `
-                    <div class="sheet-music-container">
+                    <div class="sheet-music-container animate-fade-up">
                         <div class="sheet-header">
                             <div class="sheet-title-wrapper">
                                 <div class="sheet-title editable-text" oncontextmenu="openEditorMenu(event, 'title', this)">${fileName}</div>
@@ -558,7 +585,7 @@
 
                 // 2. สร้าง Row ใหม่
                 const rowDiv = document.createElement("div");
-                rowDiv.className = "stave-row";
+                rowDiv.className = "stave-row animate-fade-up";
                 
                 // [ระบบคลิกขวาลบ] - กุใส่ไว้ให้เหมือนเดิม ไม่หายแน่นอน
                 rowDiv.oncontextmenu = function(e) {
