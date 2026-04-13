@@ -525,9 +525,14 @@
             li.setAttribute('data-inst', instrument);
             li.innerHTML = `<span class="file-icon">></span><span class="file-name">${fileName}</span>`;
             
+            // [วางทับของเดิมใน renderScoreItem]
             li.ondblclick = function() {
-                activeFileLi = li; activeFileName = fileName; activeFileInst = instrument;
-                document.getElementById('editor-title').textContent = 'Composition - ' + fileName;
+                // ดึงชื่อล่าสุดจากหน้าเว็บจริงๆ ป้องกันบัคจำชื่อเก่า
+                const currentName = li.querySelector('.file-name').textContent;
+                const currentInst = li.getAttribute('data-inst');
+                
+                activeFileLi = li; activeFileName = currentName; activeFileInst = currentInst;
+                document.getElementById('editor-title').textContent = 'Composition - ' + currentName;
                 const editorArea = document.getElementById('editor-content-area');
                 
                 // 1. สร้างหน้ากระดาษ (มีปุ่ม + ADD NOTE เริ่มต้น)
@@ -535,10 +540,10 @@
                     <div class="sheet-music-container animate-fade-up">
                         <div class="sheet-header">
                             <div class="sheet-title-wrapper">
-                                <div class="sheet-title editable-text" oncontextmenu="openEditorMenu(event, 'title', this)">${fileName}</div>
+                                <div class="sheet-title editable-text" oncontextmenu="openEditorMenu(event, 'title', this)">${currentName}</div>
                             </div>
                             <div class="sheet-meta">
-                                <div class="sheet-instrument editable-text" oncontextmenu="openEditorMenu(event, 'instrument', this)">${instrument}</div>
+                                <div class="sheet-instrument editable-text" oncontextmenu="openEditorMenu(event, 'instrument', this)">${currentInst}</div>
                                 <div class="sheet-composer editable-text" oncontextmenu="openEditorMenu(event, 'composer', this)">${typeof currentUserName !== 'undefined' ? currentUserName : 'Unknown'}</div>
                             </div>
                         </div>
@@ -553,16 +558,17 @@
                     </div>
                 `;
 
-                // 2. เรียกใช้ฟังก์ชันโหลดข้อมูล (ถ้าเคยเซฟไว้ บรรทัดจะเด้งกลับมา และปุ่มแรกจะหายไป)
-                loadSavedData(fileName);
+                // 2. เรียกใช้ฟังก์ชันโหลดข้อมูล
+                loadSavedData(currentName);
             };
 
             li.oncontextmenu = function(e) {
-                e.preventDefault(); activeFileLi = li; activeFileName = fileName; activeFileInst = instrument;
+                e.preventDefault(); 
+                const currentName = li.querySelector('.file-name').textContent;
+                activeFileLi = li; activeFileName = currentName; activeFileInst = li.getAttribute('data-inst');
                 const menu = document.getElementById('context-menu');
                 menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px'; menu.classList.remove('hidden');
             };
-
             if (prepend) list.insertBefore(li, list.firstChild); else list.appendChild(li); 
         }
 
@@ -632,11 +638,21 @@
             }
         }
 
-        // --- ระบบ Auto-Save & Load ---
-
+// ================= อัปเดตระบบ Auto-Save ให้ครอบคลุม Title, Composer, Instrument =================
         function saveData() {
             if (!activeFileName) return;
-            const data = { bars: staveCount };
+            
+            // ดึงค่าปัจจุบันที่โชว์อยู่บนหัวกระดาษมาเซฟ
+            const titleEl = document.querySelector('.sheet-title');
+            const instEl = document.querySelector('.sheet-instrument');
+            const compEl = document.querySelector('.sheet-composer');
+
+            const data = { 
+                bars: staveCount,
+                sheetTitle: titleEl ? titleEl.textContent : activeFileName,
+                sheetInstrument: instEl ? instEl.textContent : activeFileInst,
+                sheetComposer: compEl ? compEl.textContent : (typeof currentUserName !== 'undefined' ? currentUserName : 'Unknown')
+            };
             // เซฟแยกตามชื่อไฟล์
             localStorage.setItem("flonters_save_" + activeFileName, JSON.stringify(data));
         }
@@ -646,21 +662,59 @@
             const container = document.getElementById("notation-canvas");
             const initialBtn = document.getElementById("initial-add-btn");
 
+            const titleEl = document.querySelector('.sheet-title');
+            const instEl = document.querySelector('.sheet-instrument');
+            const compEl = document.querySelector('.sheet-composer');
+
             if (saved) {
                 const data = JSON.parse(saved);
                 staveCount = 0; 
                 container.innerHTML = ""; 
                 
-                // ถ้ามีข้อมูลเก่าอยู่แล้ว ปุ่มแรกเริ่มต้องลบทิ้งไปเลย
+                // โหลดข้อมูลหัวกระดาษกลับมา (ทำให้เป็นอิสระจากชื่อไฟล์และชื่อยูสเซอร์)
+                if (titleEl && data.sheetTitle) titleEl.textContent = data.sheetTitle;
+                if (instEl && data.sheetInstrument) instEl.textContent = data.sheetInstrument;
+                if (compEl && data.sheetComposer) compEl.textContent = data.sheetComposer;
+
                 if (initialBtn) initialBtn.remove(); 
 
-                // วาดบรรทัดตามจำนวนที่เคยเซฟไว้
                 for (let i = 0; i < data.bars; i++) {
                     drawNewBar();
                 }
             } else {
                 staveCount = 0;
             }
+        }
+
+        // ================= อัปเดตระบบ Inline Edit (แก้แล้วเซฟอัตโนมัติ ไม่กระทบที่อื่น) =================
+        function executeEditorEdit() {
+            document.getElementById('editor-context-menu').classList.add('hidden');
+            if (!editorContextTarget) return;
+
+            const oldVal = editorContextTarget.textContent;
+            editorContextTarget.innerHTML = `<input type="text" value="${oldVal}" style="background:transparent; border:none; border-bottom:1px solid #000; outline:none; font-family:inherit; font-size:inherit; font-weight:inherit; font-style:inherit; color:#000; text-align:inherit; width:${Math.max(80, oldVal.length * 15)}px;">`;
+            
+            const input = editorContextTarget.querySelector('input');
+            input.focus(); input.select();
+
+            const finishEdit = () => {
+                if (!editorContextTarget.contains(input)) return; // กันการเบิ้ลรันซ้ำ 2 รอบ
+                let newVal = input.value.trim() || oldVal;
+                editorContextTarget.innerHTML = newVal;
+
+                // ถ้าเปลี่ยน Instrument ให้ไปอัปเดตข้อมูลแท็บข้างๆ ด้วย
+                if (editorContextType === 'instrument' && newVal !== activeFileInst) {
+                    saveScoreToDB(`${activeFileName}|${activeFileInst}`, activeFileName, newVal);
+                    activeFileInst = newVal;
+                    if(activeFileLi) activeFileLi.setAttribute('data-inst', newVal);
+                }
+                
+                // สำหรับ Title กับ Composer แค่แก้หน้าจอ แล้วสั่งเซฟลงไฟล์ก็พอ (เป็นอิสระแล้ว)
+                saveData(); 
+            };
+
+            input.addEventListener('keypress', (e) => { if(e.key === 'Enter') finishEdit(); });
+            input.addEventListener('blur', finishEdit);
         }
         // ================= Editor Inline Editing =================
         function openEditorMenu(e, type, element) {
@@ -713,27 +767,43 @@
         }
 
         // ================= Sidebar Menu Operations =================
-        function executeRename() {
-            document.getElementById('context-menu').classList.add('hidden'); if(!activeFileLi) return;
-            const li = activeFileLi, oldName = activeFileName, oldInst = activeFileInst;
-            li.innerHTML = `<span class="file-icon">></span><input type="text" class="rename-input" value="${oldName}">`;
-            const input = li.querySelector('input'); input.focus(); input.select(); 
+function executeRename() {
+            document.getElementById('context-menu').classList.add('hidden'); 
+            if(!activeFileLi) return;
+            
+            const currentName = activeFileLi.querySelector('.file-name').textContent;
+            const oldInst = activeFileInst;
+            
+            activeFileLi.innerHTML = `<span class="file-icon">></span><input type="text" class="rename-input" value="${currentName}">`;
+            const input = activeFileLi.querySelector('input'); 
+            input.focus(); input.select(); 
 
             const finishRename = () => {
-                let newName = input.value.trim() || oldName; 
-                if (newName !== oldName) saveScoreToDB(`${oldName}|${oldInst}`, newName, oldInst); 
-                li.innerHTML = `<span class="file-icon">></span><span class="file-name">${newName}</span>`;
+                if (!activeFileLi.contains(input)) return; // กันบัคกด Enter แล้วคลิกที่อื่นเบิ้ล 2 รอบ
+
+                let newName = input.value.trim() || currentName; 
+                if (newName !== currentName) {
+                    saveScoreToDB(`${currentName}|${oldInst}`, newName, oldInst); 
+                    
+                    // วิทยายุทธย้ายไฟล์: ถ้าเปลี่ยนชื่อ ต้องย้ายข้อมูลโน้ตตามไปด้วย
+                    const savedData = localStorage.getItem("flonters_save_" + currentName);
+                    if (savedData) {
+                        localStorage.setItem("flonters_save_" + newName, savedData);
+                        localStorage.removeItem("flonters_save_" + currentName);
+                    }
+                }
+                
+                activeFileLi.innerHTML = `<span class="file-icon">></span><span class="file-name animate-fade-up">${newName}</span>`;
                 activeFileName = newName; 
-                if (document.getElementById('editor-title').textContent === 'Composition - ' + oldName) {
+                
+                if (document.getElementById('editor-title').textContent === 'Composition - ' + currentName) {
                     document.getElementById('editor-title').textContent = 'Composition - ' + newName;
-                    const sheetTitle = document.querySelector('.sheet-title');
-                    if (sheetTitle) sheetTitle.textContent = newName;
                 }
             };
+            
             input.addEventListener('keypress', function(evt) { if (evt.key === 'Enter') finishRename(); });
             input.addEventListener('blur', finishRename);
         }
-
         function executeDelete() {
             document.getElementById('context-menu').classList.add('hidden'); if(!activeFileLi) return;
             if(confirm(`Are you sure you want to delete "${activeFileName}"?`)) {
