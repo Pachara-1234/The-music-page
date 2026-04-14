@@ -357,6 +357,7 @@
         let isProcessing = false;   
         let editorContextTarget = null;
         let editorContextType = "";
+        let currentClef = "treble"; // เก็บกุญแจปัจจุบัน (เริ่มต้นเป็น ซอล/treble)
 
         // ================= Layout & Navigation =================
         const menuToggle = document.getElementById('menu-toggle');
@@ -619,7 +620,7 @@
                 const stave = new VF.Stave(0, 0, 690);
                 
                 // [จุดที่แก้ไข] - สั่งให้ใส่กุญแจซอลและ Time Signature เสมอ ไม่ต้องเช็คว่าเป็นบรรทัดแรกไหม
-                stave.addClef("treble").addTimeSignature("4/4");
+                stave.addClef(currentClef).addTimeSignature("4/4");
 
                 stave.setContext(context).draw();
                 
@@ -652,6 +653,7 @@
                 sheetTitle: titleEl ? titleEl.textContent : activeFileName,
                 sheetInstrument: instEl ? instEl.textContent : activeFileInst,
                 sheetComposer: compEl ? compEl.textContent : "Unknown" 
+                sheetClef : currentClef
             };
             
             // เซฟลงกล่องของเพลงนั้นๆ
@@ -669,6 +671,7 @@
 
             if (saved) {
                 const data = JSON.parse(saved);
+                currentClef = data.sheetClef || "treble";
                 staveCount = 0; 
                 container.innerHTML = ""; 
                 
@@ -938,6 +941,56 @@
             // 6. คืนค่าตัวแปรให้ว่าง
             activeFileLi = null;
         }
+        // ================= [NEW] ระบบเปลี่ยนกุญแจดนตรี (Clef Selector) =================
+
+        // 1. สร้างหน้าต่างเมนูเลือกกุญแจ (ซ่อนไว้ก่อน)
+        const clefMenuHTML = `
+            <div id="clef-context-menu" class="hidden" style="position: absolute; background: white; border: 1px solid #ccc; padding: 5px; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); z-index: 1000; border-radius: 4px; font-family: sans-serif;">
+                <div class="clef-option" data-clef="treble" style="padding: 8px; cursor: pointer; border-bottom: 1px solid #eee;">𝄞 กุญแจซอล (Treble Clef)</div>
+                <div class="clef-option" data-clef="alto" style="padding: 8px; cursor: pointer; border-bottom: 1px solid #eee;">𝄡 กุญแจโด (Alto Clef)</div>
+                <div class="clef-option" data-clef="bass" style="padding: 8px; cursor: pointer;">𝄢 กุญแจฟา (Bass Clef)</div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', clefMenuHTML);
+        const clefMenu = document.getElementById('clef-context-menu');
+
+        // 2. จับการคลิกเลือกกุญแจในเมนู
+        clefMenu.addEventListener('click', function(e) {
+            if (e.target.classList.contains('clef-option')) {
+                const selectedClef = e.target.getAttribute('data-clef');
+        
+                // อัปเดตตัวแปรหลัก
+                currentClef = selectedClef;
+                clefMenu.classList.add('hidden');
+        
+                // บังคับเซฟค่ากุญแจใหม่ และโหลดกระดานใหม่ทั้งหมด (บรรทัดทั้งหมดจะเปลี่ยนกุญแจตามทันที)
+                saveData(); 
+                if (activeFileName) {
+                    loadSavedData(activeFileName); 
+                }
+            }
+        });
+
+        // 3. ทำให้เมนูหายไปเวลาคลิกที่อื่น
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#clef-context-menu') && !e.target.closest('.vf-clef')) {
+                clefMenu.classList.add('hidden');
+            }
+        });
+
+        // 4. ดักจับ Double Click ที่สัญลักษณ์แม่กุญแจบนหน้ากระดาษ
+        document.body.addEventListener('dblclick', function(e) {
+            // VexFlow จะครอบแม่กุญแจไว้ใน <g class="vf-clef">
+            const clefElement = e.target.closest('.vf-clef');
+            if (clefElement) {
+                e.preventDefault();
+        
+                // เอาเมนูมาแสดงตรงจุดที่เมาส์อยู่
+                clefMenu.style.left = e.pageX + 'px';
+                clefMenu.style.top = e.pageY + 'px';
+                clefMenu.classList.remove('hidden');
+            }
+        });
     </script>
 </body>
 </html>
