@@ -717,28 +717,18 @@
             input.focus(); input.select();
 
             const finishEdit = () => {
-                if (!editorContextTarget.contains(input)) return; 
+                if (!editorContextTarget.contains(input)) return; // กันการเบิ้ลรันซ้ำ 2 รอบ
                 let newVal = input.value.trim() || oldVal;
                 editorContextTarget.innerHTML = newVal;
 
-                if (editorContextType === 'title' && newVal !== activeFileName) {
-                    saveScoreToDB(`${activeFileName}|${activeFileInst}`, newVal, activeFileInst);
-                    if(activeFileLi) activeFileLi.querySelector('.file-name').textContent = newVal;
-                    activeFileName = newVal;
-                    document.getElementById('editor-title').textContent = 'Composition - ' + newVal;
-                } else if (editorContextType === 'instrument' && newVal !== activeFileInst) {
+                // ถ้าเปลี่ยน Instrument ให้ไปอัปเดตข้อมูลแท็บข้างๆ ด้วย
+                if (editorContextType === 'instrument' && newVal !== activeFileInst) {
                     saveScoreToDB(`${activeFileName}|${activeFileInst}`, activeFileName, newVal);
                     activeFileInst = newVal;
                     if(activeFileLi) activeFileLi.setAttribute('data-inst', newVal);
-                } else if (editorContextType === 'composer' && newVal !== currentUserName) {
-                    currentUserName = newVal;
-                    document.getElementById('dashboard-username').textContent = newVal;
-                    let users = JSON.parse(localStorage.getItem('flonters_users'));
-                    users[currentUserEmail].name = newVal;
-                    localStorage.setItem('flonters_users', JSON.stringify(users));
                 }
                 
-                // สั่งเซฟข้อมูลหน้ากระดาษ
+                // สำหรับ Title กับ Composer แค่แก้หน้าจอ แล้วสั่งเซฟลงไฟล์ก็พอ (เป็นอิสระแล้ว)
                 saveData(); 
             };
 
@@ -759,7 +749,41 @@
             menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px'; menu.classList.remove('hidden');
         }
 
+        function executeEditorEdit() {
+            document.getElementById('editor-context-menu').classList.add('hidden');
+            if (!editorContextTarget) return;
 
+            const oldVal = editorContextTarget.textContent;
+            editorContextTarget.innerHTML = `<input type="text" value="${oldVal}" style="background:transparent; border:none; border-bottom:1px solid #000; outline:none; font-family:inherit; font-size:inherit; font-weight:inherit; font-style:inherit; color:#000; text-align:inherit; width:${Math.max(80, oldVal.length * 15)}px;">`;
+            
+            const input = editorContextTarget.querySelector('input');
+            input.focus(); input.select();
+
+            const finishEdit = () => {
+                let newVal = input.value.trim() || oldVal;
+                editorContextTarget.innerHTML = newVal;
+
+                if (editorContextType === 'title' && newVal !== activeFileName) {
+                    saveScoreToDB(`${activeFileName}|${activeFileInst}`, newVal, activeFileInst);
+                    if(activeFileLi) activeFileLi.querySelector('.file-name').textContent = newVal;
+                    activeFileName = newVal;
+                    document.getElementById('editor-title').textContent = 'Composition - ' + newVal;
+                } else if (editorContextType === 'instrument' && newVal !== activeFileInst) {
+                    saveScoreToDB(`${activeFileName}|${activeFileInst}`, activeFileName, newVal);
+                    activeFileInst = newVal;
+                    if(activeFileLi) activeFileLi.setAttribute('data-inst', newVal);
+                } else if (editorContextType === 'composer' && newVal !== currentUserName) {
+                    currentUserName = newVal;
+                    document.getElementById('dashboard-username').textContent = newVal;
+                    let users = JSON.parse(localStorage.getItem('flonters_users'));
+                    users[currentUserEmail].name = newVal;
+                    localStorage.setItem('flonters_users', JSON.stringify(users));
+                }
+            };
+
+            input.addEventListener('keypress', (e) => { if(e.key === 'Enter') finishEdit(); });
+            input.addEventListener('blur', finishEdit);
+        }
 
         // ================= Sidebar Menu Operations =================
         function executeRename() {
@@ -801,7 +825,34 @@
             input.addEventListener('keypress', function(evt) { if (evt.key === 'Enter') finishRename(); });
             input.addEventListener('blur', finishRename);
         }
+        function executeEditorEdit() {
+            document.getElementById('editor-context-menu').classList.add('hidden');
+            if (!editorContextTarget) return;
 
+            const oldVal = editorContextTarget.textContent;
+            editorContextTarget.innerHTML = `<input type="text" value="${oldVal}" style="background:transparent; border:none; border-bottom:1px solid #000; outline:none; font-family:inherit; font-size:inherit; font-weight:inherit; font-style:inherit; color:#000; text-align:inherit; width:${Math.max(80, oldVal.length * 15)}px;">`;
+            
+            const input = editorContextTarget.querySelector('input');
+            input.focus(); input.select();
+
+            const finishEdit = () => {
+                if (!editorContextTarget.contains(input)) return; 
+                let newVal = input.value.trim() || oldVal;
+                editorContextTarget.innerHTML = newVal;
+
+                if (editorContextType === 'instrument' && newVal !== activeFileInst) {
+                    saveScoreToDB(`${activeFileName}|${activeFileInst}`, activeFileName, newVal);
+                    activeFileInst = newVal;
+                    if(activeFileLi) activeFileLi.setAttribute('data-inst', newVal);
+                }
+                
+                // สั่งเซฟทันทีเมื่อแก้เสร็จ (ข้อมูลถูกจับโยนลง LocalStorage โดยไม่แตะ currentUserName)
+                saveData(); 
+            };
+
+            input.addEventListener('keypress', (e) => { if(e.key === 'Enter') finishEdit(); });
+            input.addEventListener('blur', finishEdit);
+        }
         // ตัวแปรสำหรับจำว่าคลิกขวาที่บรรทัดไหน
         let targetStaveRow = null;
 
